@@ -1,0 +1,8 @@
+# Ignore all logs directories (any depth)
+xylem_apps/**/logs/
+
+# Ignore all Python cache folders (Django / Python)
+xylem_apps/**/__pycache__/
+
+# Ignore all migrations
+xylem_apps/**/migrations/
