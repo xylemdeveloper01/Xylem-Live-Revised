@@ -1,0 +1,162 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <style>
+    th, td{
+      white-space: normal !important;
+      word-wrap: break-word;
+    }		
+    .image-container {
+      width: 100%;
+      max-width: 120px;
+      max-height: 120px;
+    }  
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;  
+    }
+  </style>
+
+  <!-- [ View Tool Data ] start-->
+  <div class="card border">
+    <div class="card-header">
+      <h5>{{ child }}</h5>
+      <label class="general_head_label">
+        {{ tool_type.name|capfirst }} Name : {{ tool.name }}
+      </label>
+      <a href="{% url 'dp_part' FIRST_PRODUCT_CATEGORY.icode %}">
+        <button class="btn btn-secondary btn-sm float-right">
+          <i class="fa fa-home"></i> Go Home
+        </button>				
+      </a>			
+    </div>  
+    <div class="card-body">
+      <div class="row">				
+        {% if tps_map_data_list %}    
+          <div class="col-sm-12">							
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th> Tool Location </th>
+                    <th> {{ tool_type.name|capfirst }} Full Life | Low life consideration starts from | Parts Frequency </th>											               
+                    <th> Part Numbers</th>	
+                    <th> {{ tool_type.name|capfirst }} Image  </th>											               
+                  </tr>
+                </thead>
+                <tbody> 
+                  {% for tps_map, part_numbers_str  in tps_map_data_list %}
+                    <tr>                     
+                      <td>
+                        {{tps_map.production_station_i | get_pl_ps_name_of_ps}}
+                      </td>										
+                      <td>
+                        {{tps_map.full_life}} | {{tps_map.low_life_consideration}} | {{tps_map.parts_freq}}
+                        <div class="row mt-2">
+                          <div class="col-auto">
+                            <a href="{% url 'tps_life_param_edit' tps_map.id %}">
+                              <i class="text-warning feather icon-edit"> Modify </i>
+                            </a>
+                          </div>
+                        </div>
+                      </td>
+                      <td>											
+                        {{ part_numbers_str }} 																			
+                        <div class="row mt-2">
+                          <div class="col-auto">
+                            <a href="{% url 'tps_part_numbers_map_edit' tps_map.id 1 %}">
+                              <i class="text-success feather icon-plus-circle"> Add </i>
+                            </a>
+                          </div>
+                          <div class="col-auto">														
+                            <a href="{% url 'tps_part_numbers_map_edit' tps_map.id 0 %}">
+                              <i class="text-danger feather icon-minus-circle"> Remove </i>
+                            </a>
+                          </div>													
+                        </div>											
+                      </td>	
+                      <td>
+                        <div class="row mr-0 justify-content-center">
+                          <div class="col-sm-12 image-container">								
+                            <img src="{{ tps_map.tool_image.url }}" alt="Tool Image">
+                          </div>
+                          <div class="col-auto">
+                            <a href="{% url 'tps_image_edit' tps_map.id %}">
+                              <i class="text-warning feather icon-edit"> Modify </i>
+                            </a>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>  
+              </table>   
+            </div>                              											        
+          </div>
+        {% else %}
+          <div class="col-sm-12 alert alert-info" role="alert">
+            No production station is mapped for this {{ tool_type.name|lower }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div> 
+  <!-- [ View Tool Data ] end-->
+  
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+
+{% endblock content %}

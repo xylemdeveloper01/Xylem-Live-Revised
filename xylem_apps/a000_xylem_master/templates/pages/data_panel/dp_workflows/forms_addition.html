@@ -1,0 +1,1251 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+<!-- [Main Content] start -->
+<div class="row" id="workflows">
+  <div class="col-sm-10">
+    <div class="d-flex justify-content-between align-items-center mt-2">
+      <h5 class="mb-0">Form Section</h5>
+      <div class="input-group w-auto">
+        <div class="input-group-prepend">
+          <button class="btn btn-primary" type="button">A011</button>
+        </div>
+        <input type="text"id="formNameInput"class="form-control" placeholder="Enter Form Name"/>
+      </div>
+    </div>
+    <hr>
+    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="pills-section_1-tab" data-toggle="pill" href="#pills-section_1" >Form Section 1</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="pills-section_2-tab" data-toggle="pill"href="#pills-section_2">Form Section 2</a >
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="pills-section_3-tab" data-toggle="pill"href="#pills-section_3">Form Section 3</a >
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="pills-section_4-tab" data-toggle="pill"href="#pills-section_4">Form Section 4</a >
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="pills-section_5-tab" data-toggle="pill"href="#pills-section_5">Form Section 5</a >
+      </li>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="pills-section_1">
+        <div id="form_creation_space_1" class="droppable p-3 border rounded" style="min-height: 400px" ondrop="drop_form_field(event, 'form_creation_space_1')" ondragover="allowDrop(event)"> Section 1
+        </div>
+      </div>
+      <div class="tab-pane fade" id="pills-section_2">
+        <div id="form_creation_space_2" class="droppable p-3 border rounded" style="min-height: 400px"  ondrop="drop_form_field(event, 'form_creation_space_2')" ondragover="allowDrop(event)">
+          Section 2
+        </div>
+      </div>
+      <div class="tab-pane fade" id="pills-section_3">
+        <div id="form_creation_space_3" class="droppable p-3 border rounded" style="min-height: 400px" ondrop="drop_form_field(event, 'form_creation_space_3')"  ondragover="allowDrop(event)">
+          Section 3
+        </div>
+      </div>
+      <div class="tab-pane fade" id="pills-section_4">
+        <div id="form_creation_space_4"class="droppable p-3 border rounded"style="min-height: 400px" ondrop="drop_form_field(event, 'form_creation_space_4')" ondragover="allowDrop(event)" >
+          Section 4
+        </div>
+      </div>
+      <div class="tab-pane fade" id="pills-section_5">
+        <div id="form_creation_space_5" class="droppable p-3 border rounded" style="min-height: 400px" ondrop="drop_form_field(event, 'form_creation_space_5')" ondragover="allowDrop(event)" >
+          Section 5
+        </div>
+      </div>
+    </div>
+ 
+    <!--[ Approver Section] Start -->
+    <h5 class="mt-4">Approver Section</h5>
+    <hr>
+    <div class="row">
+      <div class="col-md-3 col-sm-12">
+        <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <li><a class="nav-link active" id="v-pills-approver_1-tab" data-toggle="pill" href="#v-pills-approver_1">Approver Section 1</a></li>
+          <li><a class="nav-link" id="v-pills-approver_2-tab" data-toggle="pill" href="#v-pills-approver_2">Approver Section 2</a></li>
+          <li><a class="nav-link" id="v-pills-approver_3-tab" data-toggle="pill" href="#v-pills-approver_3">Approver Section 3</a></li>
+          <li><a class="nav-link" id="v-pills-approver_4-tab" data-toggle="pill" href="#v-pills-approver_4">Approver Section 4</a></li>
+          <li><a class="nav-link" id="v-pills-approver_5-tab" data-toggle="pill" href="#v-pills-approver_5">Approver Section 5</a></li>
+        </ul>
+      </div>
+      <div class="col-md-9 col-sm-12">
+        <div class="tab-content" id="v-pills-tabContent">
+          <div class="tab-pane fade show active" id="v-pills-approver_1">
+            <div id="approver_section_1" class="droppable p-3 border rounded" style="min-height:200px;"
+              ondrop="dropApprover(event, 'approver_section_1')" ondragover="allowDrop(event)">     
+            </div>
+          </div>
+          <div class="tab-pane fade" id="v-pills-approver_2">
+            <div id="approver_section_2" class="droppable p-3 border rounded" style="min-height:200px;"
+              ondrop="dropApprover(event, 'approver_section_2')" ondragover="allowDrop(event)">
+            </div>
+          </div>
+          <div class="tab-pane fade" id="v-pills-approver_3">
+            <div id="approver_section_3" class="droppable p-3 border rounded" style="min-height:200px;"
+              ondrop="dropApprover(event, 'approver_section_3')" ondragover="allowDrop(event)">
+            </div>
+          </div>
+          <div class="tab-pane fade" id="v-pills-approver_4">
+            <div id="approver_section_4" class="droppable p-3 border rounded" style="min-height:200px;"
+              ondrop="dropApprover(event, 'approver_section_4')" ondragover="allowDrop(event)">
+            </div>
+          </div>
+          <div class="tab-pane fade" id="v-pills-approver_5">
+            <div id="approver_section_5" class="droppable p-3 border rounded" style="min-height:200px;"
+              ondrop="dropApprover(event, 'approver_section_5')" ondragover="allowDrop(event)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Approver Section] End -->
+
+    <!--[ Mapping Section] Start -->
+    <h5 class="mt-4">Workflow Section</h5>
+    <hr>
+    <div class="card p-5">
+      <div class="row">
+        <!-- Approvers List -->
+        <div class="col-md-3">
+          <div class="p-3 border rounded mb-3">
+            <h6 class="text-center mb-3">Approvers</h6>
+            <div class="d-flex flex-column align-items-stretch p-2">
+              <div id="approver_1" class="draggable bg-primary text-white p-2 rounded mb-2 text-center" draggable="true"> 
+                Approver section 1
+              </div>
+              <div id="approver_2" class="draggable bg-success text-white p-2 rounded mb-2 text-center" draggable="true">
+                Approver section 2
+              </div>
+              <div id="approver_3" class="draggable bg-warning text-white p-2 rounded mb-2 text-center" draggable="true">
+                Approver section3
+              </div>
+              <div id="approver_4" class="draggable bg-info text-white p-2 rounded mb-2 text-center" draggable="true">
+                Approver section 4
+              </div>
+              <div id="approver_5" class="draggable bg-danger text-white p-2 rounded mb-2 text-center" draggable="true">
+                Approver section 5
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Form Sections (Right) -->
+        <div class="col-md-9 d-flex flex-column align-items-center border rounded py-3">
+          <div class="text-center mb-2 w-100">
+            <h6 class="mb-2">Form Section 1</h6>
+            <div class="mapping_section p-4 border rounded w-50 mx-auto"data-section="1"></div>
+          </div>
+          <i class="fa fa-arrow-down fa-2x my-2 text-secondary"></i>
+          <div class="text-center mb-2 w-100">
+            <h6 class="mb-2">Form Section 2</h6>
+            <div class="mapping_section p-4 border rounded w-50 mx-auto" data-section="2"></div>
+          </div>
+          <i class="fa fa-arrow-down fa-2x my-2 text-secondary"></i>
+          <div class="text-center mb-2 w-100">
+            <h6 class="mb-2">Form Section 3</h6>
+            <div class="mapping_section p-4 border rounded w-50 mx-auto" data-section="3"></div>
+          </div>
+          <i class="fa fa-arrow-down fa-2x my-2 text-secondary"></i>
+          <div class="text-center mb-2 w-100">
+            <h6 class="mb-2">Form Section 4</h6>
+            <div class="mapping_section p-4 border rounded w-50 mx-auto" data-section="4"></div>
+          </div>
+          <i class="fa fa-arrow-down fa-2x my-2 text-secondary"></i>
+          <div class="text-center mb-2 w-100">
+            <h6 class="mb-2">Form Section 5</h6>
+            <div class="mapping_section p-4 border rounded w-50 mx-auto" data-section="5"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Mapping Section] End -->
+
+    <div class="p-3 text-left">
+      <button class="btn btn-primary" id="save_worflow" onclick="saveForm()">
+        Save Form
+      </button>
+    </div>
+  </div>
+
+  <!-- -[ Sidebar] start  -->
+  <div class="col-2 text-center">
+    <button id="open_field" class="btn btn-outline-primary shadow mb-2 blink mt-5" onclick="toggleDrawer()">
+      <i class="fa fa-plus"></i> Add Fields
+    </button>
+    <div id="workflow_drawer" class="position-fixed bg-white shadow-lg border-left"style="width: 230px; right: -230px;
+                                                  transition: right 0.4s ease;border-top-left-radius: 12px;border-bottom-left-radius: 12px;
+                                                  overflow-y: auto;min-height: 550px;">
+      <div class="d-flex justify-content-between align-items-center p-3">
+        <h6 class="mb-0">Form Widgets</h6>
+        <button class="close text-warning" onclick="toggleDrawer()"style="font-size: 1.5rem">&times;</button>
+      </div>
+
+      <div class="p-3">
+        <div class="row">
+          <div class="col-6 mb-3">
+            <div class="tool-item p-2 border rounded bg-light shadow-sm text-center" draggable="true" data-type="text" ondragstart="drag(event)" style="cursor: grab">
+              <i class="fa fa-font text-primary d-block fa-lg mb-1"></i>
+              <small>Text</small>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <div class="tool-item p-2 border rounded bg-light shadow-sm text-center" draggable="true" data-type="number" ondragstart="drag(event)" style="cursor: grab">
+              <i class="fa fa-hashtag text-success d-block fa-lg mb-1"></i>
+              <small>Number</small>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <div class="tool-item p-2 border rounded bg-light shadow-sm text-center" draggable="true" data-type="date" ondragstart="drag(event)"style="cursor: grab">
+              <i class="fa fa-calendar-alt text-warning d-block fa-lg mb-1"></i>
+              <small>Date</small>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <div class="tool-item p-2 border rounded bg-light shadow-sm text-center" draggable="true" data-type="file" ondragstart="drag(event)" style="cursor: grab">
+              <i class="fa fa-upload text-info d-block fa-lg mb-1"></i>
+              <small>File</small>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <div class="tool-item p-2 border rounded bg-light shadow-sm text-center" draggable="true" data-type="user_with_dept" ondragstart="drag(event)" id="approver_dept" data-dept-url="{% url 'ajax_load_departments' %}" data-users-url="{% url 'ajax_load_all_dept_users' %}">
+              <i class="fa fa-user text-danger d-block fa-lg mb-1"></i>
+              <small>static approver </small>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <div class="tool-item p-2 border rounded bg-light shadow-sm text-center"draggable="true" data-type="dept_based_user"  ondragstart="drag(event)" id="approver_dept" data-dept-url="{% url 'ajax_load_departments' %}">
+              <i class="fa fa-user text-primary d-block fa-lg mb-1"></i>
+              <small>Department based approver </small>
+            </div>
+          </div>
+          <div class="col-6 mb-3">
+            <div class="tool-item p-2 border rounded bg-light shadow-sm text-center" draggable="true" data-type="alert_mail" ondragstart="drag(event)" >
+              <i class="fa fa-envelope text-danger d-block fa-lg mb-1"></i>
+              <small>Alert</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- -[ Sidebar] end  -->
+</div>
+<!-- [ Main Content ] end -->
+
+<!-- [Field Editor Modal] start -->
+<div class="modal fade" id="fieldEditorModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Field</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          &times;
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Label</label>
+          <input type="text" id="field-label" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Column Class</label>
+          <input type="text" id="field-css" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Help Text</label>
+          <input type="text" id="field-help" class="form-control" />
+        </div>
+        <div class="form-group common-setting">
+          <label>Placeholder</label>
+          <input type="text" id="field-placeholder" class="form-control" />
+        </div>
+        <div class="form-group common-setting">
+          <label>Value</label>
+          <input type="text" id="field-value" class="form-control" />
+        </div>
+        <div class="form-group number-setting">
+          <label>Min</label>
+          <input type="number" id="field-min" class="form-control" />
+        </div>
+        <div class="form-group number-setting">
+          <label>Max</label>
+          <input type="number" id="field-max" class="form-control" />
+        </div>
+        <div class="file-setting">
+          <div class="form-group">
+            <label>Max File Size (MB)</label>
+            <input type="number" id="field-file-max-size"  class="form-control" value="5" min="1"/>
+          </div>
+          <div class="form-group">
+            <label>Allowed File Types</label>
+            <select id="field-file-types" class="form-control" multiple>
+              <option value="application/pdf" selected>PDF</option>
+              <option value="image/*">Images</option>
+              <option value="application/msword">DOC</option>
+              <option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">DOCX</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button  type="button"class="btn btn-primary" onclick="applyFieldSettings()" >
+          Add
+        </button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- [Field Editor Modal] end -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+  let fieldCounter = 0;
+  let currentCol = null;
+  let draggedItem = null;
+  const sectionCounters = {};
+  var workflows = document.getElementById("workflows");
+  // ---------------- Toggle Drawer ----------------
+  function toggleDrawer() {
+    let drawer = document.getElementById("workflow_drawer");
+    let form_field = document.getElementById("open_field");
+
+    if (drawer.style.right === "0px") {
+      drawer.style.right = "-230px";
+      form_field.style.display = "inline-block";
+    } else {
+      drawer.style.right = "0px";
+      form_field.style.display = "none";
+    }
+  }
+
+  // ---------------- Allow Drop ----------------
+  function allowDrop(ev) {
+    ev.preventDefault();
+  }
+
+  // ---------------- Drag ----------------
+  function drag(ev) {
+    ev.dataTransfer.setData("type", ev.target.dataset.type);
+    ev.dataTransfer.setData("existing", "");
+  }
+
+  // ---------------- Form Section Drop ----------------
+  function drop_form_field(ev, formapprover_id) {
+    ev.preventDefault();
+    const form_section = document.getElementById(formapprover_id);
+    const type = ev.dataTransfer.getData("type");
+    const existingId = ev.dataTransfer.getData("existing");
+
+    // Prevent dragging existing elements again
+    if (existingId) return;
+
+    if (["user", "department", "alert_mail"].includes(type)) {
+      alert("❌ This field type is only for Approver Sections!");
+      return;
+    }
+
+    createFieldElement(type, form_section, "col-12", formapprover_id);
+  }
+
+  function addFieldIcons(col) {
+    col.innerHTML += `
+            <div class="field-icons" style="position:absolute; top:5px; right:4px; display:none;">
+                    <i class="fa fa-edit mr-3" style="cursor:pointer; color: blue;"></i>
+                    <i class="fa fa-copy mr-3" style="cursor:pointer; color: green;"></i>
+                    <i class="fa fa-trash" style="cursor:pointer; color: red;"></i>
+            </div> `;
+
+    // Select the icons
+    const iconsContainer = col.querySelector(".field-icons");
+    const [editIcon, copyIcon, deleteIcon] = iconsContainer.children;
+
+    // Attach events
+    editIcon.onclick = () => editfield(col);
+    copyIcon.onclick = () => {
+      currentCol = col;
+      copyField(col.parentNode.id);
+    };
+    deleteIcon.onclick = () => col.remove();
+
+    // Show/hide on hover
+    col.addEventListener("mouseenter",() => (iconsContainer.style.display = "flex") );
+    col.addEventListener("mouseleave",() => (iconsContainer.style.display = "none"));
+  }
+
+  function createFieldElement(type, form_section, colClass, formapprover_id) {
+    // Extract section number from ID
+    const sectionNumber = formapprover_id.split("_").pop();
+
+    // Initialize counter for this section if not exists
+    if (!sectionCounters[sectionNumber]) {
+      sectionCounters[sectionNumber] = 0;
+    }
+    sectionCounters[sectionNumber] += 1;
+    const fieldCounter = sectionCounters[sectionNumber];
+
+    // Check if row exists inside section
+    let row = form_section.querySelector(".row");
+    if (!row) {
+      // Insert header + row
+      form_section.innerHTML = `
+                    <div class="form-group mb-2 d-flex justify-content-end">
+                            <div class="input-group w-auto">
+                                    <div class="input-group-prepend">
+                                            <button class="btn btn-secondary" type="button">Section ${sectionNumber}</button>
+                                    </div>
+                                    <input type="text" class="form-control"
+                                            name="section_name_${sectionNumber}"
+                                            placeholder="Enter Section ${sectionNumber} Name">
+                            </div>
+                    </div>
+                    <div class="form-group mt-2">
+                            <label for="section_department_${sectionNumber}">Assign Department</label>
+                            <select name="section_department_${sectionNumber}"
+                                    id="section_department_${sectionNumber}"
+                                    class="form-control" multiple>
+                                    {% for dept in department %}
+                                            <option value="{{ dept.icode }}">{{ dept.name }}</option>
+                                    {% endfor %}
+                            </select>
+                    </div>
+                    <div class="row" id="form_creation_section_${sectionNumber}"
+                            data-section="${sectionNumber}"
+                            ondragover="allowDrop(event)"></div>
+            `;
+      row = form_section.querySelector(".row");
+    }
+
+    // Create column
+    let col = document.createElement("div");
+    col.className = colClass;
+    col.id = `input_element_div_${fieldCounter}`;
+    col.innerHTML = `
+            <div class="form-group">
+                    <label for="input_${fieldCounter}">${type}</label>
+                    <input type="${type}" class="form-control"
+                            id="input_${fieldCounter}"
+                            name="input_${fieldCounter}"
+                            placeholder="Enter ${type}">
+                    <small class="form-text text-muted"></small>
+            </div> `;
+
+    addFieldIcons(col);
+    row.appendChild(col);
+
+    return col;
+  }
+
+  function editfield(col) {
+    currentCol = col;
+    const input = col.querySelector("input, select, textarea");
+    const label = col.querySelector("label");
+    const help = col.querySelector("small.form-text");
+
+    // Common settings
+    document.getElementById("field-label").value = label?.innerText || "";
+    document.getElementById("field-css").value =
+      [...col.classList].find((c) => c.startsWith("col-")) || "";
+    document.getElementById("field-help").value = help?.innerText || "";
+    document.getElementById("field-placeholder").value =
+      input?.placeholder || "";
+    document.getElementById("field-value").value = input?.value || "";
+
+    // Number field settings
+    if (input?.type === "number") {
+      document
+        .querySelectorAll(".number-setting")
+        .forEach((el) => el.classList.remove("d-none"));
+      document.getElementById("field-min").value = input.min || "";
+      document.getElementById("field-max").value = input.max || "";
+    } else {
+      document
+        .querySelectorAll(".number-setting")
+        .forEach((el) => el.classList.add("d-none"));
+    }
+
+    // File field settings
+    if (input?.type === "file") {
+      document.querySelector(".common-setting")?.classList.add("d-none");
+      document.querySelector(".file-setting")?.classList.remove("d-none");
+    } else {
+      document.querySelector(".common-setting")?.classList.remove("d-none");
+      document.querySelector(".file-setting")?.classList.add("d-none");
+    }
+
+    $("#fieldEditorModal").modal("show");
+  }
+
+  function applyFieldSettings() {
+    if (!currentCol) return;
+    const col = currentCol;
+    const input = col.querySelector("input, select, textarea");
+    const label = col.querySelector("label");
+    const help = col.querySelector("small.form-text");
+    // Common settings
+    if (label) label.textContent = document.getElementById("field-label").value;
+    if (help) help.textContent = document.getElementById("field-help").value;
+    if (input) {
+      input.placeholder = document.getElementById("field-placeholder").value;
+      input.value = document.getElementById("field-value").value;
+      // Number min/max
+      if (input.type === "number") {
+        const min = document.getElementById("field-min").value;
+        const max = document.getElementById("field-max").value;
+        if (min) input.min = min;
+        else input.removeAttribute("min");
+        if (max) input.max = max;
+        else input.removeAttribute("max");
+      }
+      // File: max size & allowed types
+      if (input.type === "file") {
+        const maxSizeMB =
+          document.getElementById("field-file-max-size").value || 5;
+        input.dataset.maxFileSize = maxSizeMB * 1024 * 1024; // convert to bytes
+        const selectedTypes = Array.from(
+          document.getElementById("field-file-types").selectedOptions
+        ).map((o) => o.value);
+        input.accept = selectedTypes.join(",");
+      }
+    }
+    // Update column class but keep position-relative
+    const newColClass = document.getElementById("field-css").value;
+    col.className = newColClass;
+
+    $("#fieldEditorModal").modal("hide");
+  }
+
+  function copyField() {
+    if (!currentCol) return;
+    const originalCol = currentCol.closest("div[class*='col-']");
+    if (!originalCol) return;
+    // Get parent row and section number
+    const parentRow = originalCol.closest(".row");
+    const sectionNumber = parentRow.dataset.section;
+    // Initialize counter for this section if not exists
+    if (!sectionCounters[sectionNumber]) {
+      // find max existing input id in this section
+      let maxId = 0;
+      parentRow.querySelectorAll("input[id^='input_']").forEach((input) => {
+        const num = parseInt(input.id.split("_")[1]);
+        if (num > maxId) maxId = num;
+      });
+      sectionCounters[sectionNumber] = maxId;
+    }
+    // Increment counter
+    sectionCounters[sectionNumber]++;
+    const fieldCounter = sectionCounters[sectionNumber];
+    const cloneCol = originalCol.cloneNode(true);
+    cloneCol.id = `input_element_div_${fieldCounter}`;
+    const cloneInput = cloneCol.querySelector("input, textarea, select");
+    if (cloneInput) {
+      cloneInput.id = `input_${fieldCounter}`;
+      cloneInput.name = `input_${fieldCounter}`;
+      cloneInput.value = ""; // reset value
+    }
+    const cloneLabel = cloneCol.querySelector("label");
+    if (cloneLabel && cloneInput) cloneLabel.setAttribute("for", cloneInput.id);
+    const cloneHelp = cloneCol.querySelector("small.form-text");
+    if (cloneHelp) cloneHelp.textContent = "";
+    // Rebind icons
+    const icons = cloneCol.querySelector(".field-icons");
+    if (icons) {
+      const [editBtn, copyBtn, deleteBtn] = icons.children;
+      editBtn.onclick = () => editfield(cloneCol);
+      copyBtn.onclick = () => {
+        currentCol = cloneCol;
+        copyField();
+      };
+      deleteBtn.onclick = () => cloneCol.remove();
+    }
+    // Show/hide icons on hover
+    cloneCol.addEventListener( "mouseenter",() => (cloneCol.querySelector(".field-icons").style.display = "flex"));
+    cloneCol.addEventListener("mouseleave",() => (cloneCol.querySelector(".field-icons").style.display = "none"));
+    cloneCol.setAttribute("draggable", "true");
+    cloneCol.ondragstart = (ev) => {
+      cloneCol.classList.add("dragging");
+      ev.dataTransfer.setData("existing", cloneCol.id);
+      ev.dataTransfer.setData("type", cloneInput?.type || "text");
+    };
+    cloneCol.ondragend = () => cloneCol.classList.remove("dragging");
+
+    // Append to parent row
+    parentRow.appendChild(cloneCol);
+  }
+
+  function empty_option_disable() {
+    document.querySelectorAll("option").forEach((opt) => {
+      if (opt.value === "") {
+        opt.disabled = true;
+      }
+    });
+  }
+
+  // DROP APPROVER
+  function dropApprover(ev, approverId) {
+    ev.preventDefault();
+    const approverSection = document.getElementById(approverId);
+    const type = ev.dataTransfer.getData("type");
+    if (!approverSection.querySelector(".autoapprove_div")) {
+      let autoapprove = document.createElement("div");
+      autoapprove.className = "autoapprove_div mb-3";
+      autoapprove.innerHTML = `<div class="d-flex justify-content-between align-items-center">
+                                  <div class="form-check mb-0">
+                                          <input class="form-check-input" type="checkbox" id="autoApproveCheck_${approverId}">
+                                          <label class="form-check-label" for="autoApproveCheck_${approverId}">Auto Approve</label>
+                                  </div>
+                                  <div class="d-flex align-items-center">
+                                          <label class="form-check-label me-2" for="autoApproveDays_${approverId}">Enter Days:</label>
+                                          <input type="number" class="form-control form-control-sm"
+                                                  id="autoApproveDays_${approverId}"
+                                                  placeholder="Days" min="1">
+                                  </div>
+                                </div>`;
+      approverSection.prepend(autoapprove);
+    }
+    // ---------------- Determine drop target ----------------
+    let target = ev.target;
+    while (target &&!target.classList.contains("droppable") &&!target.classList.contains("dynamic-wrapper")
+         && !target.classList.contains("inner-content")) 
+    {
+      target = target.parentElement;
+    }
+    if (!target) return;
+
+    // ---------------- Validation checks ----------------
+    let isInsideDynamic = target.closest(".dynamic-wrapper") !== null;
+    if (isInsideDynamic) {
+      if (type === "alert_mail") {
+        alert("Alert Mail cannot be dropped inside a department based approver!");
+        return;
+      }
+      if (type === "dept_based_user") {
+        alert("Dynamic Approver cannot be allowed inside another Dynamic Approver!" );
+        return;
+      }
+    }
+
+    if (!["user_with_dept", "alert_mail", "dept_based_user"].includes(type))
+      return;
+
+    if (type === "alert_mail" &&approverSection.querySelector(".alert-settings")
+    ) {
+      alert("Only one Alert Mail is allowed per section!");
+      return;
+    }
+
+    // ---------------- Create wrapper ----------------
+    const approver_div = document.createElement("div");
+    approver_div.className = "mb-3 p-3 position-relative";
+    approver_div.dataset.approver_divid = `approver_div_${Date.now()}`;
+    if (type === "dept_based_user")
+      approver_div.classList.add("border", "rounded", "dynamic-wrapper");
+
+    // ---------------- Delete icon ----------------
+    const deleteIcon = document.createElement("div");
+    deleteIcon.className = "field-icons";
+    deleteIcon.style.cssText = `position:absolute;top:5px;right:5px;display:none;color:red;cursor:pointer;`;
+    deleteIcon.innerHTML = `<i class="fa fa-trash"></i>`;
+    deleteIcon.querySelector("i").onclick = () => approver_div.remove();
+    approver_div.addEventListener("mouseenter",() => (deleteIcon.style.display = "flex"));
+    approver_div.addEventListener("mouseleave",() => (deleteIcon.style.display = "none"));
+    approver_div.appendChild(deleteIcon);
+
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "inner-content";
+    approver_div.appendChild(contentDiv);
+    // ---------------- user_with_dept (static) ----------------
+    if (type === "user_with_dept") {
+      contentDiv.innerHTML = `<div class="row">
+                                <div class="col-md-6">
+                                          <label class="form-label fw-bold">Department</label>
+                                        <select class="form-control mb-2" data-type="department"></select>
+                                </div>
+                                <div class="col-md-6">
+                                        <label class="form-label fw-bold">User</label>
+                                        <select class="form-control mb-2" data-type="user" disabled></select>
+                                </div>
+                              </div>`;
+      const deptSelect = contentDiv.querySelector('select[data-type="department"]');
+      const userSelect = contentDiv.querySelector('select[data-type="user"]');
+      const url_dept = $("#approver_dept").data("dept-url");
+      const url_users = $("#approver_dept").data("users-url");
+      $.ajax({
+        url: url_dept,
+        success: (data) => {
+          deptSelect.innerHTML = data;
+        },
+      });
+      deptSelect.addEventListener("change", function () {
+        const deptCode = deptSelect.value;
+        userSelect.innerHTML = "";
+        userSelect.disabled = true;
+        if (!deptCode) return;
+        $.ajax({
+          url: url_users,
+          data: { dept_id: deptCode },
+          success: (data) => {
+            userSelect.innerHTML = data;
+            userSelect.disabled = false;
+          },
+        });
+      });
+    }
+    // ---------------- dept_based_user (dynamic approver) ----------------
+    if (type === "dept_based_user") {
+      contentDiv.innerHTML = `<div class="mb-2">
+                                <label class="form-label fw-bold">Department Based Approver</label>
+                                <select class="form-control mb-2 p-2 border rounded" data-type="department"></select>
+                              </div>`;
+      const deptSelect = contentDiv.querySelector(
+        'select[data-type="department"]'
+      );
+      const url_dept = $("#approver_dept").data("dept-url");
+      $.ajax({
+        url: url_dept,
+        success: (data) => {
+          deptSelect.innerHTML = data;
+        },
+      });
+    }
+
+    // ---------------- alert_mail ----------------
+    if (type === "alert_mail") {
+      const alertDiv = document.createElement("div");
+      alertDiv.className = "alert-settings mb-3";
+      alertDiv.innerHTML = `<div class="alert-basic-settings mb-3">
+                              <label class="form-label fw-bold">Mail Alert Name</label>
+                              <input type="text" class="form-control mb-2" placeholder="Enter Alert Name" required />
+                              <label class="form-label fw-bold">Reminder Mail Send Format</label>
+                              <select class="form-control mb-2 mail-format-select">
+                                      <option value="daywise">DayWise</option>
+                                      <option value="weekly">Weekly</option>
+                                      <option value="monthly">Monthly</option>
+                              </select>
+                            </div>
+                          <div class="alert-timing-settings mb-3"></div>`;
+      approver_div.appendChild(alertDiv);
+      const mailFormat = alertDiv.querySelector(".mail-format-select");
+      const timingDiv = alertDiv.querySelector(".alert-timing-settings");
+      function renderTiming(format) {
+        let html = "";
+        if (format === "daywise") {
+          html = `
+                                    <label class="form-label">Enter Days</label>
+                                    <input type="number" class="form-control mb-2" placeholder="Number of Days" />
+                                    <label class="form-label">Select Time</label>
+                                    <input type="time" class="form-control mb-2" />`;
+        } else if (format === "weekly") {
+          html = `<label class="form-label">Weekly Trigger</label>
+                    <select class="form-control mb-2">
+                            <option value="monday">Monday</option>
+                            <option value="tuesday">Tuesday</option>
+                            <option value="wednesday">Wednesday</option>
+                            <option value="thursday">Thursday</option>
+                            <option value="friday">Friday</option>
+                            <option value="saturday">Saturday</option>
+                    </select>
+                  <label class="form-label">Select Time</label>
+                  <input type="time" class="form-control mb-2" />`;
+        } else if (format === "monthly") {
+          html = `<label class="form-label">Monthly Trigger</label>
+                    <input type="number" class="form-control mb-2 alert-monthday"
+                            placeholder="Enter day of month (1-31)" min="1" max="31" />
+                    <label class="form-label">Select Time</label>
+                    <input type="time" class="form-control mb-2" />`;
+        }
+        timingDiv.innerHTML = html;
+      }
+
+      renderTiming(mailFormat.value);
+      mailFormat.addEventListener("change", () =>
+        renderTiming(mailFormat.value)
+      );
+    }
+    target.appendChild(approver_div);
+  }
+
+  // Mapping section
+  document.querySelectorAll(".draggable").forEach((item) => {
+    item.addEventListener("dragstart", (e) => {
+      draggedItem = e.target;
+      e.dataTransfer.effectAllowed = "copy";
+      e.target.classList.add("opacity-50");
+    });
+
+    item.addEventListener("dragend", (e) => {
+      draggedItem = null;
+      e.target.classList.remove("opacity-50");
+    });
+  });
+
+  // Handle droppable sections
+  document.querySelectorAll(".mapping_section").forEach((section) => {
+    // Dragover effect
+    section.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      section.classList.add("dragover");
+    });
+
+    section.addEventListener("dragleave", () => {
+      section.classList.remove("dragover");
+    });
+
+    section.addEventListener("drop", (e) => {
+      e.preventDefault();
+      section.classList.remove("dragover");
+
+      if (draggedItem) {
+        // Prevent duplicates
+        const exists = [...section.children].some(
+          (el) => el.textContent === draggedItem.textContent
+        );
+        if (!exists) {
+          let clone = draggedItem.cloneNode(true);
+          clone.classList.remove("opacity-50");
+          clone.setAttribute("draggable", false);
+          clone.classList.add("m-1");
+
+          // Click to remove from section
+          clone.addEventListener("click", () => clone.remove());
+
+          section.appendChild(clone);
+          console.log(
+            `Assigned ${clone.textContent} to Section ${section.dataset.section}`
+          );
+        }
+      }
+    });
+
+    // Make section sortable
+    new Sortable(section, {
+      animation: 150,
+      ghostClass: "sortable-ghost",
+    });
+  });
+
+  function collectFormSections() {
+    const sectionsData = {};
+    const missingSections = [];
+
+    const sectionDivs = document.querySelectorAll(
+      "[id^='form_creation_space_']"
+    );
+    sectionDivs.forEach((sectionDiv) => {
+      const idParts = sectionDiv.id.split("_");
+      const sectionNumber = idParts[idParts.length - 1];
+      const row = sectionDiv.querySelector(".row");
+
+      if (!row || row.children.length === 0) {
+        return;
+      }
+
+      // Section name
+      const sectionNameInput = sectionDiv.querySelector(
+        "input[name='section_name_" + sectionNumber + "']"
+      );
+      let sectionName = "";
+      if (sectionNameInput) {
+        sectionName = sectionNameInput.value.trim();
+      }
+      if (sectionName === "") {
+        missingSections.push(sectionNumber);
+      }
+
+      // Section departments
+      const sectionDeptSelect = sectionDiv.querySelector(
+        "select[name='section_department_" + sectionNumber + "']"
+      );
+      let sectionDept = [];
+      if (sectionDeptSelect) {
+        const selectedOptions = Array.from(sectionDeptSelect.selectedOptions);
+        sectionDept = selectedOptions.map(function (opt) {
+          return opt.value;
+        });
+      }
+
+      // Fields data
+      const fieldsData = [];
+      const colDivs = row.querySelectorAll("div[class^='col-']");
+      colDivs.forEach((col) => {
+        const input = col.querySelector("input, select, textarea");
+        if (!input) {
+          return;
+        }
+
+        let fieldLabel = "";
+        const label = col.querySelector("label");
+        if (label) {
+          fieldLabel = label.innerText;
+        }
+
+        let helpText = "";
+        const help = col.querySelector("small.form-text");
+        if (help) {
+          helpText = help.innerText;
+        }
+
+        const fieldInfo = {
+          id: input.id,
+          name: input.name,
+          type: input.type,
+          label: fieldLabel,
+          value: input.value,
+          placeholder: input.placeholder,
+          helpText: helpText,
+        };
+
+        // Number field settings
+        if (input.type === "number") {
+          if (input.min) {
+            fieldInfo.min = input.min;
+          } else {
+            fieldInfo.min = null;
+          }
+          if (input.max) {
+            fieldInfo.max = input.max;
+          } else {
+            fieldInfo.max = null;
+          }
+        }
+
+        // File field settings
+        if (input.type === "file") {
+          if (input.dataset.maxFileSize) {
+            fieldInfo.maxFileSize = parseInt(input.dataset.maxFileSize);
+          } else {
+            fieldInfo.maxFileSize = 5 * 1024 * 1024; // 5MB default
+          }
+
+          if (input.accept && input.accept.trim() !== "") {
+            fieldInfo.allowedFileTypes = input.accept.split(",");
+          } else {
+            fieldInfo.allowedFileTypes = ["application/pdf", "image/*"];
+          }
+        }
+
+        fieldsData.push(fieldInfo);
+      });
+
+      // Clone and clean HTML
+      const clone = sectionDiv.cloneNode(true);
+      const absEls = clone.querySelectorAll("div[style*='position: absolute']");
+      absEls.forEach((el) => el.remove());
+
+      const draggableEls = clone.querySelectorAll("[ondragover], [draggable]");
+      draggableEls.forEach((el) => {
+        el.removeAttribute("ondragover");
+        el.removeAttribute("draggable");
+      });
+
+      const styledEls = clone.querySelectorAll("[style]");
+      styledEls.forEach((el) => el.removeAttribute("style"));
+
+      const smallEls = clone.querySelectorAll("small");
+      smallEls.forEach((el) => {
+        if (el.textContent.trim() === "") {
+          el.remove();
+        }
+      });
+
+      const removeEls = clone.querySelectorAll(
+        "label[for='section_department_" +
+          sectionNumber +
+          "'], select[name='section_department_" +
+          sectionNumber +
+          "']"
+      );
+      removeEls.forEach((el) => el.remove());
+
+      const inputSectionName = clone.querySelector(
+        "input[name='section_name_" + sectionNumber + "']"
+      );
+      if (inputSectionName) {
+        if (sectionName !== "") {
+          inputSectionName.value = sectionName;
+          inputSectionName.setAttribute("value", sectionName);
+        } else {
+          const defaultName = "Section " + sectionNumber;
+          inputSectionName.value = defaultName;
+          inputSectionName.setAttribute("value", defaultName);
+        }
+      }
+
+      sectionsData["section_" + sectionNumber] = {
+        name: sectionName,
+        order: parseInt(sectionNumber, 10),
+        html: clone.innerHTML.trim(),
+        department: sectionDept,
+        fields: fieldsData,
+      };
+    });
+
+    if (missingSections.length > 0) {
+      alert("Please enter names for sections: " + missingSections.join(", "));
+      return null;
+    }
+
+    const sectionCount = Object.keys(sectionsData).length;
+    if (sectionCount === 0) {
+      alert("Kindly create at least one form section");
+      return null;
+    }
+
+    return sectionsData;
+  }
+
+  
+  function collectApprovers() {
+    const sections = document.querySelectorAll("[id^='approver_section_']");
+    const approversSections = {};
+    sections.forEach((section, index) => {
+      const sectionId = section.id;
+      const approverOrder = index + 1;
+      /* - AUTO APPROVE --- */
+      let autoApprove = false;
+      let autoApproveDays = "";
+
+      const autoApproveCheck = section.querySelector("#autoApproveCheck_" + sectionId);
+      if (autoApproveCheck) {
+        autoApprove = autoApproveCheck.checked;
+      }
+
+      const autoApproveDaysInput = section.querySelector("#autoApproveDays_" + sectionId);
+      if (autoApproveDaysInput) {
+        if (autoApproveDaysInput.value) {
+          autoApproveDays = autoApproveDaysInput.value;
+        }
+      }
+
+      /* DEPT BASED APPROVERS */
+      const dept_based_card = [];
+      const dept_based_user = new Set();
+      const dynamicWrappers = section.querySelectorAll(".dynamic-wrapper");
+      dynamicWrappers.forEach((dynamic) => {
+        const deptSelect = dynamic.querySelector("select[data-type='department']");
+        let deptApprover = "";
+
+        if (deptSelect) {
+          deptApprover = deptSelect.value;
+        }
+        const users = [];
+        const innerList = dynamic.querySelectorAll(".inner-content [data-approver_divid]");
+        innerList.forEach((inner) => {
+          const deptElement = inner.querySelector("select[data-type='department']");
+          const userElement = inner.querySelector("select[data-type='user']");
+          let userDept = "";
+          let user = ""
+          if (deptElement) {
+            userDept = deptElement.value;
+          }
+          if (userElement) {
+            user = userElement.value;
+          }
+          if (userDept && user) {
+            const key = user + "-" + userDept;
+
+            if (!dept_based_user.has(key)) {
+              users.push({ user_department: userDept, user: user });
+              dept_based_user.add(key);
+            }
+          }
+        });
+        if (deptApprover && users.length > 0) {
+          dept_based_card.push({
+            department_based_approver_dept: deptApprover,
+            users: users
+          });
+        }
+      });
+
+      /* -------------------- STATIC APPROVERS -------------------- */
+      const staticApprovers = [];
+      const static_user = new Set();
+      const staticWrappers = section.querySelectorAll("[data-approver_divid]");
+      staticWrappers.forEach((wrapper) => {
+        if (wrapper.closest(".dynamic-wrapper")) return;
+        const deptElement = wrapper.querySelector("select[data-type='department']");
+        const userElement = wrapper.querySelector("select[data-type='user']");
+        let dept = "";
+        let user = "";
+        if (deptElement) {
+          dept = deptElement.value;
+        }
+        if (userElement) {
+          user = userElement.value;
+        }
+        if (dept && user) {
+          const key = user + "-" + dept;
+          if (!static_user.has(key)) {
+            staticApprovers.push({ user_department: dept, user: user });
+            static_user.add(key);
+          }
+        }
+      });
+      /* -------------------- ALERT SETTINGS -------------------- */
+      let alert = {
+        alertName: "",
+        sendFormat: "",
+        daywise: null,
+        weeklyDay: null,
+        monthlyDay: null,
+        time: null
+      };
+
+      const alertDiv = section.querySelector(".alert-settings");
+
+      if (alertDiv) {
+        const alertInput = alertDiv.querySelector("input");
+        const alertSelect = alertDiv.querySelector(".mail-format-select");
+        const alertTiming = alertDiv.querySelector(".alert-timing-settings");
+
+        if (alertInput) {
+          alert.alertName = alertInput.value;
+        }
+
+        if (alertSelect) {
+          alert.sendFormat = alertSelect.value;
+        }
+
+        if (alertTiming) {
+          if (alert.sendFormat === "daywise") {
+            const numberInput = alertTiming.querySelector("input[type='number']");
+            const timeInput = alertTiming.querySelector("input[type='time']");
+
+            if (numberInput) {
+              alert.daywise = numberInput.value;
+            }
+            if (timeInput) {
+              alert.time = timeInput.value;
+            }
+          }
+
+          if (alert.sendFormat === "weekly") {
+            const weekSelect = alertTiming.querySelector("select");
+            const timeInput = alertTiming.querySelector("input[type='time']");
+
+            if (weekSelect) {
+              alert.weeklyDay = weekSelect.value;
+            }
+            if (timeInput) {
+              alert.time = timeInput.value;
+            }
+          }
+
+          if (alert.sendFormat === "monthly") {
+            const monthDay = alertTiming.querySelector(".alert-monthday");
+            const timeInput = alertTiming.querySelector("input[type='time']");
+
+            if (monthDay) {
+              alert.monthlyDay = monthDay.value;
+            }
+            if (timeInput) {
+              alert.time = timeInput.value;
+            }
+          }
+        }
+      }
+
+      /* -------------------- FINAL JSON -------------------- */
+      approversSections[sectionId] = {
+        approverOrder: approverOrder,
+        autoApprove: autoApprove,
+        autoApproveDays: autoApproveDays,
+        static_approvers: staticApprovers,
+        dept_based_users: dept_based_card,
+        alert: alert
+      };
+    });
+
+    console.log("Final Approver JSON:", approversSections);
+    return approversSections;
+  }
+
+  function collectMapping() {
+    const mapping = [];
+    document.querySelectorAll(".mapping_section").forEach((dropZone) => {
+      const formSection = dropZone.dataset.section;
+      const approvers = dropZone.querySelectorAll(".draggable");
+      approvers.forEach((approver, idx) => {
+        mapping.push({
+          form_section: formSection,
+          approver_section: approver.id.replace("approver_", ""),
+          parallel_order: idx + 1,
+          stage: idx + 1,
+        });
+      });
+    });
+    return mapping;
+  }
+
+  function saveForm() {
+    const formName = document.getElementById("formNameInput").value.trim();
+    if (!formName) {
+      alert(" Please enter a form name");
+      return;
+    }
+
+    const sectionsData = collectFormSections();
+    if (!sectionsData) {
+      alert("Please add at least one form section");
+      return;
+    }
+
+    const approversData = collectApprovers();
+    const mappingData = collectMapping();
+
+    const saveButton = document.getElementById("save_worflow");
+    saveButton.disabled = true; // disable during save
+
+    fetch("{% url 'workflows_save_form' current_dept_i.icode %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: JSON.stringify({
+        form_name: formName,
+        sections: sectionsData,
+        approvers: approversData,
+        mapping: mappingData,
+      }),
+    })
+      .then((response) => response.text())
+      .then((text) => {
+        // ✅ If backend sent a JSON-style message as text
+        if (text.includes('"status": "exists"')) {
+          try {
+            const data = JSON.parse(text);
+            alert(data.message);
+          } catch {
+            alert(" Form already exists.");
+          }
+          saveButton.disabled = false;
+          return;
+        }
+
+        // ✅ Otherwise replace page content with rendered HTML
+        workflows.innerHTML = text;
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("❌ Something went wrong while saving the form.");
+        saveButton.disabled = false;
+      });
+  }
+
+</script>
+<!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

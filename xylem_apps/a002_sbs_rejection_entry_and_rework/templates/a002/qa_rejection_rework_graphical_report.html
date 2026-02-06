@@ -1,0 +1,771 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block extrastyle %}
+
+	<style>
+		.iframe-container {display: flex; width: 100%; height: 100%; flex-direction: column; overflow: hidden;}
+		.parent-fit { flex-grow: 1; border: none; margin: 0; padding: 0; height: 100vh; }
+		.sticky {
+			position: fixed;
+			top: 0;
+			width:70%;
+			margin-top:10px;
+			z-index: 1000; 
+		}
+		.bootstrap-select .dropdown-toggle {
+			border: 1px solid #ced4da; /* Match the default Bootstrap border */
+			border-radius: 0.25rem; /* Match the default Bootstrap border radius */
+		}  
+		.bootstrap-select .dropdown-menu {
+			border-radius: 0.25rem; /* Match the default Bootstrap border radius */
+		}  
+		.bootstrap-select .dropdown-menu .selected {
+			background-color: #908d92; /* Custom background color for selected items */
+			color: #fff; /* Custom text color for selected items */
+		}
+  </style>
+  
+{% endblock extrastyle %}
+
+{% block content %}
+
+    <script src="{% static 'assets/plugins/chartjs/4.4.0/package/dist/chart.umd.js' %}"></script>
+    <script src="{% static 'assets/plugins/chartjs/datalabel/datalabels.js' %}"></script>
+    <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+{{ status_counts.name}}
+
+	<div class="col-sm-12 mb-3">
+		<h5 class="mb-3">Rejection and Rework Graphical Report</h5>
+		<div class="btn-group mb-2 mr-2">
+			<button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+				aria-haspopup="true" aria-expanded="false">{{ current_product_category.name }}</button>
+			<div class="dropdown-menu">
+				{% for product_category in product_categories %}
+					<a class="dropdown-item {% if product_category == current_product_category %}active{% endif %}" href="{% url 'a002:qa_rejection_rework_dashboard' product_category.icode %}"> {{ product_category.name }} </a>
+				{% endfor %}
+			</div>
+		</div>
+		<hr>
+		<div class="header" id="myHeader">
+			<a class="btn btn-primary" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false"
+				aria-controls="multiCollapseExample1" >Filter Options</a>
+			<div class="row">
+				<div class="col"  >
+					<div class="collapse multi-collapse mt-2" id="multiCollapseExample1">
+						<div class="card">
+							<div class="card-body">
+								<div class="card-block">
+									<div class="row">
+										<div class="col-sm-2">
+											<p><b>From Date:</b></p>
+											<input type="date" id="from_date" class="form-control" onchange="updateCharts()">
+										</div>
+										<div class="col-sm-2">
+											<p><b>To Date:</b></p>
+											<input type="date" id="to_date" class="form-control" onchange="updateCharts()">
+										</div>
+										<div class="col-sm-2">
+											<p><b>Technology:</b></p>
+											<select id="technologyFilter" class="form-control" onchange="updateCharts()">
+												<option value="">-- All Technologies --</option>
+												{% for technology in technology_names %}
+												<option value="{{ technology.technology_i_id }}">{{ technology.name }}</option>
+												{% endfor %}
+											</select>
+										</div>
+										<div class="col-sm-2">
+											<p><b>Production Line:</b></p>
+											<select id="lineFilter" class="form-control" onchange="updateCharts()">
+												<option value="">-- All Lines --</option>
+												{% for line in line_names %}
+												<option value="{{ line.production_line_i_id }}">{{ line.name }}</option>
+												{% endfor %}
+											</select>
+										</div>
+										<div class="col-sm-2">
+											<p><b>Reason:</b></p>
+											<select id="reasonFilter"  class="form-control" onchange="updateCharts()">
+												<option value="">-- All reasons --</option>
+												{% for reason in reason_names %}
+												<option value="{{ reason.rejection_reason_i_id }}">{{ reason.name }}</option>
+												{% endfor %}
+											</select>
+										</div>
+										<div class="col-sm-2">
+											<p><b>Shift:</b></p>
+											<select id="shiftFilter" class="form-control" onchange="updateCharts()">
+												<option value="">-- All shift --</option>
+												{% for shift in shift_names %}
+												<option value="{{ shift.shift }}">{{ shift.name }}</option>
+												{% endfor %}
+											</select>
+										</div>
+										<div class="col-sm-2">
+											<p><b>Status:</b></p>
+											<select id="statusFilter" class="form-control" onchange="updateCharts()">
+												<option value="">-- All status --</option>
+												{% for status in status_names %}
+												<option value="{{ status.part_status_i_id }}">{{ status.name }}</option>
+												{% endfor %}
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="row">
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Technology wise Rejection Trend</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="technologyChart"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Technology wise Rejection Pareto</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="technologyParetoChart"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Line wise Rejection Trend</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="lineChart"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Line wise Rejection Pareto</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="lineParetoChart"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Cause wise Rejection Trend</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="reasonChart"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Cause wise Rejection Pareto</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="reasonParetoChart"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Shift wise Rejection Distribution</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="shiftChart" style="height:200px; width:200px;"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Status wise Distribution</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="statusChart" style="height:200px; width:200px;"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Day wise Rejection Trend</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="dayChart"></canvas>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-6">
+						<div class="card">
+							<div class="card-header">
+								<h5>Product Month wise Rejection Trend</h5>
+							</div>
+							<div class="card-block">
+								<canvas id="monthChart"></canvas>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+							
+	<script>
+		var fromDateInput = document.getElementById("from_date");
+		var toDateInput = document.getElementById("to_date");
+
+		// Initialize "From Date" maximum value to today's date
+		var today = new Date()
+		const offset = today.getTimezoneOffset()
+		f_today = new Date(today.getTime() - (offset*60*1000))
+		var formattedToday = f_today.toISOString().split('T')[0];
+		
+		fromDateInput.max = formattedToday;
+		toDateInput.max = formattedToday;
+			
+		var dayData = JSON.parse('{{day_counts|safe|escapejs|safe}}');
+		var monthData = JSON.parse('{{month_counts|safe|escapejs|safe}}');
+		var technologyData = JSON.parse('{{technology_counts|safe|escapejs|safe}}');
+		var lineData = JSON.parse('{{line_counts|safe|escapejs|safe}}');
+		var reasonData = JSON.parse('{{reason_counts|safe|escapejs|safe}}');
+		var shiftData = JSON.parse('{{shift_counts|safe|escapejs|safe}}');
+		// console.log(shiftData)
+		var statusData = JSON.parse('{{status_counts|safe|escapejs|safe}}');
+		// console.log(statusData)
+		Chart.register(ChartDataLabels);
+		Chart.defaults.set('plugins.datalabels', {
+			color: 'black'
+		});
+
+		var dayCtx = document.getElementById('dayChart').getContext('2d');
+		var dayChart = new Chart(dayCtx, {
+			type: 'bar',
+			data: {
+				labels: dayData.map(item => item.date),
+				datasets: [{
+					label: 'No.of Rejection',
+					data: dayData.map(item => item.count),
+					backgroundColor: 'rgba(255, 255, 0)',
+					borderColor: 'rgba(255, 255, 0)',
+					borderWidth: 1
+				}]
+			},
+			options: {
+				scales: {
+					x: {
+						grid: {
+							display: false
+						},
+						ticks: {
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					},
+					y: {
+						grid: {
+							display: true,
+							color: 'rgba(0, 0, 0, 0.1)' // Adjust grid color
+						},
+						ticks: {
+							precision: 0,
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					}
+				}
+				}
+		});
+
+		var monthCtx = document.getElementById('monthChart').getContext('2d');
+		var monthChart = new Chart(monthCtx, {
+			type: 'bar',
+			data: {
+				labels: monthData.map(item => item.month),
+				datasets: [{
+					label: 'No.of Rejection',
+					data: monthData.map(item => item.count),
+					backgroundColor: 'rgba(0, 255, 0)',
+					borderColor: 'rgba(0, 255, 0)',
+					borderWidth: 1
+				}]
+			},
+			options: {
+				scales: {
+					x: {
+						grid: {
+							display: false
+						},
+						ticks: {
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					},
+					y: {
+						grid: {
+							display: true,
+							color: 'rgba(0, 0, 0, 0.1)' // Adjust grid color
+						},
+						ticks: {
+							precision: 0,
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					}
+				}
+			}
+		});
+
+		// Create Technology Chart
+		var technologyCtx = document.getElementById('technologyChart').getContext('2d');
+		var technologyChart = new Chart(technologyCtx, {
+			type: 'bar',
+			data: {
+				labels: technologyData.map(item => item.name),
+				datasets: [{
+					label: 'No.of Rejection',
+					data: technologyData.map(item => item.count),
+					backgroundColor: 'rgba(0, 255, 238)',
+					borderColor: 'rgba(75, 192, 192, 1)',
+					borderWidth: 1
+				}]
+			},
+			options: {
+				scales: {
+					x: {
+						grid: {
+							display: false
+						},
+						ticks: {
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					},
+					y: {
+						grid: {
+							display: true,
+							color: 'rgba(0, 0, 0, 0.1)' // Adjust grid color
+						},
+						ticks: {
+							precision: 0,
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					}
+				}
+			}
+		});
+			// Create Technology Pareto Chart
+		var technologyParetoCtx = document.getElementById('technologyParetoChart').getContext('2d');
+		var technologyParetoChart = new Chart(technologyParetoCtx, {
+				type: 'bar',
+				data: {
+					labels: technologyData.map(item => item.name),
+					datasets: [{
+						label: 'No.of Rejection',
+						data: technologyData.map(item => item.count),
+						backgroundColor: 'rgba(255, 0, 0, 0.2)',
+						borderColor: 'rgba(255, 0, 0, 1)',
+						borderWidth: 1
+					},
+					{
+						type: 'line',
+						label: 'Cumulative Percentage',
+						data: calculateCumulativePercentage(technologyData),
+						borderColor: 'rgba(255, 99, 132, 1)',
+						fill: false,
+						yAxisID: 'cumulativePercentageAxis'
+					}]
+				},
+				options: {
+					scales: {
+						x: {
+							grid: {
+								display: false
+							},
+							ticks: {
+								fontColor: 'rgb(0, 0, 0)' // Adjust text color
+							}
+						},
+						y: {
+							grid: {
+								display: false,
+								color: 'rgba(0, 0, 0, 0.1)' // Adjust grid color
+							},
+							ticks: {
+								precision: 0,
+								fontColor: 'rgb(0, 0, 0)' // Adjust text color
+							},
+							beginAtZero: true
+						},
+						cumulativePercentageAxis: {
+							position: 'right',
+							max: 100,
+							beginAtZero: true,
+							title: {
+								display: true,
+								text: 'Cumulative Percentage'
+							}
+						}
+					}
+				}
+			});
+
+			// Create Line Chart
+		var lineCtx = document.getElementById('lineChart').getContext('2d');
+		var lineChart = new Chart(lineCtx, {
+			type: 'bar',
+			data: {
+				labels: lineData.map(item => item.name),
+				datasets: [{
+					label: 'No.of Rejection',
+					data: lineData.map(item => item.count),
+					backgroundColor: 'rgba(136, 255, 0)',
+					borderColor: 'rgba(136, 255, 0)',
+					borderWidth: 1
+				}]
+			},
+			options: {
+				scales: {
+					x: {
+						grid: {
+							display: false
+						},
+						ticks: {
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					},
+					y: {
+						grid: {
+							display: true,
+							color: 'rgba(0, 0, 0, 0.1)' // Adjust grid color
+						},
+						ticks: {
+							precision: 0,
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					}
+				}
+			}
+		});
+
+		// Create Line Pareto Chart
+		var lineParetoCtx = document.getElementById('lineParetoChart').getContext('2d');
+		var lineParetoChart = new Chart(lineParetoCtx, {
+			type: 'bar',
+			data: {
+				labels: lineData.map(item => item.name),
+				datasets: [{
+					label: 'No.of Rejection',
+					data: lineData.map(item => item.count),
+					backgroundColor: 'rgba(255, 0, 0, 0.2)',
+					borderColor: 'rgba(255, 0, 0, 1)',
+					borderWidth: 1
+				}, 
+				{
+					type: 'line',
+					label: 'Cumulative Percentage',
+					data: calculateCumulativePercentage(lineData),
+					borderColor: 'rgba(255, 99, 132, 1)',
+					fill: false,
+					yAxisID: 'cumulativePercentageAxis'
+				}]
+			},
+			options: {
+				scales: {
+					x: {
+						grid: {
+							display: false
+						},
+						ticks: {
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					},
+					y: {
+						beginAtZero: true,
+						grid: {
+							display: false,
+							color: 'rgba(0, 0, 0, 0.1)' // Adjust grid color
+						},
+						ticks: {
+							precision: 0,
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					},
+					cumulativePercentageAxis: {
+						position: 'right',
+						max: 100,
+						beginAtZero: true,
+						title: {
+							display: true,
+							text: 'Cumulative Percentage'
+						}
+					}
+				}
+			}
+		});
+
+		// Create Reason Chart
+		var reasonCtx = document.getElementById('reasonChart').getContext('2d');
+		var reasonChart = new Chart(reasonCtx, {
+			type: 'bar',
+			data: {
+				labels: reasonData.map(item => item.name),
+				datasets: [{
+					label: 'No.of Rejection',
+					data: reasonData.map(item => item.count),
+					backgroundColor: 'rgba(0, 170, 255)',
+					borderColor: 'rgba(0, 170, 255)',
+					borderWidth: 1
+				}]
+			},
+			options: {
+				scales: {
+					x: {
+						grid: {
+							display: false
+						},
+						ticks: {
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					},
+					y: {
+						grid: {
+							display: true,
+							color: 'rgba(0, 0, 0, 0.1)' // Adjust grid color
+						},
+						ticks: {
+							precision: 0,
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					}
+				}
+			}
+		});
+
+		// Create Reason Pareto Chart
+		var reasonParetoCtx = document.getElementById('reasonParetoChart').getContext('2d');
+		var reasonParetoChart = new Chart(reasonParetoCtx, {
+			type: 'bar',
+			data: {
+				labels: reasonData.map(item => item.name),
+				datasets: [{
+					label: 'No.of Rejection',
+					data: reasonData.map(item => item.count),
+					backgroundColor: 'rgba(255, 0, 0, 0.2)',
+					borderColor: 'rgba(255, 0, 0, 1)',
+					borderWidth: 1
+				},
+				{
+					type: 'line',
+					label: 'Cumulative Percentage',
+					data: calculateCumulativePercentage(reasonData),
+					borderColor: 'rgba(255, 99, 132, 1)',
+					fill: false,
+					yAxisID: 'cumulativePercentageAxis'
+				}]
+			},
+			options: {
+				scales: {
+					x: {
+						grid: {
+							display: false
+						},
+						ticks: {
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						}
+					},
+					y: {
+						grid: {
+							display: false,
+							color: 'rgba(0, 0, 0, 0.1)' // Adjust grid color
+						},
+						ticks: {
+							precision: 0,
+							fontColor: 'rgb(0, 0, 0)' // Adjust text color
+						},
+						beginAtZero: true
+					},
+					cumulativePercentageAxis: {
+						position: 'right',
+						max: 100,
+						beginAtZero: true,
+						title: {
+							display: true,
+							text: 'Cumulative Percentage'
+						}
+					}
+				}
+			}
+		});
+	
+
+		var shiftCtx = document.getElementById('shiftChart').getContext('2d');
+		var shiftPieChart = new Chart(shiftCtx, {
+			type: 'pie',
+			data: {
+				labels: shiftData.map(item => item.name),
+				datasets: [{
+					data: shiftData.map(item => item.count),
+					backgroundColor: [
+						'rgba(0, 255, 85)',
+						'rgba(0, 191, 255)',
+						'rgba(187, 255, 0)',
+					],
+					borderColor: [
+						'rgba(0, 255, 85)',
+						'rgba(0, 191, 255)',
+						'rgba(187, 255, 0)',
+					],
+					borderWidth: 1
+				}]
+			},
+			options: {
+				responsive: false,				
+			}				
+		});
+
+		var statusCtx = document.getElementById('statusChart').getContext('2d');
+		var statusPieChart = new Chart(statusCtx, {
+			type: 'pie',
+			data: {
+				labels: statusData.map(item => item.name),
+				datasets: [{
+					data: statusData.map(item => item.count),
+					backgroundColor: [
+						'rgba(0, 153, 255)',
+						'rgba(255, 0, 255)',
+						'rgba(16, 230, 222)',
+					],
+					borderColor: [
+						'rgba(0, 153, 255)',
+						'rgba(255, 0, 255)',
+						'rgba(16, 230, 222)',
+					],
+					borderWidth: 1
+				}]
+			},
+			options: {
+				responsive: false,
+				// maintainAspectRatio: false
+			}
+		});
+
+		function updateCharts() {
+			var from_date = document.getElementById('from_date').value;
+			var to_date = document.getElementById('to_date').value;
+			var selectedTechnology = document.getElementById('technologyFilter').value;
+			var selectedLine = document.getElementById('lineFilter').value;
+			var selectedReason = document.getElementById('reasonFilter').value;
+			var selectedShift = document.getElementById('shiftFilter').value;
+			var selectedStatus = document.getElementById('statusFilter').value;
+
+				// Use AJAX to send a request to the server
+			$.ajax({
+				url: '/a002/filter_data/',
+				data: {
+					'from_date': from_date,
+					'to_date': to_date,
+					'technology': selectedTechnology,
+					'line': selectedLine,
+					'reason': selectedReason,
+					'shift': selectedShift,
+					'status': selectedStatus,
+				},
+				dataType: 'json',
+				success: function (data) {			
+					dayChart.data.labels = data.day_counts.map(item => item.date);
+					dayChart.data.datasets[0].data = data.day_counts.map(item => item.count);
+					dayChart.update();
+					
+					monthChart.data.labels = data.month_counts.map(item => item.month);
+					monthChart.data.datasets[0].data = data.month_counts.map(item => item.count);
+					monthChart.update();
+
+					// Update Technology Chart
+					technologyChart.data.labels = data.technology_counts.map(item => item.name);
+					technologyChart.data.datasets[0].data = data.technology_counts.map(item => item.count);
+					technologyChart.update();
+
+					// Update Technology Pareto Chart
+					technologyParetoChart.data.labels = data.technology_counts.map(item => item.name);
+					technologyParetoChart.data.datasets[0].data = data.technology_counts.map(item => item.count);
+					technologyParetoChart.data.datasets[1].data = calculateCumulativePercentage(data.technology_counts);
+					technologyParetoChart.update();
+
+					// Update Line Chart
+					lineChart.data.labels = data.line_counts.map(item => item.name);
+					lineChart.data.datasets[0].data = data.line_counts.map(item => item.count);
+					lineChart.update();
+
+					// Update Line Pareto Chart
+					lineParetoChart.data.labels = data.line_counts.map(item => item.name);
+					lineParetoChart.data.datasets[0].data = data.line_counts.map(item => item.count);
+					lineParetoChart.data.datasets[1].data = calculateCumulativePercentage(data.line_counts);
+					lineParetoChart.update();
+
+					// Update Reason Chart
+					reasonChart.data.labels = data.reason_counts.map(item => item.name);
+					reasonChart.data.datasets[0].data = data.reason_counts.map(item => item.count);
+					reasonChart.update();
+
+					// Update Reason Pareto Chart
+					reasonParetoChart.data.labels = data.reason_counts.map(item => item.name);
+					reasonParetoChart.data.datasets[0].data = data.reason_counts.map(item => item.count);
+					reasonParetoChart.data.datasets[1].data = calculateCumulativePercentage(data.reason_counts);
+					reasonParetoChart.update();
+
+					// Update Status Chart
+					statusPieChart.data.labels = data.status_counts.map(item => item.name);
+					statusPieChart.data.datasets[0].data = data.status_counts.map(item => item.count);
+					statusPieChart.update();
+
+					// Update Shift Chart
+					shiftPieChart.data.labels = data.shift_counts.map(item => item.name);
+					shiftPieChart.data.datasets[0].data = data.shift_counts.map(item => item.count);
+					shiftPieChart.update();
+								
+				}
+			});
+		}
+
+		function calculateCumulativePercentage(data) {
+			var total = data.reduce((sum, item) => sum + item.count, 0);
+			var cumulativePercentage = 0;
+			return data.map(item => {
+				cumulativePercentage += (item.count / total) * 100;
+				return cumulativePercentage.toFixed(2);
+			});
+		}
+	</script>
+
+	<script>
+		window.onscroll = function() { myFunction() };			
+		var header = document.getElementById("myHeader");
+		var sticky = header.offsetTop;
+		var width_l = header.offsetWidth
+		console.log(width_l)
+		function myFunction() {
+			if (window.pageYOffset > sticky) {
+				header.classList.add("sticky");
+			} else {
+				header.classList.remove("sticky");
+			}
+		}
+	</script>
+{% endblock content %}

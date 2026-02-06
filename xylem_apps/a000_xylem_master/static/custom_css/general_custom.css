@@ -1,0 +1,9 @@
+.general_head_label{
+  background: linear-gradient(to right, #007BFF, #0056b3); 
+  color: white;
+  font-weight: bold;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  text-align: left;
+}

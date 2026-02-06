@@ -1,0 +1,205 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block extrastyle %}
+  <link rel="stylesheet" href="{% static 'custom_css/radio_ok_nok_color.css' %}">
+{% endblock extrastyle %}
+
+{% block content %}
+  
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [Poka Yoke Inspection ] start-->
+  {% if current_product_category %}
+    <div class="row">
+      <div class="col-sm-12 ml-3 mb-1">
+        <h5 class="mb-3">Awaiting Poka Yoke Inspections</h5>
+      </div>
+      <div class="col-sm-12 ml-3 mb-1">
+        <div class="btn-group mb-2 mr-2">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{ current_product_category.name }}</button>
+          <div class="dropdown-menu">
+            {% for product_category in product_categories %}
+              <a class="dropdown-item {% if product_category == current_product_category %}active{% endif %}" href="{% url 'a010:awaiting_poka_yoke_inspections' product_category.icode %}"> {{ product_category.name }} </a>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="btn-group mb-2 mr-2">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{ current_production_line.name }}</button>
+          <div class="dropdown-menu">
+            {% for production_line in production_lines %}
+              <a class="dropdown-item {% if production_line == current_production_line %}active{% endif %}" href="{% url 'a010:awaiting_poka_yoke_inspections_with_pl_id' current_product_category.icode production_line.icode %}"> {{ production_line.name }} </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row ">
+      <div class="col-md-3 col-sm-12 ml-3">
+        <ul class="nav flex-column nav-pills border border-secondary-subtle" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <h5 class="mb-3">Stations</h5>
+          {% for production_station in pl_pyps_maps_of_awaiting_inspections_dic %}
+            <li><a class="nav-link text-left {% if forloop.first %}active{% endif %} " id="v-pills-{{production_station.icode}}-tab" data-toggle="pill"
+                href="#v-pills-{{production_station.icode}}" role="tab" aria-controls="v-pills-{{production_station.icode}}" aria-selected="true">{{production_station.name}}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-md-8 col-sm-12">
+        <div class="tab-content border border-secondary-subtle" id="v-pills-tabContent">
+          <h5 class="mb-3">Poka Yoke</h5>
+          {% for production_station, pyps_maps in pl_pyps_maps_of_awaiting_inspections_dic.items %}
+            <div class="tab-pane fade {% if forloop.first %}show active{% endif %} " id="v-pills-{{production_station.icode}}" role="tabpanel"
+              aria-labelledby="v-pills-{{production_station.icode}}-tab">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Poka Yoke name</th>
+                      <th>Inspection due date</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for pyps_map in pyps_maps %}
+                      <tr>
+                        <td>{{pyps_map.poka_yoke_i.name}}</td>
+                        <td>{{pyps_map.upcoming_due_date}}</td>
+                        <td>
+                          <form>
+                            <div id="inspection_{{pyps_map.id}}_div" class="row mr-0">
+                              <div class="custom-control custom-radio">
+                                <input type="radio" id="inspection_ok_{{pyps_map.id}}" name="inspection_radio_{{pyps_map.id}}" class="custom-control-input" value="1">
+                                <label class="custom-control-label green" for="inspection_ok_{{pyps_map.id}}">Ok</label>
+                              </div>
+                              <div class="custom-control custom-radio ml-3">
+                                <input type="radio" id="inspection_nok_{{pyps_map.id}}" name="inspection_radio_{{pyps_map.id}}" class="custom-control-input" value="0">
+                                <label class="custom-control-label red" for="inspection_nok_{{pyps_map.id}}">Nok</label>
+                              </div>
+                              <div class="ml-4">
+                                <a href="#" onclick="saveInspection('{{pyps_map.id}}')" style="text-decoration:underline;">Submit Inspection</a>
+                              </div>
+                            </div>
+                            <div class="row d-none mr-0"  id="inspection_error_{{pyps_map.id}}_div">
+                              <p class="text-danger"> Inspection result is required </p>
+                            </div>
+                          </form>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>  
+                </table>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <!-- [Poka Yoke Inspection ] end-->
+
+ 
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+    
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+    
+    const inspection_save_url  = "{% url 'a010:poka_yoke_inspection_additon' %}"
+    const saving_str_html = "<p class='text-info'>Saving inspection</p>"
+    const saved_html = "<p class='text-success'>Inspection saved successfully!</p>"
+    const already_saved_html = "<p class='text-warning'>Inspection already saved!</p>"
+    const saving_error_html = "<p class='text-danger'>Unable to save inspection</p>"
+    function saveInspection(pyps_map_id) {
+      var inspection_div = $(`#inspection_${pyps_map_id}_div`)
+      var inspection_status = $(`input[name='inspection_radio_${pyps_map_id}']:checked`).val()
+      if (inspection_status==0 || inspection_status==1){
+        $(`#inspection_error_${pyps_map_id}_div`).addClass('d-none');
+        inspection_div.html(saving_str_html)
+        $.ajax({                       // initialize an AJAX request
+          url: inspection_save_url,                    // set the url of the request (= /members/ajax/load-data/ )
+          data: {
+            'pyps_map_id': pyps_map_id,      // GET parameters
+            'inspection_status': inspection_status,      // GET parameters
+          },
+          success: function (data) {
+            console.log(data.submission_status)
+            if (data.submission_status){
+              inspection_div.html(saved_html)
+            }
+            else{
+              inspection_div.html(already_saved_html)
+            }
+          },
+          error: function (){
+            inspection_div.html(saving_error_html)
+          },
+        });
+      }
+      else{
+        $(`#inspection_error_${pyps_map_id}_div`).removeClass('d-none');
+      }
+    }
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

@@ -1,0 +1,158 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  {% if form %}
+    <!-- [OEE Events Mapping Header] start-->
+    <div class="row">
+      <div class="col-sm-12 mt-5 ml-3  mb-1">
+        <h5 class="mb-3">OEE Events - Mapping</h5>
+        <hr>
+        <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#oeDModal">
+          <i class="feather icon-link"></i>OEE Events - Dept.
+        </button>
+      </div>
+    </div>
+    <!-- [OEE Events Mapping Header] end-->
+
+    <!-- [OEE Event - Department Mapping Modal] start-->
+    <div class="modal fade" id="oeDModal" tabindex="-1" role="dialog" aria-labelledby="oeDModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content card rounded">
+          <div class="modal-header">
+            <h5 class="modal-title">OEE Event - Department({{user_dept_i.name}})</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form action="{% url 'oed_mapping' user_dept_i.icode %}" method="post">
+              {% csrf_token %}
+              {% for field in form %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+              {% endfor %}
+              <button type="submit" class="btn btn-primary">Map</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- [OEE Event - Department Mapping Modal] end-->
+  {% endif %}
+
+  <!-- [ Available Data ] start-->
+  <div class="col-xl-12">
+    <div class="card">
+      <div class="card-header">
+        <h5>OEE Events Available Data</h5>
+        <div class="btn-group mb-2 mr-2">   
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{ current_dept_i.name }}</button>
+          <div class="dropdown-menu">
+            {% for dept_i in depts_for_oee_list %}
+              <a class="dropdown-item {% if dept_i == current_dept_i %}active{% endif %}" href="{% url 'dp_oee_event' dept_i.icode %}"> {{ dept_i.name }} </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="card-block">
+        {% if oee_events_of_dept %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <tbody>
+                {% for oee_event in oee_events_of_dept %}
+                  <tr>
+                    <td>
+                      {{oee_event.name}}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>  
+            </table>
+          </div>
+        {% else %}
+          <div class="row ">
+            <div class="alert alert-info" role="alert">
+              No OEE events available for this department
+            </div>  
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <!-- [ Available Data ] end-->
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST %}
+
+    <!-- [Popup Modal] start-->
+    <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content card rounded">
+          <div class="modal-header">
+            <h5 class="modal-title"> Notification </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center text-{{ message.tags }}">
+            {{ message }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- [Popup Modal] end-->
+
+    <script>
+      $(document).ready(function () {
+        $("#messageModal").modal('show')
+      })
+    </script>
+
+    {% else %}
+    <div class="alert alert-{{ message.tags }}" role="alert">
+      {{ message }}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable() {
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

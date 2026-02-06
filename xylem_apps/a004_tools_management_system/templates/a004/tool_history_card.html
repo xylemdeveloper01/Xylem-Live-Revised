@@ -1,0 +1,289 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block extrastyle %}
+  <style>
+    td, th {
+      white-space: normal !important;
+      word-wrap: break-word;
+      min-width: 150px;;
+    }
+  </style>
+{% endblock extrastyle %}
+
+{% block content %}
+<script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+<!-- [Tool History Card Selection ] start-->
+<div class="row">
+  <div class="col-sm-12">
+    <div class="card">
+      <div class="card-header">
+        <h5>{{ segment }}</h5>
+        <div class="btn-group mb-2 mr-2">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{ current_product_category.name }}</button>
+          <div class="dropdown-menu">
+            {% for product_category in product_categories %}
+              <a class="dropdown-item {% if product_category == current_product_category %}active{% endif %}" href="{% url 'a004:tool_history_card' product_category.icode current_tool_type.icode %}"> {{ product_category.name }} </a>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="btn-group mb-2 mr-2">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{ current_tool_type.name }}</button>
+          <div class="dropdown-menu">
+            {% for tool_type in tool_types %}
+              <a class="dropdown-item {% if tool_type == current_tool_type %}active{% endif %}" href="{% url 'a004:tool_history_card' current_product_category.icode tool_type.icode %}"> {{ tool_type.name }} </a>
+            {% endfor %}
+          </div>
+        </div>
+     </div>
+     <div class="card-body">
+      {% if production_lines_drop_down_html %}
+        <div class="row">
+          <div class="col-auto">
+            <div class="form-group">
+              <label for="productionLineSelection">Select Production Line</label>
+              <select class="form-control" id="productionLineSelection">{{ production_lines_drop_down_html | safe }}</select>
+              <span class="text-danger" id="productionLineError" hidden>Please select Production Line</span>
+            </div>
+          </div>
+          <div class="col-auto">
+            <div class="form-group">
+              <label for="productionStationSelection">Select Production Station</label>
+              <select class="form-control" id="productionStationSelection"></select>
+              <span class="text-danger" id="productionStationError" hidden>Please select Production Station</span>
+            </div>
+          </div>
+          <div class="col-auto">
+            <div class="form-group">
+              <label for="toolSelection">Select {{current_tool_type.name | capfirst }}</label>
+              <select class="form-control" id="toolSelection"></select>
+              <span class="text-danger" id="toolError" hidden>Please select Tool</span>
+            </div>
+          </div>
+          <div class="col-auto">
+            <div class="form-group">
+              <label for="fromDateInput">From Date</label>
+              <input class="form-control" type="date" id="fromDateInput">
+              <span class="text-danger" id="fromDateError" hidden>Please select from date</span>
+            </div>
+          </div>
+          <div class="col-auto">
+            <div class="form-group">
+              <label for="toDateInput">To Date</label>
+              <input class="form-control" type="date" id="toDateInput" disabled>
+            </div>
+          </div>
+          <div class="col-auto d-flex flex-column-reverse">
+            <div class="form-group">
+              <button type="button" class="btn btn-sm btn-primary" id="filterBtn">
+                <i class="feather icon-file"></i>View History Card
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="reportTableContainer">
+        </div>
+      {% else %}
+        <div class="alert alert-info" role="alert">
+          No {{ current_tool_type.name | lower }} & production station mappings available for this product category
+        </div>
+      {% endif %}
+     </div>
+   </div>
+ </div>
+</div>
+<!-- [Tool History Card Selection ] end-->
+
+<!-- [ messages ] start-->
+<div class="col-sm-12">
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+
+        <!-- [Popup Modal] start-->
+        <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content card rounded">
+              <div class="modal-header">
+                <h5 class="modal-title"> Notification </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body text-center text-{{ message.tags }}">
+                {{ message }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- [Popup Modal] end-->
+
+        <script>
+          $(document).ready(function() {
+            $("#messageModal").modal('show')
+          })
+        </script>
+
+      {% else %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+          {{ message }}
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+</div>
+<!-- [ messages ] end-->
+
+<!-- [ Script / Ajax ] start-->
+<script>
+  function empty_option_disable(){
+    document.querySelectorAll("option").forEach(opt => {
+      if (opt.value == "") {
+        opt.disabled = true;
+      }
+    });
+  }
+  empty_option_disable()
+
+  var productionLineSelection = document.getElementById("productionLineSelection");
+  var fromDateInput = document.getElementById("fromDateInput");
+  var toDateInput = document.getElementById("toDateInput");
+  var productionStationSelection = document.getElementById("productionStationSelection");
+  var toolSelection = document.getElementById("toolSelection");
+  var fromDateError = document.getElementById("fromDateError");
+  var productionLineError = document.getElementById("productionLineError")
+  var productionStationError = document.getElementById("productionStationError")
+  var toolError = document.getElementById("toolError")
+
+  // Initialize "From Date" maximum value to today's date
+  var today = new Date()
+  const offset = today.getTimezoneOffset()
+  f_today = new Date(today.getTime() - (offset*60*1000))
+  var formattedToday = f_today.toISOString().split('T')[0];
+
+  fromDateInput.max = formattedToday;
+  toDateInput.max = formattedToday;
+
+  fromDateInput.addEventListener("change", function () {
+    var fromDate = new Date(fromDateInput.value);
+
+    // Set the minimum value for To Date to be the selected From Date
+    toDateInput.min = fromDateInput.value;
+
+    maxToDate = fromDate
+    maxToDate.setDate(fromDate.getDate() + 365);
+
+    // Ensure To Date doesn't exceed today's date or precede the From Date
+    if (maxToDate > today) {
+      toDateInput.max = formattedToday;
+      toDateInput.value = formattedToday;
+    }
+    else{
+      toDateInput.max = maxToDate.toISOString().split('T')[0];
+      toDateInput.value = maxToDate.toISOString().split('T')[0];
+    }
+    toDateInput.disabled = false
+  });
+
+  $(document).on('click',"#filterBtn", function () {
+    $("#reportTableContainer").html("");
+    if (productionLineSelection.value =="") {
+      productionLineError.hidden = false
+      return;
+    }
+    if (productionStationSelection.value =="") {
+      productionStationError.hidden = false
+      return;
+    }
+    if (toolSelection.value =="") {
+      toolError.hidden = false
+      return;
+    }
+    if (fromDateInput.value =="") {
+      fromDateError.hidden = false
+      return;
+    }
+    productionLineError.hidden = true
+    productionStationError.hidden = true
+    toolError.hidden = true
+    fromDateError.hidden = true
+    $.ajax({
+      url: '{% url "a004:ajax_tool_history_card" %}',
+      data: {
+        'production_station_id': productionStationSelection.value,
+        'tool_id': toolSelection.value,
+        'from_date': fromDateInput.value,
+        'to_date': toDateInput.value,
+      },
+      success: function (data) {
+        $("#reportTableContainer").html(data);
+      },
+    });
+  });
+
+  // Ajax Start for select production stations and tool
+  const current_tool_type_id = '{{ current_tool_type.icode }}'
+  const url_ps = '{% url "ajax_load_production_stations_of_pl_tools" %}';  // Define url for production stations
+  const url_tool = '{% url "ajax_load_tools_of_ps" %}';  // Define URL for tools based on selected production station
+  const url_eo = '{% url "ajax_load_empty_option" %}';
+
+  $(document).on('change', "#productionLineSelection", function () {
+    const production_line_id = $(this).val();
+    console.log(url_ps)
+    $.ajax({
+      url: url_ps,
+      data: {
+        'production_line_id': production_line_id,
+        'tool_type_id' : current_tool_type_id,
+      },
+      success: function (data) {
+        $("#productionStationSelection").html(data);  // Update the production station selection
+        empty_option_disable();
+      }
+    });
+    // AJAX request for tool options (empty options)
+    $.ajax({
+      url: url_eo,
+      data: {
+        'production_line_id': production_line_id
+      },
+      success: function (data) {
+        $("#toolSelection").html(data);  // Update the tool selection
+        empty_option_disable();  // Assuming this function disables the empty option
+      }
+    });
+  });
+
+  $(document).on('change', "#productionStationSelection", function () {
+    const production_station_id = $(this).val();  // Get the selected production station ID
+    // AJAX request for tools based on selected production station
+    $.ajax({
+      url: url_tool,
+      data: {
+        'production_station_id': production_station_id,
+        'tool_type_id' : current_tool_type_id,
+      },
+      success: function (data) {
+        $("#toolSelection").html(data);  // Update the tool selection
+        empty_option_disable();  // Assuming this function disables the empty option
+      }
+    });
+  });
+
+</script>
+<!-- [ Script / Ajax ] start-->
+
+{% endblock content %}

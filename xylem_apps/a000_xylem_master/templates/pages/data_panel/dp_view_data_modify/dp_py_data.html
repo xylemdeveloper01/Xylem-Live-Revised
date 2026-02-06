@@ -1,0 +1,132 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <style>
+    th, td{
+      white-space: normal !important;
+      word-wrap: break-word;
+    }		
+    .image-container {
+      width: 100%;
+      max-width: 120px;
+      max-height: 120px;
+    }  
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;  
+    }
+  </style>
+
+  <!-- [ View Tool Data ] start-->
+  <div class="card border">
+    <div class="card-header">
+      <label class="general_head_label">
+        {{ child }}
+      </label>
+      <a href="{% url 'dp_part' FIRST_PRODUCT_CATEGORY.icode %}">
+        <button class="btn btn-secondary btn-sm float-right">
+          <i class="fa fa-home"></i> Go Home
+        </button>				
+      </a>			
+    </div>  
+    <div class="card-body">
+      <div class="row">				
+        {% if pyps_maps %}        
+          <div class="col-sm-12">							
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th> Pokeyoke Location </th>
+                    <th> Criticality Level </th>
+                  </tr>
+                </thead>
+                <tbody> 
+                  {% for pyps_map in pyps_maps %}
+                    <tr>                                       
+                      <td>
+                        {{pyps_map.production_station_i | get_pl_ps_name_of_ps}}
+                      </td>	
+                      <td>
+                        {{pyps_map.criticality_level.name}}
+                      </td>	
+                      <td>
+                        {% if request.user|get_access_to_del_py %}
+                          <a href="{% url 'delete_pyps_map' pyps_map.id %}" onclick="return confirm('All inspections of this mapping will be deleted, Are you sure you want to delete this mapping?');">
+                            <i class="fas fa-trash text-danger">Delete Pokeyoke mapping</i>
+                          </a>
+                        {% endif %}                                             
+                      </td>                      
+                    </tr>
+                  {% endfor %}
+                </tbody>  
+              </table>     
+            </div>                                                            											              
+          </div>
+        {% else %}
+          <div class="col-sm-12 alert alert-info" role="alert">
+            No production station is mapped for {{ poke_yoke.name|lower }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div> 
+  <!-- [ View Tool Data ] end-->
+  
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+
+{% endblock content %}

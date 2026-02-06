@@ -1,0 +1,188 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!--[ New 4M Forms ] start-->
+  {% if new_four_m_forms_pagination %}
+  <div class="row justify-content-between">
+    <div class="col">
+      <h5>{{segment}}</h5>
+    </div>
+    <div class="col-auto align-self-end">
+      <form class="form-inline">
+        <span class="mr-2">{{ new_four_m_forms_pagination.start_index }}-{{ new_four_m_forms_pagination.end_index }} of {{ new_four_m_forms_pagination.paginator.count }}</span>
+        <a {% if new_four_m_forms_pagination.has_previous %} href="{% url 'a006:four_m_approval' current_pagination_option.icode 1 %}" {% endif %}><i class="feather icon-chevrons-left"></i></a>
+        <a {% if new_four_m_forms_pagination.has_previous %} href="{% url 'a006:four_m_approval' current_pagination_option.icode new_four_m_forms_pagination.previous_page_number %}" {% endif %}><i class="feather icon-chevron-left"></i></a>
+        <a href="#">Page {{ new_four_m_forms_pagination.number }} of {{ new_four_m_forms_pagination.paginator.num_pages }}</a>
+        <a {% if new_four_m_forms_pagination.has_next %} href="{% url 'a006:four_m_approval' current_pagination_option.icode new_four_m_forms_pagination.next_page_number %}" {% endif %}><i class="feather icon-chevron-right"></i></a>
+        <a {% if new_four_m_forms_pagination.has_next %} href="{% url 'a006:four_m_approval' current_pagination_option.icode new_four_m_forms_pagination.paginator.num_pages %}" {% endif %}><i class="feather icon-chevrons-right"></i></a>
+        <label for="rowCountSelection" class="ml-2">Show:</label> 
+        <select class="form-control ml-1 p-0" style="height: 20px;" id="rowCountSelection" onchange="changePaginationRows(this)">
+          {% for pagination_option in pagination_options %}
+            <option value="{% url 'a006:four_m_approval' pagination_option.icode 1 %}" {% if pagination_option == current_pagination_option %} selected {% endif %}>{{pagination_option.name}}</option>
+          {% endfor %}
+        </select>
+        <label class="ml-1">Forms</label>
+      </form>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="row justify-content-end align-items-end mb-2">
+        <div class="col-5 justify-content-end">    
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="feather icon-search"></i></span>
+            </div>
+            <input type="text" id="searchInput" class="form-control" placeholder="Search data inside table...">       
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card Recent-Users">
+        <div class="card-block">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr class="unread"> 
+                  <th>Ref ID</th>               
+                  <th>Raised by</th>               
+                  <th>Changing Point</th>
+                  <th>Raised Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for form in new_four_m_forms_pagination %}
+                  <tr class="unread">
+                    <td>
+                      {{XYLEM_CODE}}-{{app_name}}-{{form.id}}
+                    </td>
+                    <td>
+                      <img class="rounded-circle" style="width:40px;" 
+                        {% if form.raised_user.gender_i == MALE  %} 
+                          src="{% static 'assets/images/user/avatar-2.jpg' %}"
+                        {% else %}
+                          src="{% static 'assets/images/user/avatar-1.jpg' %}"
+                        {% endif %}
+                        alt="activity-user"></img>
+                        {{form.raised_user | get_user_display_format }}
+                    </td> 
+                    <td>{{ form.four_m_point_i.name}}</td>                                                                                     
+                    <td><i class="fas fa-circle text-c-green f-10 m-r-15"></i>{{ form.raised_datetime }}</td> 
+                    <td>
+                      <a href="{% url 'a006:four_m_approval_view' current_pagination_option.icode new_four_m_forms_pagination.number form.id %}" class="btn btn-primary">
+                        <i class="feather icon-eye"></i>View
+                      </a>
+                    </td>                                                   
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+    <div class="col-sm-12 ml-3">
+      <div class="alert alert-info" role="alert">
+        No 4M forms available for your approval
+      </div>  
+    </div>
+  {% endif %}
+  <!--[ New 4M Forms ] end-->
+
+  <!--[ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!--[ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable() {
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+
+    function changePaginationRows(element) {
+      window.location.href = element.value;
+    }
+
+
+    var filteredRows = document.querySelectorAll("table.table-striped tbody tr");						
+    document.getElementById("searchInput").addEventListener("input", function () {
+      var searchTerm = this.value.toLowerCase().trim();
+      filteredRows.forEach(function (row) {
+        var rowData = row.textContent.toLowerCase();
+        if (rowData.includes(searchTerm)) {
+          row.style.display = "table-row";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    });
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+  
+{% endblock content %}

@@ -1,0 +1,203 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+  
+  <style>
+    td {
+      white-space: normal !important;
+      word-wrap: break-word;
+    }
+  </style>
+
+  <!--[ New 4M Forms Approval ] start-->
+  {% if not messages %}
+    <div class="col-sm-12">
+      <div class="card Recent-Users">
+        <div class="card-header">
+          <h5>{{child}}</h5>
+          <a href="{% url 'a006:four_m_approval' current_pagination_option_id current_page_num %}">
+            <button class="btn btn-secondary btn-sm float-right">
+              <i class="fa fa-home"></i> Go Home
+            </button>
+          </a>
+        </div>
+        <div class="card-block">
+          <form method="post">
+            {% csrf_token %}
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <tbody class="border">
+                  <tr> 
+                    <th>Reference ID : {{xylem_code}}-{{app_name}}-{{four_m_form.id}}</th>                 
+                  </tr>
+                  <tr>                        
+                    <th> Raised User : {{ four_m_form.raised_user | get_user_display_format }}</th> 
+                  </tr>
+                  <tr>                        
+                    <th> Raised on : {{ four_m_form.raised_datetime }}</th>
+                  </tr>   
+                </tbody>
+              </table>        
+              <table class="table table-striped">
+                <tbody class="border">                
+                  <tr>                        
+                    <th>Production Lines</th>
+                    <td colspan="2">
+                      {% for pl in production_lines %}
+                        {{ pl.name }}
+                        {% if not forloop.last %},{% endif %}
+                      {% endfor %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Models</th>
+                    <td colspan="2">
+                      {% for pm in product_models %}
+                        {{ pm.name }}
+                        {% if not forloop.last %},{% endif %}
+                      {% endfor %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Part Numbers</th>
+                    <td colspan="2">
+                      {% for pn in part_numbers %}
+                        {{ pn.name }}
+                        {% if not forloop.last %},{% endif %}
+                      {% endfor %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>4M Point</th>
+                    <td colspan="2">{{ four_m_form.four_m_point_i.name }}</td>
+                  </tr>
+                  <tr>
+                    <th>4M Change Date</th>
+                    <td colspan="2"> {{ four_m_form.fm_change_datetime }}</td>
+                  </tr>
+                  <tr>
+                    <th>Before Description</th>
+                    <td colspan="2">{{ four_m_form.fm_before_desc }}</td>
+                  </tr>
+                  <tr>
+                    <th>After Description</th>
+                    <td colspan="2">{{ four_m_form.fm_after_desc }}</td>
+                  </tr>
+                  <tr>
+                    <th>Change Description</th>
+                    <td colspan="2" >{{ four_m_form.fm_change_desc }}</td>
+                  </tr>
+                  <tr>
+                    <th>Is supplier Related Change</th>
+                    <td colspan="2">
+                      {% if four_m_form.supplier_rel_chng == 0 %}
+                        No
+                      {% elif four_m_form.supplier_rel_chng == 1 %}
+                        Yes
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% if child_part_numbers %}
+                  <tr>
+                    <th>Child Part Numbers</th>
+                    <td colspan="2">
+                      {% for cp in child_part_numbers %}
+                        {{ cp.name }}
+                        {% if not forloop.last %},{% endif %}
+                      {% endfor %}
+                    </td>
+                  </tr>
+                  {% endif %}
+                  <tr>
+                    <th>Overall Status</th>
+                    <td colspan="2">{{ overall_status }}</td>
+                  </tr>
+                </tbody>
+              </table>                
+              <table class="table table-striped">
+                <tr class="border">
+                  <th colspan="{{approval_list_depts.0 | length}}" class="text-center">Approvals</th>
+                  <tr class="border">
+                    <th class="border">Department</th> 
+                    <th class="border">Responsed User</th>
+                    <th class="border">Response</th>
+                    <th class="border">Response Time</th>
+                    <th class="border">Comments</th>
+                    {% for i in approval_list_depts %}
+                      <tr class="border">
+                        {% for j in i %}
+                        <td class="border">{{ j }}</td>
+                        {% endfor %}
+                      </tr>
+                    {% endfor %}
+                  </tr> 
+                </tr>
+              </table>
+            </div>
+            <div class="form-group">
+              <label for="response_desc">Give Your Comments</label>
+              <textarea class="form-control" name="response_desc" id="response_desc" minlength="{{approval_response_min_len}}" maxlength="{{approval_response_max_len}}" rows="5" required></textarea>
+            </div>
+            <button type="submit" name="approver_response" class="btn btn-success" value="1">Approve</button>
+            <button type="submit" name="approver_response" class="btn btn-danger" value="0">Reject</button>                         
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <!--[ New 4M Forms Approval] end-->
+
+  <!--[ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hitden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hitden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hitden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!--[ messages ] end-->
+  
+{% endblock content %}

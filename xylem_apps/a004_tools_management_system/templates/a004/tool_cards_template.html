@@ -1,0 +1,68 @@
+{% load a000_custom_tags %}
+
+<!-- [ Tool cards ] start-->
+{% if tps_map_list %}
+  <div class="row">
+    {% for i in tps_map_list %}
+      <div class="col-md-6 col-xl-4 ">
+        <div class="card daily-sales">
+          <div class="card-header pb-0">
+            <div class="row">
+              <div class="col-9">
+                <h4>{{ i.tps_map.tool_i.name }}</h4>
+                <h6><i class="feather icon-map-pin text-primary"></i><span class="text-muted"> {{ i.tps_map.production_station_i | get_pl_ps_name_of_ps }} </span></h6>
+              </div>
+              <div class="col-3 align-self-center">
+                <div class="row justify-content-end pr-1">
+                  <a href="{% url 'a004:tool_life_boost' current_tool_type.icode i.tps_map.id %}" data-toggle="tooltip" title="Boost Life">
+                    <i class="bi bi-rocket-takeoff-fill f-30 text-c-green"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-block border-bottom">
+            <div class="row align-items-center justify-content-center mt-1">
+              <div class="col-auto tool-heart">
+                {% if i.in_low_life %}
+                  <h1><i class="feather icon-heart-on text-danger"></i></h1>
+                {% else %}
+                  <h1><i class="feather icon-heart-on text-success"></i></h1>
+                {% endif %}
+              </div>
+              <div class="col text-right">
+                <h3>{{ i.avl_tool_life | number_with_comma }}</h3>
+              </div>
+            </div>
+            <div class="row d-flex align-items-center mt-2">
+              <div class="col-7">
+                <small class="mb-4">Available life [{{ i.avl_life_percent }}%]</small>
+              </div>
+              <div class="col-5 text-right">
+                <p class="m-b-0">{{ i.tps_map.full_life | number_with_comma }}</p>
+              </div>
+            </div>
+            <div class="progress">
+              {% if i.in_low_life %}
+                <div class="progress-bar progress-c-theme2" role="progressbar" style="width: {{ i.avl_life_percent }}%" aria-valuenow="{{ i.avl_life_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+              {% else %}
+                <div class="progress-bar progress-c-theme" role="progressbar" style="width: {{ i.avl_life_percent }}%" aria-valuenow="{{ i.avl_life_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+  {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info ml-3" role="alert">
+    Life is available for all the {{current_tool_type.name}}
+  </div>
+{% endif %}
+
+<script>
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();   
+  });
+</script>
+<!-- [ Tool cards ] end-->

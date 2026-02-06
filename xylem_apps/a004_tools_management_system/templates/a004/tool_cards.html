@@ -1,0 +1,184 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [Selection ] start-->
+  <div class="row">
+    <div class="col-sm-12 ml-3  mb-1">
+      <h5 class="mb-3">{{ segment }}</h5>
+      <hr>
+      <div class="row ml-0">
+        <div class="btn-group mb-2 mr-2">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{ current_product_category.name }}</button>
+          <div class="dropdown-menu">
+            {% for product_category in product_categories %}
+              <a class="dropdown-item {% if product_category == current_product_category %}active{% endif %}" href="{% url 'a004:tool_cards' product_category.icode FIRST_TOOL_TYPE.icode %}"> {{ product_category.name }} </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% if tool_avl_flag %}
+          <div class="btn-group mb-2 mr-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">{{ current_tool_type.name }}</button>
+            <div class="dropdown-menu">
+              {% for tool_type in tool_types %}
+                <a class="dropdown-item {% if tool_type == current_tool_type %}active{% endif %}" href="{% url 'a004:tool_cards' current_product_category.icode tool_type.icode %}"> {{ tool_type.name }} </a>
+              {% endfor %}
+            </div>
+          </div>
+          {% if mapping_avl_flag %}
+            <div class="col-auto d-flex flex-column-reverse">
+              <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio_tc_alr" name="customRadio" class="custom-control-input" checked value="1">
+                <label class="custom-control-label" for="customRadio_tc_alr">{{current_tool_type.name}} - Low Life</label>
+              </div>
+            </div>
+            <div class="col-auto d-flex flex-column-reverse">
+              <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio_tc_pl" name="customRadio" class="custom-control-input" value="2">
+                <label class="custom-control-label" for="customRadio_tc_pl">{{current_tool_type.name}} by Production Line</label>
+              </div>
+            </div>
+            <div class="col-auto d-flex flex-column-reverse">
+              <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio_tc_t" name="customRadio" class="custom-control-input" value="3">
+                <label class="custom-control-label" for="customRadio_tc_t">{{current_tool_type.name}} by Name</label>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div id="pl_or_tool_selection"></div>
+  <!-- [Selection ] end-->
+
+  <!-- [ Tool cards ] start-->
+  <div class="row ml-0">
+    <div class="col">
+      <div id="tool_cards">
+        {{ tool_cards_html }}
+      </div>
+    </div>
+  </div>
+  <!-- [ Tool cards ] end-->
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+    const product_category_id = "{{current_product_category.icode}}"
+    const tool_type_id = "{{current_tool_type.icode}}"
+
+    $(document).on('change',"#customRadio_tc_alr", function () {
+      const url_t_tr =  '{% url "a004:ajax_tool_cards_of_tools_with_low_life" %}';  // get the url of the `load_data` view
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_t_tr,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id,       // GET parameters
+          'tool_type_id': tool_type_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pl_or_tool_selection").html("");
+          $("#tool_cards").html(data);
+        }
+      });
+    });
+
+    $(document).on('change',"#customRadio_tc_pl", function () {
+      const url_tc_pl =  '{% url "a004:ajax_tool_cards_of_pl" %}';  // get the url of the `load_data` view
+      $.ajax({                       // initialize an AJAX request
+        url: url_tc_pl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id,       // GET parameters
+          'tool_type_id': tool_type_id       // GET parameters
+        },
+        success: function (data) {
+          $("#pl_or_tool_selection").html(data.pl_or_tool_selection_html);
+          $("#tool_cards").html(data.tool_cards_html);
+        }
+      });
+    });
+
+    $(document).on('change',"#customRadio_tc_t", function () {
+      const url_tc_t =  '{% url "a004:ajax_tool_cards_of_tool" %}';  // get the url of the `load_data` view
+      $.ajax({                       // initialize an AJAX request
+        url: url_tc_t,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id,       // GET parameters
+          'tool_type_id': tool_type_id       // GET parameters
+        },
+        success: function (data) {
+          $("#pl_or_tool_selection").html(data.pl_or_tool_selection_html);
+          $("#tool_cards").html(data.tool_cards_html);
+        }
+      });
+    });
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

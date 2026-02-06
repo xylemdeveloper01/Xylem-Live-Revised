@@ -1,0 +1,110 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+	
+  <!-- [Events Carousel] start-->
+  <div class="row">
+		<div class="col-md-12 ml-3 mb-1">
+			{% if events %}
+				<div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+					<ol class="carousel-indicators">
+						{% for event in events %}
+							<li data-target="#carouselExampleIndicators" data-slide-to="{{ forloop.counter0 }}" {% if forloop.first %} class="active" {% endif %}></li>
+						{% endfor %}
+					</ol>
+					<div id="carousel-inner" class="carousel-inner">
+						{% for event in events %}
+							<div class="carousel-item {% if forloop.first %} active {% endif %}">
+                  <img src="{{ event.event_image.url }}" class="d-block w-100 mt-3 border-text">							
+									<div class="carousel-caption .d-block p-3">											
+										<h2 style="color: rgb(238, 15, 164);">{{ event.caption }}</h2>
+										<p style="color: aliceblue;">{{ event.description }}</p>											
+									</div>   
+									<a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+									</a>
+									<a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+									</a>
+							</div>
+						{% endfor %}
+					</div>
+				</div>	
+			{% else %}
+			<div>
+				<img src="{% static 'assets/images/a008/default_event.jpg' %}" class="d-block w-100 mt-3 border-text" alt="Placeholder event" style="max-width: 100%; max-height: 700px;">	
+				<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0, 0, 0, 0.5); color: white; padding: 10px;">
+					<h3 style="color:hwb(252 83% 11%) ; background-color: #ddd;">
+            <a href="{% url 'a008:event_addition' %}" class="link-underline-primary">
+              <u> Click here to add any events or celebrations </u>
+            </a>
+          </h3>
+				</div>
+			</div>							
+			{% endif %}
+		</div>
+	</div>
+  <div class="row">
+    <div class="col-sm-12 ml-3 mb-1 text-right">
+      <a href="{% url 'a008:event_addition' %}" class="link-underline-primary">
+        <u><i class="feather icon-plus-circle"> Add events or celebrations here </i></u>
+      </a>
+    </div>
+  </div>
+  <!-- [Events Carousel] end-->
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+{% endblock content %}

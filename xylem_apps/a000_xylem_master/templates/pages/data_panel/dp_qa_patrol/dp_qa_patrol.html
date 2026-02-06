@@ -1,0 +1,313 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [QA Patrol ] start-->
+  <div class="row row justify-content-between">
+    <div class="col-sm-12 mb-1">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-1">QA Patrol Checksheets - Available</h5> 
+        <div style="display: flex; align-items: center; gap: 0;">
+          <div class="pcoded-badge label label-danger" style="border-radius: 50%; width: 20px; height: 20px; display: inline-block; text-align: center; line-height: 20px; padding: 0;">X</div>
+          <div>X - No of Part numbers without QA Patrol Checksheet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="row mb-1">
+    <div class="col-sm-12">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">         
+        <div class="d-flex flex-wrap">                  
+          <div class="btn-group mr-2 mb-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">{{ current_product_category.name }}</button>
+            <div class="dropdown-menu">
+              {% for product_category in product_categories %}
+                <a class="dropdown-item {% if product_category == current_product_category %}active{% endif %}" href="{% url 'dp_qa_patrol' product_category.icode current_checksheet_status_type.icode %}"> {{ product_category.name }} </a>
+              {% endfor %}
+            </div>                 
+          </div>        
+          <div class="btn-group mb-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{ current_checksheet_status_type.name }}</button>
+            <div class="dropdown-menu">
+              {% for checksheet_status_type in checksheets_status_types %}
+                <a class="dropdown-item {% if checksheet_status_type == current_checksheet_status_type %}active{% endif %}" href="{% url 'dp_qa_patrol' current_product_category.icode checksheet_status_type.icode %}"> {{ checksheet_status_type.name }} </a>
+              {% endfor %}
+            </div>          
+          </div>        
+          <div class="btn-group mb-2 ml-3">
+            <span class="pcoded-badge label label-danger"
+              style="border-radius: 50%; width: 38px; height: 38px; display: inline-block; text-align: center; line-height: 38px; padding: 0;">{{total_pn_wo_cs_count}}</span>
+          </div>
+        </div>
+        <div class="input-group mb-2" style="max-width: 350px;">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i class="feather icon-search"></i></span>
+          </div>
+          <input type="text" id="searchInput" class="form-control" placeholder="Search data inside table...">
+        </div>            
+      </div>
+    </div>    
+  </div>
+  <div class="row mb-1">    
+    {% if pl_pn_qa_pcs_avl_dic %}
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-3 col-sm-12">
+            <ul class="nav flex-column nav-pills border border-secondary-subtle" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+              <h5 class="mb-3">Lines</h5>
+              {% for prod_line in pl_pn_qa_pcs_avl_dic %}
+                {% with pn=pl_pn_wo_cs_dic|get_item:prod_line %}
+                  <li class="nav-item mb-1"><a class="nav-link text-left {% if forloop.first %}active{% endif %} " id="v-pills-{{prod_line.icode}}-tab" data-toggle="pill" 
+                    href="#v-pills-{{prod_line.icode}}" role="tab" aria-controls="v-pills-{{prod_line.icode}}" aria-selected="true">
+                      {{ prod_line.name }}
+                      {% if pn %}
+                        <span class="pcoded-badge label label-danger"
+                          style="border-radius: 50%; width: 20px; height: 20px; display: inline-block; text-align: center; line-height: 20px; padding: 0;">
+                          {{ pn|length }}
+                        </span>
+                      {% endif %}
+                    </a>
+                  </li>
+                {% endwith %}
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="col-md-9 col-sm-12">
+            <div class="tab-content border border-secondary-subtle" id="v-pills-tabContent">
+              <h5 class="mb-3">Checksheets</h5>
+              {% for prod_line, qa_pcss in pl_pn_qa_pcs_avl_dic.items %}
+                <div class="tab-pane fade {% if forloop.first %}show active{% endif %} " id="v-pills-{{prod_line.icode}}" role="tabpanel"
+                  aria-labelledby="v-pills-{{prod_line.icode}}-tab">
+                  {% if qa_pcss or pl_pn_wo_cs_dic|get_item:prod_line %}
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Check sheet name</th>
+                            <th>Check sheet version</th>
+                            <th>Status</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for pn in pl_pn_wo_cs_dic|get_item:prod_line %}
+                            <tr>
+                              <td>{{ pn.name }}</td>
+                              <td>-----</td>
+                              <td>------</td>
+                              <td>
+                                <a href="{% url 'qa_patrol_cs_addition' prod_line.icode pn.icode %}" 
+                                  ><i class="text-success fa fa-plus-circle"> Add </i>
+                                </a>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                          {% for qa_pcs in qa_pcss %}
+                            <tr>
+                              <td>{{qa_pcs.part_number_i.name}}</td>
+                              <td>{{qa_pcs.cs_version}}</td>
+                              <td>
+                                {% if qa_pcs.alive_flag %}
+                                  <i class="text-success fa fa-check-circle"> Active </i>
+                                {% else %}
+                                  <i class="text-danger fa fa-times-circle"> Deactivated </i>
+                                {% endif %}
+                              </td>
+                              <td>
+                                <a href="{% url 'qa_patrol_cs_view' qa_pcs.id %}">
+                                  <i class="feather icon-eye"> View </i>
+                                </a> 
+                                {% if qa_pcs.alive_flag %}
+                                  |<a href="{% url 'qa_patrol_cs_modification' qa_pcs.id %}">
+                                    <i class="text-warning feather icon-edit"> Modify </i>
+                                  </a> |
+                                  <a href="{% url 'qa_patrol_cs_deactivate' qa_pcs.id %}">
+                                    <i class="text-danger feather icon-power"> Deactivate </i>
+                                  </a> 
+                                {% endif %}
+                              </td>
+                            </tr>
+                          {% endfor %}
+                          <tr id="message" style="display: none;">
+                            <td colspan="4" class="text-center text-danger">No matching records found</td>
+                          </tr>
+                        </tbody>  
+                      </table> 
+                    </div>
+                  {% else %}
+                    <div class="alert alert-info" role="alert">
+                      No part numbers mapped for this line
+                    </div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>  
+    {% else %}
+    <div class="col-sm-12 mb-2">
+      <div class="alert alert-info" role="alert">
+        No QA Patrol Checksheets available
+      </div>  
+    </div>      
+    {% endif %}
+  </div>  
+  <!-- [QA Patrol ] end-->
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+    var filteredRows = document.querySelectorAll("table.table-hover tbody tr");
+    document.getElementById("searchInput").addEventListener("input", function () {
+    var searchTerm = this.value.toLowerCase().trim();
+    var message = document.getElementById("message");
+    let show_data = false;
+    filteredRows.forEach(function (row) {
+      var rowData = row.textContent.toLowerCase();
+      if (rowData.includes(searchTerm)) {
+        row.style.display = "table-row";
+        show_data = true;
+      } else {
+        row.style.display = "none";
+      }
+    });
+    if (show_data) {
+      message.style.display = "none";
+    } else {
+      message.style.display = "table-row";
+    }
+    });
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+    $(document).on('change', "#plmpn_id_product_category", function () {
+      const url_eo = $("#PnMPlSelection").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_pl = $("#PnMPlSelection").attr("data-production-lines-url");  // get the url of the `load_data` view
+      const product_category_id = $(this).val();
+      $.ajax({                       // initialize an AJAX request
+        url: url_pl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {
+          $("#plmpn_id_production_line").html(data);
+          empty_option_disable();
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#plmpn_id_product_model").html(data);
+          $("#plmpn_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change', "#plmpn_id_production_line", function () {
+      const url_eo = $("#PnMPlSelection").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_mpl = $("#PnMPlSelection").attr("data-product-models-pl-url");  // get the url of the `load_data` view
+      const production_line_id = $(this).val();
+      $.ajax({                       // initialize an AJAX request
+        url: url_mpl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id': production_line_id      // GET parameters
+        },
+        success: function (data) {
+          $("#plmpn_id_product_model").html(data);
+          empty_option_disable();
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#plmpn_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change', "#plmpn_id_product_model", function () {
+      const url_pnplm = $("#PnMPlSelection").attr("data-part-numbers-pl-m-url");  // get the url of the `load_data` view
+      const production_line_id = $("#plmpn_id_production_line").val();
+      const model_id = $(this).val();
+      $.ajax({                       // initialize an AJAX request
+        url: url_pnplm,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id': production_line_id,      // GET parameters
+          'model_id': model_id      // GET parameters
+        },
+        success: function (data) {
+          $("#plmpn_id_part_number").html(data);
+          empty_option_disable();
+        }
+      });
+    });
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

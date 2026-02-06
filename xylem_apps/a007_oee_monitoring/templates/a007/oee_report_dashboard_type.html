@@ -1,0 +1,158 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!--[OEE Reports filter data through, production lines, date, shift] start-->	
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>{{ child }}</h5>
+          <div class="btn-group mb-2 mr-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">{{ current_product_category.name }}</button>
+            <div class="dropdown-menu">
+              {% for product_category in product_categories %}
+                <a class="dropdown-item {% if product_category == current_product_category %}active{% endif %}" href="{% url 'a007:oee_report_dashboard_type' product_category.icode %}"> {{ product_category.name }} </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            {% if production_lines %}
+              <div class="col-sm-12">
+                <div class="form-group">
+                  <label for="productionLinesSelect">Select Production Line</label>
+                  <select class="form-control" id="productionLinesSelect" multiple> 
+                    <option value="" disabled>------</option>
+                    {% for pl in production_lines %}
+                      <option value="{{ pl.icode }}">{{ pl.name }}</option>
+                    {% endfor %}
+                  </select> 
+                  <span class="text-danger" id="productionLinesError" hidden>Please select from Production Line</span>
+                </div>
+                <div class="form-group">
+                  <label for="dateInput">Date</label>
+                  <input class="form-control" type="date" id="dateInput" value=''>
+                  <span class="text-danger" id="dateError" hidden>Please select date</span>
+                </div>
+                <div class="form-group">
+                  <label for="shiftInput">Select Shift</label>
+                  <select class="form-control" id="shiftInput">
+                    <option value="">------</option>
+                    {% for shift in shifts %}
+                      <option value="{{ shift.icode }}">{{ shift.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <span class="text-danger" id="shiftError" hidden>Please select shift</span>
+                </div>
+              </div> 
+              <div class="col-auto d-flex flex-column-reverse">
+                <div class="form-group">
+                  <button type="button" class="btn btn-sm btn-primary" id="filterBtn">
+                    <i class="feather icon-bar-chart-2"></i>Show Dashboard
+                  </button>
+                </div>
+              </div>    
+            {% else %} 
+              <div class="col-sm-12">
+                <div class="alert alert-warning" role="alert">
+                  No OEE Enabled Lines available for this Product Category
+                </div>       
+              </div>       
+            {% endif %}         
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="reportTableContainer">
+  </div>
+  <!--[OEE Reports filter data through, production lines, date, shift] end-->	
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+    var productionLines = document.getElementById("productionLinesSelect");
+    var date = document.getElementById("dateInput");
+    var shift = document.getElementById("shiftInput");
+    var productionLinesError = document.getElementById("productionLinesError");
+    var dateError = document.getElementById("dateError");
+    var shiftError = document.getElementById("shiftError");
+
+    var today = new Date()
+    const offset = today.getTimezoneOffset()
+    f_today = new Date(today.getTime() - (offset*60*1000))
+    var formattedToday = f_today.toISOString().split('T')[0];
+    
+    date.max = formattedToday;
+    date.min = "2024-06-01";
+
+    $(document).on('click',"#filterBtn", function () {
+      var productionLinesArray = []
+      Array.from(productionLines.options).forEach(option => {
+        if (option.selected){
+          productionLinesArray.push(option.value);
+        }
+      });
+    
+      var null_val 
+      if (!productionLinesArray.length){
+        productionLinesError.hidden = false
+        null_val = true
+      } 
+      else{
+        productionLinesError.hidden = true
+      }
+      if (!dateInput.value){
+        dateError.hidden = false
+        null_val = true
+      } 
+      else{
+        dateError.hidden = true
+      }
+      if (!shift.value){
+        shiftError.hidden = false
+        null_val = true
+      } 
+      else{
+        shiftError.hidden = true
+      }
+      if (null_val){
+        return
+      }
+      $("#reportTableContainer").html('<div class="alert alert-warning" role="alert">Loading the dashboard</div>');
+      $.ajax({                      
+        url: '{% url "a007:ajax_load_oee_report_dashboard_type" %}',                   
+        data: {
+          'production_line_ids': productionLinesArray.join(','),
+          'date': dateInput.value,       
+          'shift_id': shift.value,
+        },
+        success: function (data) {   
+          $("#reportTableContainer").html(data);
+        },
+        error: function (xhr, status, error) {  
+          $("#reportTableContainer").html(
+            `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+              Unable to show the dashboard
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>`
+          );
+        }
+      });
+    });
+  </script>
+  <!-- [ Script / Ajax ] end-->
+{% endblock content %}
+ 
+
+
+

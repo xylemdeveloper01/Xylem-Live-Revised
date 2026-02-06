@@ -1,0 +1,331 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <style>
+    .summary-table-main-head th{
+      white-space: normal !important;
+      word-wrap: break-word;
+    }
+  </style>
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [Production Plan View] start-->
+  {% if pp_view %}
+    {% if color_code_dict %}
+      <div class="col-sm-12">
+        <div class="row justify-content-end">
+          <div class="col-auto">
+            <span class="badge border border-secondary" style="background-color: {{color_code_dict.pc_lbc}};"> &nbsp; &nbsp;</span>
+            <span class="align-middle">{{ color_code_dict.pc_lt }} </span>
+            <span> &nbsp; &nbsp; &nbsp; &nbsp;</span>
+            <span class="badge border border-secondary" style="background-color: {{ color_code_dict.pc_mbc }};"> &nbsp; &nbsp; </span>
+            <span class="align-middle">{{ color_code_dict.pc_mt }}</span>
+            <span> &nbsp; &nbsp; &nbsp; &nbsp;</span>
+            <span class="badge border border-secondary" style="background-color: {{ color_code_dict.pc_hbc }};"> &nbsp; &nbsp; </span>
+            <span class="align-middle">{{ color_code_dict.pc_ht }}</span>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    <div class="col-sm-12 mt-1">
+      <div class="card Recent-Users">
+        <div class="card-header">
+          <h5>{{child}}</h5>
+          <a href="{% url 'a007:production_plan' production_line|get_pc_id_of_item home_dict.month_id home_dict.year_id %}">
+            <button class="btn btn-secondary btn-sm float-right">
+              <i class="fa fa-home"></i> Go Home  
+            </button>
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <tbody>
+                    <tr>
+                      <th>Production Line</th>
+                      <td style="border-top: 1px solid #ddd;">{{ production_line.name }}</td>
+                    </tr>
+                    <tr>
+                      <th>Month & Year</th>
+                      <td>{{ month.name }} - {{ year.name }}</td>
+                    </tr>
+                    <tr>
+                      <th>Month Plan</th>
+                      <td>{{ month_plan | number_with_comma }}</td>
+                    </tr>
+                    <tr>
+                      <th>Plan Revision</th>
+                      <td>{{ pp_revision }}</td>
+                    </tr>
+                    <tr>
+                      <th>MTD Plan</th>
+                      <td>{{ mtd_plan | number_with_comma }}</td>
+                    </tr>
+                    <tr>
+                      <th>MTD Actual</th>
+                      <td>{{ mtd_actual | number_with_comma }}</td>
+                    </tr>
+                    <tr>
+                      <th>Adherence</th>
+                      {% if adherence_dict.percent_bg_c %}
+                        <td style="color:{{adherence_dict.percent_txt_c}};background-color:{{adherence_dict.percent_bg_c}};">
+                          {{ adherence_dict.percent_str }}
+                        </td>
+                      {% else %}
+                        <td>
+                          {{ adherence_dict }}
+                        </td>
+                      {% endif %}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              {% if day_max %}
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr class="summary-table-main-head">
+                        <th>Day Capacity</th>
+                        <th>Shift A Capacity</th>
+                        <th>Shift B Capacity</th>
+                        <th>Shift C Capacity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{{ day_max | number_with_comma }}</td>
+                        <td>{{ shiftA_max | number_with_comma }}</td>
+                        <td>{{ shiftB_max | number_with_comma }}</td>
+                        <td>{{ shiftC_max | number_with_comma }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              {% endif %}
+              {% if summary_table_dict %}
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr class="summary-table-main-head">
+                        <th>#</th>
+                        <th>Total Plan Quantity</th>
+                        <th>No of Days / Shifts Splited</th>
+                        <th>Planned Efficiency</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th>Day</th>
+                        <td>
+                          <span>{{ summary_table_dict.day.planned_qty | number_with_comma }}</span>
+                        </td>
+                        <td>
+                          <span>{{ summary_table_dict.day.splited_count }}</span>
+                        </td>
+                        <td>
+                          <span>{{ summary_table_dict.day.planned_efficiency_in_str }}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Shift A</th>
+                        <td>
+                          <span>{{ summary_table_dict.shiftA.planned_qty | number_with_comma }}</span>
+                        </td>
+                        <td>
+                          <span>{{ summary_table_dict.shiftA.splited_count }}</span>
+                        </td>
+                        <td>
+                          <span>{{ summary_table_dict.shiftA.planned_efficiency_in_str }}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Shift B</th>
+                        <td>
+                          <span>{{ summary_table_dict.shiftB.planned_qty | number_with_comma }}</span>
+                        </td>
+                        <td>
+                          <span>{{ summary_table_dict.shiftB.splited_count }}</span>
+                        </td>
+                        <td>
+                          <span>{{ summary_table_dict.shiftB.planned_efficiency_in_str }}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Shift C</th>
+                        <td>
+                          <span>{{ summary_table_dict.shiftC.planned_qty | number_with_comma }}</span>
+                        </td>
+                        <td>
+                          <span>{{ summary_table_dict.shiftC.splited_count }}</span>
+                        </td>
+                        <td>
+                          <span>{{ summary_table_dict.shiftC.planned_efficiency_in_str }}</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              {% endif %}
+            </div>
+            <div class="col">
+              <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr>
+                      <th class="align-middle text-center" rowspan="2">Date</th>
+                      <th class="align-middle text-center" rowspan="2">Day</th>
+                      <th class="align-middle text-center" rowspan="2">Plan</th>
+                      <th class="align-middle text-center" rowspan="2">Actual</th>
+                      <th class="align-middle text-center" rowspan="2">Adherence</th>
+                      <th class="text-center" colspan="3">Shift A</th>
+                      <th class="text-center" colspan="3">Shift B</th>
+                      <th class="text-center" colspan="3">Shift C</th>
+                    </tr>
+                    <tr>
+                      <th>Plan</th>
+                      <th>Actual</th>
+                      <th>Adherence</th>
+                      <th>Plan</th>
+                      <th>Actual</th>
+                      <th>Adherence</th>
+                      <th>Plan</th>
+                      <th>Actual</th>
+                      <th>Adherence</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for pp_view_data in pp_view_data_list %}
+                      <tr>
+                        <td>{{ pp_view_data.date_str }}</td>
+                        <td>{{ pp_view_data.day_str }}</td>
+                        <td>{{ pp_view_data.plan | number_with_comma }}</td>
+                        <td>{{ pp_view_data.actual | number_with_comma }}</td>
+                        {% if pp_view_data.adherence_dict.percent_bg_c %}
+                          <td style="color:{{pp_view_data.adherence_dict.percent_txt_c}};background-color:{{pp_view_data.adherence_dict.percent_bg_c}};">
+                            {{ pp_view_data.adherence_dict.percent_str }}
+                          </td>
+                        {% else %}
+                          <td>
+                            {{ pp_view_data.adherence_dict }}
+                          </td>
+                        {% endif %}
+                        <td>{{ pp_view_data.shiftA_view.plan | number_with_comma }}</td>
+                        <td>{{ pp_view_data.shiftA_view.actual | number_with_comma }}</td>
+                        {% if pp_view_data.shiftA_view.adherence_dict.percent_bg_c %}
+                          <td style="color:{{pp_view_data.shiftA_view.adherence_dict.percent_txt_c}};background-color:{{pp_view_data.shiftA_view.adherence_dict.percent_bg_c}};">
+                            {{ pp_view_data.shiftA_view.adherence_dict.percent_str }}
+                          </td>
+                        {% else %}
+                          <td>
+                            {{ pp_view_data.shiftA_view.adherence_dict }}
+                          </td>
+                        {% endif %}
+                        <td>{{ pp_view_data.shiftB_view.plan | number_with_comma }}</td>
+                        <td>{{ pp_view_data.shiftB_view.actual | number_with_comma }}</td>
+                        {% if pp_view_data.shiftB_view.adherence_dict.percent_bg_c %}
+                          <td style="color:{{pp_view_data.shiftB_view.adherence_dict.percent_txt_c}};background-color:{{pp_view_data.shiftB_view.adherence_dict.percent_bg_c}};">
+                            {{ pp_view_data.shiftB_view.adherence_dict.percent_str }}
+                          </td>
+                        {% else %}
+                          <td>
+                            {{ pp_view_data.shiftB_view.adherence_dict }}
+                          </td>
+                        {% endif %}
+                        <td>{{ pp_view_data.shiftC_view.plan | number_with_comma }}</td>
+                        <td>{{ pp_view_data.shiftC_view.actual | number_with_comma }}</td>
+                        {% if pp_view_data.shiftC_view.adherence_dict.percent_bg_c %}
+                          <td style="color:{{pp_view_data.shiftC_view.adherence_dict.percent_txt_c}};background-color:{{pp_view_data.shiftC_view.adherence_dict.percent_bg_c}};">
+                            {{ pp_view_data.shiftC_view.adherence_dict.percent_str }}
+                          </td>
+                        {% else %}
+                          <td>
+                            {{ pp_view_data.shiftC_view.adherence_dict }}
+                          </td>
+                        {% endif %}
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <!-- [Production Plan View] end-->
+  
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

@@ -1,0 +1,224 @@
+{% extends "layouts/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<!-- [ Main Content ] start -->
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>{{ child }}</h5>
+                <label class="general_head_label">
+                    Line : {{ line.name }}
+                </label>
+                <label class="general_head_label">
+                    Station : {{ stn.name }}
+                </label>
+            </div>
+            <div class="card-block">
+                <div id="inputContainer"></div><br>
+                <div id="reportContainer"></div><br>
+                <div id="updationContainer"></div><br>
+                <div id="infoContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var inputContainer = document.getElementById("inputContainer")
+    var reportContainer = document.getElementById("reportContainer")
+    var updationContainer = document.getElementById("updationContainer")
+    var infoContainer = document.getElementById("infoContainer")
+
+    inputContainer.style.display = "none"
+    reportContainer.style.display = "none"
+    inputContainer.style.display = "none"
+
+    infoContainer.className = "alert alert-secondary"
+    infoContainer.innerHTML = "Connecting Server, Please wait..."
+
+    const send_data = { work_type: "{{ work_type }}", line_id: "{{ line.id }}", stn_id: "{{ stn.id }}" };
+    var connection_id = null
+
+    fetch("{{ connect_server_url }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify(send_data),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.connection_id) {
+            inputContainer.innerHTML = `<div class="form-group">
+                                            <label for="serialNo"> Enter Serial No </label>
+                                            <input type="text" class="form-control" id="serialNo" name="serialNo"> </input>
+                                        </div>
+                                        <button type="button" class="btn btn-primary" onclick="getServerData()"> Fetch Data </button>
+                                        <button type="button" class="btn btn-outline-warning" onclick="document.getElementById('serialNo').value=''"> Clear </button>`
+            inputContainer.style.display = "block"
+            infoContainer.style.display = "none"
+            connection_id = data.connection_id
+        }
+        else {
+            infoContainer.className = "alert alert-danger"
+            infoContainer.innerHTML = "Unable to connect to the server, please refresh the page to reconnect";
+            infoContainer.style.display = "block"
+        }
+    })
+    .catch(error => {
+        console.log("An error occurred while connecting to the server:", error);
+        infoContainer.className = "alert alert-danger"
+        infoContainer.innerHTML = "Error occured while connecting to the server, please refresh the page to reconnect";
+        infoContainer.style.display = "block"
+    });
+
+
+    function getServerData() {
+        reportContainer.style.display = "none"
+        var serialNo = document.getElementById("serialNo").value
+        var uid = null
+        if (!serialNo) {
+            infoContainer.className = "alert alert-danger"
+            infoContainer.innerHTML = "Please fill serial no"
+            infoContainer.style.display = "block"
+        }
+        else {
+            var send_data = { connection_id: connection_id, serialNo: serialNo };
+            infoContainer.className = "alert alert-secondary"
+            infoContainer.innerHTML = "Fetching data, Please wait..."
+            infoContainer.style.display = "block"
+
+            fetch("{{ server_get_data_url }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: JSON.stringify(send_data),
+            })
+            .then(response => response.json())
+            .then(data_dic => {
+                if (!data_dic.report_data["data"]) {
+                        infoContainer.className = "alert alert-info"
+                    infoContainer.innerHTML = "No records found"
+                    infoContainer.style.display = "block"
+                }
+                else {
+                    temp_str =`<div class="col-xl-12">
+                                    <div class="card-block table-border-style" style="max-height: 300px; overflow-y: auto;">
+                                        <div class="table-responsive">
+                                            <table id="reportTable" class="table table-striped">`;
+                    temp_str += `<tr><th colspan="2"> Line : {{ line.name }} </th></tr>
+                                <tr><th colspan="2"> Station : {{ stn.name }} </th></tr>
+                                <tr><th colspan="2">` + data_dic.head_msg + `</th></tr>`
+                    for (var key1 in data_dic.report_data.data) {
+                        temp_str = temp_str + "<tr><th>" + key1 + "</th>" + "<td>" + data_dic.report_data.data[key1] + "</td></tr>"
+                    }
+                    temp_str = temp_str + "</tr></table></div></div></div>"
+
+                    if (!data_dic.report_data.reprocess_status) {
+                        uid = data_dic.report_data.uid
+                        temp_str = temp_str + ` <br>
+                                                <div>
+                                                    <center>
+                                                        <button type="button" class="btn btn-primary"  id ="updateButton" onclick="showUpdationContainer()"> Update </button>
+                                                    </center>
+                                                </div>`
+                        infoContainer.style.display = "none"
+                    }
+                    else {
+                        infoContainer.className = "alert alert-info"
+                        infoContainer.innerHTML = "Hey Dude, Reprocess already allowed"
+                        infoContainer.style.display = "block"
+                    }
+                    reportContainer.innerHTML = temp_str
+                    reportContainer.style.display = "block"
+                }
+            })
+            .catch(error => {
+                console.log("An error occurred while getting data from the server");
+                infoContainer.className = "alert alert-danger"
+                infoContainer.innerHTML = "Error acqiured while connecting to server, Please refresh the page to reconnect"
+                infoContainer.style.display = "block"
+            });
+        }
+    }
+
+
+    function showUpdationContainer() {
+        updationContainer.innerHTML = `<div class="form-group">
+                                            <label for="reasonInput">Select the reson for the reprocess </label>
+                                            <select class="form-control col-6" id="reasonInput" name="reasonInput">
+                                                <option value=""> -- Select Reason -- </option>
+                                                <option value="121"> Process Failed </option>
+                                                <option value="122"> Process Completed, Allow again </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-primary" id="confirmReason" onclick="updateServerData()"> Confirm </button>
+                                            <button type="button" class="btn btn-primary" id="cancelReason" onclick="hideUpdationContainer()"> Cancel </button>
+                                        </div>`
+        updationContainer.style.display = "block"
+    }
+    function hideUpdationContainer() {
+        updationContainer.innerHTML = ""
+        updationContainer.style.display = "none"
+    }
+
+    function updateServerData() {
+        var reasonInput = document.getElementById("reasonInput").value
+        document.getElementById("confirmReason").disabled = true
+        document.getElementById("confirmReason").disabled = true
+        document.getElementById("cancelReason").disabled = true
+        reportContainer.style.display = "none"
+        updationContainer.style.display = "none"
+        infoContainer.className = "alert alert-secondary"
+        infoContainer.innerHTML = "Upadating data in database, Please wait..."
+        infoContainer.style.display = "block"
+        if (reasonInput) {
+            var send_data = { connection_id: connection_id, serialNo: document.getElementById("serialNo").value, remarks: reasonInput };
+            fetch("{{ server_update_data_url }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type" : "application/json",
+                    "X-CSRFToken" : "{{ csrf_token }}",
+                },
+                body: JSON.stringify(send_data),
+            })
+            .then(response => response.json())
+            .then(data_dic => {
+                if (data_dic.update_reponse) {
+                    infoContainer.className = "alert alert-success"
+                    infoContainer.innerHTML = "Successfully updated the reprocess for " + data_dic.serialNo
+                    infoContainer.style.display = "block"
+                    document.getElementById("serialNo").value = "";
+                }
+                else {
+                    infoContainer.className = "alert alert-danger"
+                    infoContainer.innerHTML = "Unable to do reprocess, data mismatched"
+                    infoContainer.style.display = "block"
+                }
+            })
+            .catch(error => {
+                console.log("An error occurred while updating data to the server");
+                infoContainer.className = "alert alert-danger"
+                infoContainer.innerHTML = "An error occurred while updating data to the server"
+                infoContainer.style.display = "block"
+            });
+        }
+        else {
+            infoContainer.className = "alert alert-danger"
+            infoContainer.innerHTML = "Please select the reason"
+            infoContainer.style.display = "block"
+        }
+    }
+
+</script>
+<!-- [ Main Content ] end -->
+
+{% endblock content %}

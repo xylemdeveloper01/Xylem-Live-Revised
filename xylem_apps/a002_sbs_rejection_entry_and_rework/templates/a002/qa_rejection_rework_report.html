@@ -1,0 +1,153 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!--[Rejection and Rework Forms Reports filter data through dates, production line, shift] start-->	
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>{{ segment }} </h5>
+          <div class="btn-group mb-2 mr-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">{{ current_product_category.name }}</button>
+            <div class="dropdown-menu">
+              {% for product_category in product_categories %}
+                <a class="dropdown-item {% if product_category == current_product_category %}active{% endif %}" href="{% url 'a002:qa_rejection_rework_report' product_category.icode %}"> {{ product_category.name }} </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-auto">
+              <div class="form-group">
+                <label for="production_line_filter">Select Production Line</label>
+                <select class="form-control" id="production_line_filter">                
+                  <option value=""> All production lines </option>                 
+                  {% for pl in production_lines %}
+                   <option value="{{ pl.icode }}">{{ pl.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>  
+            <div class="col-auto">
+              <div class="form-group">
+                <label for="fromDateInput">From Date</label>
+                <input class="form-control" type="date" id="fromDateInput">
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-group">
+                <label for="toDateInput">To Date</label>
+                <input class="form-control" type="date" id="toDateInput" disabled>
+              </div>
+            </div>
+            <div class="col-auto">
+              <div class="form-group">
+                <label for="shiftFilter">Select Shift</label>
+                <select class="form-control" id="shiftFilter">
+                  <option value="">All shift</option>
+                  {% for shift in shifts %}
+                    <option value="{{ shift.icode }}">{{ shift.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>   
+            <div class="col-auto">
+              <div class="form-group">
+                <label for="part_status_filter">Select Part Status</label>
+                <select class="form-control" id="part_status_filter">                
+                  <option value=""> All Status </option>                 
+                  {% for ps in part_status %}
+                   <option value="{{ ps.icode }}">{{ ps.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>             
+            <div class="col-auto d-flex flex-column-reverse">
+              <div class="form-group">
+                <button type="button" class="btn btn-sm btn-secondary" id="filterBtn">
+                  <i class="feather icon-filter"></i>Filter
+                </button>
+              </div>
+            </div>
+          </div>
+          <span class="text-danger my-3" id="fromDateError" hidden>Please select from date</span>
+          <div id="reportTableContainer">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--[Rejection and Rework Forms Reports filter data through dates , production line, shift] end-->	
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    var production_line = document.getElementById("production_line_filter");
+    var fromDateInput = document.getElementById("fromDateInput");
+    var toDateInput = document.getElementById("toDateInput");
+    var shift = document.getElementById("shiftFilter");
+    var part_status = document.getElementById("part_status_filter");
+    var fromDateError = document.getElementById("fromDateError");
+    
+    // Initialize "From Date" maximum value to today's date
+    var today = new Date()
+    const offset = today.getTimezoneOffset()
+    f_today = new Date(today.getTime() - (offset*60*1000))
+    var formattedToday = f_today.toISOString().split('T')[0];
+    
+    fromDateInput.max = formattedToday;
+    toDateInput.max = formattedToday;
+
+    fromDateInput.addEventListener("change", function () {
+      var fromDate = new Date(fromDateInput.value);
+
+      // Set the minimum value for To Date to be the selected From Date
+      toDateInput.min = fromDateInput.value;
+
+      maxToDate = fromDate
+      maxToDate.setDate(fromDate.getDate() + 30);
+
+      // Ensure To Date doesn't exceed today's date or precede the From Date
+      if (maxToDate > today) {
+        toDateInput.max = formattedToday;
+        toDateInput.value = formattedToday;
+      } 
+      else{
+        toDateInput.max = maxToDate.toISOString().split('T')[0];
+        toDateInput.value = maxToDate.toISOString().split('T')[0];
+      }
+      toDateInput.disabled = false
+    });   
+    $(document).on('click',"#filterBtn", function () {
+      if (fromDateInput.value =="") {
+        fromDateError.hidden = false
+        return;
+      }      
+      fromDateError.hidden = true
+      $.ajax({                      
+        url: '{% url "a002:ajax_load_report_table" current_product_category.icode %}',                   
+        data: {
+          'from_date': fromDateInput.value,      
+          'to_date': toDateInput.value,       
+          'shift_id': shift.value,
+          'production_line_id': production_line.value,
+          'part_status_id': part_status.value,
+        },
+        success: function (data) {   
+          $("#reportTableContainer").html(data);
+        },
+      });
+    });
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}
+ 

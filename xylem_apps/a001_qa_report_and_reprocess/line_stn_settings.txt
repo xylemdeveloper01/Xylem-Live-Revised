@@ -1,0 +1,13 @@
+line_id_between_10_to_99===line_name_on_web_page,stn1,stn2,etc
+10===3.0 Line,101,102
+11===Static Production,103,104,105,106
+12===Web Pulling,107,108
+station_id===stn_name_on_web_page,sql_instance_name,user_name,password,database_name,table_name,serialno_col_name,result_col_name,datetime_col_name,sort_by_col_name_pk,remarks_col_name
+101===Web winding,ZRAISPKLSBTS\LEGACYLINES,sa,Plerane@123,3.0,STN10,SerialNo,Result,DateTime,ID,Remarks
+102===Anchor sewing,ZRAISPKLSBTS\LEGACYLINES,sa,Plerane@123,3.0,STN20,SerialNo,Result,DateTime,ID,Remarks
+103===Connectivity checking,ZRAISPKLSBTS\AUTOBUCKLE,sa,Plerane@123,AUTOBUCKLE,STN60,SerialNo,Result,DateTime,ID,Remarks
+104===Boot cover sewing Single BKL,ZRAISPKLSBTS\AUTOBUCKLE,sa,Plerane@123,AUTOBUCKLE,STATIC10,BarcodeBKL1,Result,DateTimeBKL1,ID,Remarks
+105===Boot cover sewing Twin BKL1,ZRAISPKLSBTS\AUTOBUCKLE,sa,Plerane@123,AUTOBUCKLE,STATIC10,BarcodeBKL1,ParResult,DateTimeBKL1,ID,Remarks
+106===Boot cover sewing Twin BKL2,ZRAISPKLSBTS\AUTOBUCKLE,sa,Plerane@123,AUTOBUCKLE,STATIC10,BarcodeBKL2,Result,DateTimeBKL2,ID,Remarks
+107===SPR 3PGA1 - Web Pulling,ZRAISPKLSBTS\SPR4,sa,Plerane@123,NEWSPR4_V2,STN80,HomoSerialNo,Result,DateTime,ID,Remarks
+108===SPR 3PGA2 - Web Pulling,ZRAISPKLSBTS\SPR4,sa,Plerane@123,NEWSPR4_V2,STN800,HomoSerialNo,Result,DateTime,ID,Remarks

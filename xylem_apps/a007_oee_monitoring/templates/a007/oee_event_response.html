@@ -1,0 +1,184 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  <style>
+    button.label {
+      border: none;
+    }
+  </style>
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [OEE Evenet Approval Form ] start-->
+  {% if idle_events_pagination %}
+    <div class="row justify-content-between">
+      <div class="col-auto">
+        <h5>OEE Events Captured</h5>
+      </div>
+      <div class="col-auto align-self-end">
+        <form class="form-inline">
+          <span class="mr-2">{{ idle_events_pagination.start_index }}-{{ idle_events_pagination.end_index }} of {{ idle_events_pagination.paginator.count }}</span>
+          <a {% if idle_events_pagination.has_previous %} href="{% url 'a007:oee_event_response' current_pagination_option.icode 1 %}" {% endif %}><i class="feather icon-chevrons-left"></i></a>
+          <a {% if idle_events_pagination.has_previous %} href="{% url 'a007:oee_event_response' current_pagination_option.icode idle_events_pagination.previous_page_number %}" {% endif %}><i class="feather icon-chevron-left"></i></a>
+          <a href="#">Page {{ idle_events_pagination.number }} of {{ idle_events_pagination.paginator.num_pages }}</a>
+          <a {% if idle_events_pagination.has_next %} href="{% url 'a007:oee_event_response' current_pagination_option.icode idle_events_pagination.next_page_number %}" {% endif %}><i class="feather icon-chevron-right"></i></a>
+          <a {% if idle_events_pagination.has_next %} href="{% url 'a007:oee_event_response' current_pagination_option.icode idle_events_pagination.paginator.num_pages %}" {% endif %}><i class="feather icon-chevrons-right"></i></a>
+          <label for="rowCountSelection" class="ml-2">Show:</label> 
+          <select class="form-control ml-1 p-0" style="height: 20px;" id="rowCountSelection" onchange="changePaginationRows(this)">
+            {% for pagination_option in pagination_options %}
+              <option value="{% url 'a007:oee_event_response' pagination_option.icode 1 %}" {% if pagination_option == current_pagination_option %} selected {% endif %}>{{pagination_option.name}}</option>
+            {% endfor %}
+          </select>
+          <label class="ml-1">Events</label>
+        </form>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="row justify-content-end align-items-end mb-2">
+          <div class="col-5 justify-content-end">    
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="feather icon-search"></i></span>
+              </div>
+              <input type="text" id="searchInput" class="form-control" placeholder="Search data inside table...">       
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-12">          
+        <div class="card Recent-Users">
+          <div class="card-block">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <tbody>
+                  {% for idle_event in idle_events_pagination %}
+                    <tr>
+                      <td>
+                        <dl class="row">
+                          <dt class="col-sm-4">Where:</dt>
+                          <dd class="col-sm-8">{{ idle_event.where_id_i.name }}</dd>
+                          <dt class="col-sm-4">What:</dt>
+                          <dd class="col-sm-8">{{ idle_event.what_id_i.name }}</dd>
+                          <dt class="col-sm-4">Loss Event Time:</dt>
+                          <dd class="col-sm-8">{{ idle_event.it_formatted }}</dd>
+                          <dt class="col-sm-4">Start Time:</dt>
+                          <dd class="col-sm-8">{{ idle_event.start_time }}</dd>
+                          <dt class="col-sm-4">End Time:</dt>
+                          <dd class="col-sm-8">{{ idle_event.end_time}}</dd>
+                        </dl>
+                      </td>
+                      <td>
+                        <form method="post">
+                          {% csrf_token %}
+                          <input type="hidden" name="event_id" value="{{ idle_event.id }}">
+                          <button type="submit"class="label theme-bg text-white f-12" name="approver_response" value="1">Accept</button>
+                          <button type="submit" class="label theme-bg2 text-white f-12" name="approver_response"value="0">Reject</button>
+                        </form>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-sm-12 ml-3">
+      <div class="alert alert-info" role="alert">
+        No OEE events available
+      </div>  
+    </div>
+  {% endif %}
+  <!-- [OEE Evenet Approval Form ] end-->
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST %}
+
+        <!-- [Popup Modal] start-->
+        <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content card rounded">
+              <div class="modal-header">
+                <h5 class="modal-title"> Notification </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body text-center text-{{ message.tags }}">
+                {{ message }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- [Popup Modal] end-->
+
+        <script>
+          $(document).ready(function () {
+            $("#messageModal").modal('show')
+          })
+        </script>
+
+        {% else %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+          {{ message }}
+        </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable() {
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+
+    function changePaginationRows(element) {
+      window.location.href = element.value;
+    }
+
+
+    var filteredRows = document.querySelectorAll("table.table-hover tbody tr");						
+    document.getElementById("searchInput").addEventListener("input", function () {
+      var searchTerm = this.value.toLowerCase().trim();
+      filteredRows.forEach(function (row) {
+        var rowData = row.textContent.toLowerCase();
+        if (rowData.includes(searchTerm)) {
+          row.style.display = "table-row";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    });
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

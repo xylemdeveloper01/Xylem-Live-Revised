@@ -1,0 +1,10 @@
+{% load a000_custom_tags %}
+
+{% if departments %}
+	<option value="">---------</option>
+	{% for dept in departments %}
+		<option value="{{ dept.icode }}">{{ dept.name }}</option>
+	{% endfor %}
+{% else %}
+	<option value="">-- No data --</option>
+{% endif %}

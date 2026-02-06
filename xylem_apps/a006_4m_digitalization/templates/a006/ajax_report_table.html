@@ -1,0 +1,73 @@
+
+{% load a000_custom_tags %}
+
+<!--[ 4M Forms Reports Date Filtered Data ] start-->	
+<div class="col">		
+  <div class="row justify-content-end">
+    <div class="col-sm-5 mt-3 mb-3">
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text"><i class="feather icon-search"></i></span>
+        </div>
+        <input type="text" id="searchInput" class="form-control" placeholder="Search data inside table...">				
+      </div>
+    </div>
+  </div>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Reference ID</th>
+        <th>Raised by</th>
+        <th>4M Change Point</th>
+        <th>Form Status</th>
+        <th>Date</th>
+        <th>#</th>               
+      </tr>
+    </thead>
+    <tbody>
+      {% for form in four_m_forms %}
+      <tr> 
+        <td>{{xylem_code}}-{{app_name}}-{{form.id}}</td>
+        <td>{{ form.raised_user | get_user_display_format }} </td>
+        <td>{{ form.four_m_point_i.name }}</td>
+        <td>                       
+          {% if form.fm_status == 1 %}
+          <p>Approved</p>
+            {% elif form.fm_status == 0 %}
+              <p>Rejected</p>
+            {% else %}
+              <p>Pending</p>
+            {% endif %}                                                                
+        </td>
+        <td>{{ form.raised_datetime }}</td>  
+        <td>
+          <a href="{% url 'a006:four_m_report_view' form.id %}" class="btn btn-primary">
+            <i class="feather icon-eye"> View </i>
+          </a>
+        </td>                                                         
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<!--[ 4M Forms Reports Date Filtered Data ] end-->
+
+<!-- [ Script / Search the Filtered data  ] start-->
+<script>			
+  var filteredRows = document.querySelectorAll("table.table-striped tbody tr");						
+  document.getElementById("searchInput").addEventListener("input", function () {
+    var searchTerm = this.value.toLowerCase().trim();
+
+    filteredRows.forEach(function (row) {
+      var rowData = row.textContent.toLowerCase();
+      if (rowData.includes(searchTerm)) {
+        row.style.display = "table-row";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  });
+</script>
+<!-- [ Script / Search the Filtered data ] end-->

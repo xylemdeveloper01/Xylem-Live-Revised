@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <style>
+      body {
+        background-color: #f9f9f9;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      table {
+        margin-top: 20px;
+        font-size: 1.0em;
+        border-radius: 10px;
+        border-collapse: collapse;
+        overflow: hidden;
+        width: 35%;
+        margin-left: 0;
+        margin-right: auto;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      th.top_head {
+        text-align: center; 
+        background: linear-gradient(to right, #6BBF8C, #A3E3B2);
+        color: white;
+        padding: 15px;
+      }
+      th {
+        text-align: left; 
+        padding: 12px;
+        background-color: #6BBF8C;
+        color: white;
+        border: 1px solid #E0E0E0;
+      }
+      td {
+        text-align: left; 
+        padding: 12px;
+        border: 1px solid #E0E0E0;
+        background-color: #E0F2E9;
+      }
+      @media (max-width: 600px) {
+        table {
+          width: 100%; /* Full width on smaller screens */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <th class="top_head" colspan="2">Poka Yoke Inspection (Current Status)</th>
+      </tr>
+      <tr>
+        <th>Inspected Ok</th>
+        <td>{{ ok_f | number_with_comma }} ({{ ok_f_p }}%)</td>
+      </tr>                                 
+      <tr>
+        <th>Inspected Nok</th>
+        <td>{{ nok_f | number_with_comma  }} ({{ nok_f_p }}%)</td>          
+      </tr>
+      <tr>
+        <th>Waiting For Inspection</th>
+        <td>{{ waiting_f | number_with_comma }} ({{ waiting_f_p }}%)</td>
+      </tr>
+      <tr>
+        <th>Total Poka Yoke</th>
+        <td>{{ tf_in_tree | number_with_comma }}</td>             
+      </tr> 
+    </table>
+    <table>
+      <tr>
+        <th class="top_head" colspan="2">Poka Yoke Inspection for month as on {{today_date}}</th>
+      </tr>
+      <tr>
+        <th>Inspected Ok</th>
+        <td>{{ h_ok_f | number_with_comma }} ({{ h_ok_p }}%)</td>
+      </tr>                                 
+      <tr>
+        <th>Inspected Nok</th>
+        <td>{{ h_nok_f | number_with_comma }} ({{ h_nok_p }}%)</td>          
+      </tr>
+      <tr>
+        <th>Missed Inspection</th>
+        <td>{{ h_missed_f | number_with_comma }} ({{ h_missed_p }}%)</td>
+      </tr>
+      <tr>
+        <th>Total Inspections</th>
+        <td>{{ thf | number_with_comma }}</td>
+      </tr>
+    </table>
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

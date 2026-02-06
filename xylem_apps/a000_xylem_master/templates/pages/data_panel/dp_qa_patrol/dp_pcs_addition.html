@@ -1,0 +1,683 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+{% block extrastyle %}
+  <link rel="stylesheet" href="{% static 'custom_css/dp_qa_patrol_checksheet.css' %}">
+  <style>
+    td, th {
+      white-space: normal !important;
+      word-wrap: break-word;
+      min-width: 150px;;
+    }
+    .hide_div {
+      display: none;
+    }
+  </style>
+{% endblock extrastyle %}
+
+{% block content %}
+  
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [QA Patrol Checksheet Addition] start-->
+  {% if qa_pcs_addition %}
+    <div class="col-sm-12">
+      <div class="card Recent-Users">
+        <div class="card-header">
+          <h5>{{child}}</h5>
+          <label class="general_head_label">
+						Line : {{ production_line.name }}
+					</label>
+					<label class="general_head_label">
+						Part Number : {{ part_number.name }}
+					</label>
+          <span>
+            <a href="{% url 'dp_qa_patrol' FIRST_PRODUCT_CATEGORY.icode FIRST_CHECKSHEET_STATUS.icode %}">
+              <button class="btn btn-secondary float-right">
+                <i class="fa fa-home"></i> Go Home
+              </button>
+            </a>
+          </span>
+        </div>
+        <div class="card-body">
+          <div id="ribbonField">
+            <a class="btn btn-primary float-start" data-toggle="collapse" href="#elementsField" role="button" aria-expanded="false"
+            aria-controls="elementsField"> Show / Hide Elements
+            </a>
+            <div class="bg-white border border-primary rounded p-3 collapse" id="elementsField">
+              <div class="row noselect">
+                <div class="col-3 ml-3">
+                  <div class="row field-group-element head-text">
+                    <span> Operator element </span>
+                  </div>
+                  <div class="row justify-content-center field-group-element"> 
+                    <div class="col">
+                      <span> Select field </span>
+                      <div id="{{operator_input_element_name}}_div_s" draggable="true" ondragstart="copyElementID(event)">
+                        <select id="{{operator_input_element_name}}" name="{{operator_input_element_name}}" class="form-control" disabled required></select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-8 ml-3">
+                  <div class="row field-group-element head-text">
+                    <span> Inspection field elements </span>
+                  </div>
+                  <div class="row justify-content-center field-group-element">
+                    <div class="col-4">
+                      <span> Text field </span>
+                      <div id="{{inspection_input_element_name}}_div_t" draggable="true" ondragstart="copyElementID(event)">
+                        <input type="text" name="{{inspection_input_element_name}}" maxlength="{{inspection_input_element_max_len}}" class="form-control" placeholder="text" disabled required>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <span> Number field </span>
+                      <div id="{{inspection_input_element_name}}_div_n" draggable="true" ondragstart="copyElementID(event)">
+                        <div class="input-group mb-3">
+                          <input type="number" name="{{inspection_input_element_name}}" class="form-control" min="" max="" step="0.001" title="" placeholder="number" disabled required>
+                          <div class="input-group-append">
+                            <span class="input-group-text">unit</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <span> Radio field </span>
+                      <div id="{{inspection_input_element_name}}_div_r" draggable="true" ondragstart="copyElementID(event)">
+                        <div class="custom-control custom-radio">
+                          <input type="radio" id="{{inspection_input_element_name}}_ok" name="{{inspection_input_element_name}}" class="custom-control-input" value="Ok" disabled required>
+                          <label class="custom-control-label green" for="{{inspection_input_element_name}}_ok">Ok</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                          <input type="radio" id="{{inspection_input_element_name}}_nok" name="{{inspection_input_element_name}}" class="custom-control-input" value="Nok" disabled required>
+                          <label class="custom-control-label red" for="{{inspection_input_element_name}}_nok">Nok</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <small class="form-text">
+                    * Drag and Drop the elements to the Operator and Inspection Result coulmns
+                  </small>
+                  <div class="d-flex flex-row-reverse">
+                    <button class="btn btn-success btn-sm float-right" onclick="addNewRow()">
+                      <i class="fa fa-plus"></i> Add Row
+                    </button>
+                    <button class="btn btn-success btn-sm float-right" onclick="insertNewRow()">
+                      <i class="fa fa-plus"></i> Insert Row
+                    </button>
+                    <div class="d-flex flex-column-reverse mr-3">
+                      <span class="total-cp-text"> Total Checkpoints: <span id="rowCount">0 </span></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row ml-2" id="uploadEditField">
+            <div class="col-sm-12">
+              <form id="fileUploadForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if qa_pcss_of_pns_html_str %}
+                  <div class="row">
+                    <div class="col-sm-6 d-flex flex-column-reverse">
+                      <div class="custom-control custom-radio">
+                        <input type="radio" id="customRadio_cs_from_pl" name="customRadio" class="custom-control-input" onchange="change_upload_source()" checked value="1">
+                        <label class="custom-control-label" for="customRadio_cs_from_pl">Upload from another checksheet</label>
+                      </div>
+                    </div>
+                    <div class="col-sm-3 d-flex flex-column-reverse">
+                      <div class="custom-control custom-radio">
+                        <input type="radio" id="customRadio_cs_from_excel" name="customRadio" class="custom-control-input" onchange="change_upload_source()" value="">
+                        <label class="custom-control-label" for="customRadio_cs_from_excel">Upload from excel file</label>
+                      </div>
+                    </div>
+                    <div class="col-sm-12 pl-0">
+                      <hr>
+                    </div>
+                  </div>
+                  <div class="form-group" id="uploadChecksheetField">
+                    <label for="qa_pcs_select">Select partnumber for upload checksheet</label>
+                    <select class="form-control" id="qa_pcs_select" name="qa_pcs_select">
+                      {{qa_pcss_of_pns_html_str}}
+                    </select>
+                  </div>
+                {% endif %}
+                <div class="form-group {% if qa_pcss_of_pns_html_str %} hide_div {% endif %}" id="uploadExcelField">
+                  <label>Choose a checksheet excel file as per the requirement</label>
+                  <input type="file" id="fileInput" name="fileInput" class="form-control-file" accept=".xlsx">
+                  <small class="form-text">
+                    Note: Only excel file is allowed. Columns named as "STATION WORK","INSPECTION ITEMS","SPECIFICATION","INSPECTION METHOD" are filltered as table from excel.
+                    <a href="{% static 'assets/ref_docs/a005/x_a005_qa_patrol_check_ref_excel.xlsx' %}" target="_blank"><u>Download Reference Excel</u></a>
+                  </small>
+                </div>
+                <span class="text-danger d-block my-3" id="errorMessage"></span>
+                <button id="uploadButton" type="submit" class="btn btn-primary">Upload</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <!-- [QA Patrol Checksheet Addition ] end-->
+  
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+  
+  </script>
+  {% if qa_pcs_addition %}
+    <script>
+
+      var uploadChecksheetField = document.getElementById('uploadChecksheetField')
+      var uploadExcelField = document.getElementById('uploadExcelField')
+      var fileUploadForm = document.getElementById('fileUploadForm');
+      var qa_pcs_select = document.getElementById('qa_pcs_select');
+      var fileInput = document.getElementById('fileInput');
+      var errorMessage = document.getElementById("errorMessage");
+      var uploadButton = document.getElementById("uploadButton");
+      var ribbonField = document.getElementById("ribbonField");
+      var rowCountElement = document.getElementById('rowCount');
+      var uploadEditField = document.getElementById("uploadEditField");
+      var customRadio_cs_from_pl = document.getElementById("customRadio_cs_from_pl");
+      var customRadio_cs_from_excel = document.getElementById("customRadio_cs_from_excel");
+      var uploadEditField = document.getElementById("uploadEditField");
+      const operator_input_element_name = '{{operator_input_element_name}}';
+      const inspection_input_element_name = '{{inspection_input_element_name}}';
+      const operator_input_elements_max = '{{operator_input_elements_max}}';
+      const inspection_input_elements_max = '{{inspection_input_elements_max}}';
+      const operator_col_index = '{{operator_col_index}}'
+      const inspection_col_index = '{{inspection_col_index}}'
+      const rowUpHTML = "<i style='cursor:pointer;' class='text-primary fa fa-chevron-up' onclick='moveRowUp(this)'>Up</i>"
+      const rowDownHTML = "<i style='cursor:pointer;' class='text-primary fa fa-chevron-down' onclick='moveRowDown(this)'>Down</i>"
+      const rowDeleteHTML = "<i style='cursor:pointer;' class='text-danger fa fa-trash' onclick='deleteRow(this)'>Delete</i>"
+      var lastClickedRowIndex = 1
+      ribbonField.style.display="none"
+
+      function change_upload_source(element){
+        errorMessage.textContent="";
+        if (customRadio_cs_from_pl.checked){
+          uploadChecksheetField.style.display = "block"
+          uploadExcelField.style.display = "none"
+        }
+        else if (customRadio_cs_from_excel.checked){
+          uploadChecksheetField.style.display = "none"
+          uploadExcelField.style.display = "block"
+        }
+      }
+
+      function validateFile() {
+        var fileName = fileInput.value;
+        var allowedExtensions = /(\.xlsx)$/i;
+        return !!allowedExtensions.exec(fileName)
+      }
+
+      function addDropCellAttributes(cell){
+        cell.setAttribute("ondrop", "copyElement(event)")
+        cell.setAttribute("ondragover", "preventDrop(event)")
+        cell.setAttribute("ondragenter", "addHoverStyle(event)")
+        cell.setAttribute("ondragleave", "removeHoverStyle(event)")
+      }
+
+      function preventDrop(event) {
+        event.preventDefault();
+      }
+
+      function addHoverStyle(event) {
+        event.target.closest('td').className = "cell-hover";
+      }
+
+      function removeHoverStyle(event) {
+        event.target.closest('td').className = "";
+      }
+      
+      function copyElementID(event) {
+        event.dataTransfer.setData("org_element_id", event.target.id);
+      }
+
+      function copyElement(event) {
+        event.preventDefault();
+        var org_element_id = event.dataTransfer.getData("org_element_id")
+        var element_copy = document.getElementById(org_element_id).cloneNode(true)
+        var i = 0
+        var element_name = ""
+        var element_div_id = ""
+        element_copy.removeAttribute("draggable")
+        element_copy.removeAttribute("ondragstart")
+        var outer_html = element_copy.outerHTML
+        var target_cell = event.target.closest('td')
+        target_cell.className = "";
+        if (outer_html.includes(operator_input_element_name) && target_cell.cellIndex == operator_col_index){
+          while (i < operator_input_elements_max) {
+            element_name = operator_input_element_name + i;
+            element_div_id = element_name + "_div"
+            const element = document.getElementById(element_div_id);
+            if (!element){
+              element_copy.id = element_div_id
+              element_copy.innerHTML = element_copy.innerHTML.replaceAll(operator_input_element_name, element_name)
+              outer_html = element_copy.outerHTML
+              break
+            }
+            i++;
+          }
+          if (i==operator_input_elements_max) {
+            alert("Max operator input limit reached")
+            return;
+          }
+        }
+        else if (outer_html.includes(inspection_input_element_name) && target_cell.cellIndex == inspection_col_index){
+          while (i < inspection_input_elements_max) {
+            element_name = inspection_input_element_name + i;
+            element_div_id = element_name + "_div"
+            const element = document.getElementById(element_div_id);
+            if (!element){
+              if (org_element_id.includes("div_n")){
+                var { unit, minNumber, maxNumber } = promptMinMax();
+                if (unit !== null && maxNumber !== null && minNumber !== null){
+                  if(!(parseInt(unit) == unit || parseFloat(unit)== unit)){
+                    if (parseFloat(minNumber) <= parseFloat(maxNumber) && parseFloat(minNumber)==minNumber && parseFloat(maxNumber)==maxNumber){
+                      element_copy.innerHTML = element_copy.innerHTML.replace(`min=""`, `min="${minNumber}"`)
+                      element_copy.innerHTML = element_copy.innerHTML.replace(`max=""`, `max="${maxNumber}"`)
+                      element_copy.innerHTML = element_copy.innerHTML.replace('title=""', `title="Min: ${minNumber}${unit}, Max: ${maxNumber}${unit}" data-toggle="tooltip" data-placement="top"`);
+                      element_copy.innerHTML = element_copy.innerHTML.replace(`unit`, unit)
+                    }
+                    else {
+                      alert("Invalid max and min values!");
+                      return;
+                    }
+                  }
+                  else {
+                    alert("unit should not be a number!");
+                    return;
+                  }
+                }
+                else {
+                  alert("enter all the values!");
+                  return;
+                }
+              }
+              element_copy.id = element_div_id
+              element_copy.innerHTML = element_copy.innerHTML.replaceAll(inspection_input_element_name, element_name)
+              outer_html = element_copy.outerHTML
+              break
+            }
+            i++;
+          }
+          if (i==inspection_input_elements_max) {
+            alert("Max inspection input limit reached")
+            return;
+          }
+        }
+        else{
+          alert("Inappropripate dropping")
+          return;
+        }
+        target_cell.innerHTML = outer_html
+        target_cell.removeAttribute("ondrop")
+        target_cell.removeAttribute("ondragover")
+        target_cell.removeAttribute("ondragenter")
+        target_cell.removeAttribute("ondragleave")
+        addDeleteIcon(element_div_id);
+      }
+
+      function addDeleteIcon(element_id) {
+        var element = document.getElementById(element_id)
+        var deleteIcon = document.createElement('i');
+        deleteIcon.classList.add('fa', 'fa-trash', 'delete-icon');
+        deleteIcon.style.cursor = 'pointer';
+        deleteIcon.addEventListener('click', function () {
+          var cell = element.closest('td')
+          cell.setAttribute("ondrop", "copyElement(event)")
+          cell.setAttribute("ondragover", "preventDrop(event)")
+          cell.setAttribute("ondragenter", "addHoverStyle(event)")
+          cell.setAttribute("ondragleave", "removeHoverStyle(event)")
+          element.remove(); // Remove the div when delete icon is clicked
+        });
+        element.appendChild(deleteIcon);// Insert the delete icon after the div element
+      }
+      
+      function promptMinMax() {
+        var unit = prompt("Enter the unit: (eg. mm, psi)");
+        var minNumber = prompt("Enter Min limit: (eg. 100)");
+        var maxNumber = prompt("Enter Max limit: (eg. 200)");
+        return { unit, minNumber, maxNumber };
+      }
+
+      // Function to update the row count
+      function updateRowCountActionCell() {
+        const rows = document.querySelectorAll("#tableContainer table tbody tr")
+        const max_row_index = rows.length - 1;
+        rowCountElement.textContent = rows.length;
+        if (max_row_index){
+          rows[0].querySelector("#action_cell").innerHTML = rowDownHTML+rowDeleteHTML
+          rows[max_row_index].querySelector("#action_cell").innerHTML = rowUpHTML+rowDeleteHTML
+        }
+        else{
+          rows[max_row_index].querySelector("#action_cell").innerHTML = ''
+        }
+      }
+
+      // Function to update last clicked row index
+      function updateLastClickedRowIndex(event) {
+        var clickedElement = event.target;
+        var row = clickedElement.closest("tr");
+        if (row) {
+          var rows = Array.from(document.querySelectorAll("#tableContainer table tbody tr"));
+          lastClickedRowIndex = rows.indexOf(row) + 1;
+        }
+      }
+
+      // Function to row actions cell create
+      function createActionCell() {
+        const action_cell = document.createElement("td");
+        action_cell.id= "action_cell"
+        action_cell.className= "noselect"
+        action_cell.innerHTML = rowUpHTML+rowDownHTML+rowDeleteHTML
+        return action_cell;
+      }
+
+      // Function to add a new row
+      function addNewRow() {
+        const table = document.getElementById('tableContainer').querySelector('table');
+        const newRow = table.insertRow(-1);
+        const numColumns = table.rows[0].cells.length;
+
+        // Add empty cells for the other columns
+        for (let i = 0; i < numColumns - 1; i++) {
+          const cell = newRow.insertCell(i);
+          if (cell.cellIndex==operator_col_index || cell.cellIndex==inspection_col_index){
+            addDropCellAttributes(cell)
+          }
+          else{
+            cell.setAttribute("contenteditable", "plaintext-only")
+          }
+        }
+        newRow.appendChild(createActionCell());
+        
+        const previousRow = newRow.previousElementSibling;
+        const pre_action_cell = previousRow.querySelector("#action_cell");
+        pre_action_cell.innerHTML = rowUpHTML+rowDownHTML+rowDeleteHTML
+        // Update the row count after adding a new row
+        updateRowCountActionCell();
+      }
+
+      // Function to insert a new row
+      function insertNewRow() {
+        const table = document.getElementById('tableContainer').querySelector('table');
+        const newRow = table.insertRow(lastClickedRowIndex+1);
+        const numColumns = table.rows[0].cells.length;
+
+        // Add empty cells for the other columns
+        for (let i = 0; i < numColumns - 1; i++) {
+          const cell = newRow.insertCell(i);
+          if (cell.cellIndex==operator_col_index || cell.cellIndex==inspection_col_index){
+            addDropCellAttributes(cell)
+          }
+          else{
+            cell.setAttribute("contenteditable", "plaintext-only")
+          }
+        }
+        newRow.appendChild(createActionCell());
+        
+        const previousRow = newRow.previousElementSibling;
+        const pre_action_cell = previousRow.querySelector("#action_cell");
+        pre_action_cell.innerHTML = rowUpHTML+rowDownHTML+rowDeleteHTML
+        // Update the row count after adding a new row
+        updateRowCountActionCell();
+      }
+
+      // Function to move a row up
+      function moveRowUp(icon) {
+        const action_cell = icon.closest('td')
+        const row = action_cell.closest('tr')
+        const previousRow = row.previousElementSibling;
+        const pre_action_cell = previousRow.querySelector("#action_cell");
+        const temp_str = action_cell.innerHTML
+        action_cell.innerHTML = pre_action_cell.innerHTML
+        pre_action_cell.innerHTML = temp_str
+        row.parentNode.insertBefore(row, previousRow);
+      }
+
+      // Function to move a row down
+      function moveRowDown(icon) {
+        const action_cell = icon.closest('td')
+        const row = action_cell.closest('tr')
+        const nextRow = row.nextElementSibling;
+        const next_action_cell = nextRow.querySelector("#action_cell");
+        const temp_str = action_cell.innerHTML
+        action_cell.innerHTML = next_action_cell.innerHTML
+        next_action_cell.innerHTML = temp_str
+        row.parentNode.insertBefore(nextRow, row);
+      }
+      
+      // Function to delete the row
+      function deleteRow(icon) {
+        icon.closest('tr').remove();
+        updateRowCountActionCell();
+      }
+
+      function saveCSData(){
+        var saveButton = document.getElementById("saveButton")
+        const rows = document.querySelectorAll("#tableContainer table tbody tr")
+        if (rows.length){
+          saveButton.disabled = true 
+          var tableContent = getTableContainerHTMLContent()
+          fetch('{% url "fetch_qa_patrol_cs_save" production_line.icode part_number.icode %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+              checksheet_content: tableContent,
+            }),
+          })
+          .then(response => response.text())
+          .then(data => {
+            ribbonField.style.display="none"
+            uploadEditField.innerHTML = data;
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            saveButton.disabled = false
+          });
+        }
+        else{
+          alert("Unable to save the Chechsheet without a checkpoint")
+        }
+      }
+
+      function getTableContainerHTMLContent(){
+        const tableContainer = document.getElementById('tableContainer').cloneNode(true);
+        const table =tableContainer.querySelector('table')
+        const table_body =tableContainer.querySelector('tbody')
+        table_body.removeAttribute("onclick")
+        var header_row = table.querySelectorAll('tr th')
+        header_row.forEach(cell => {
+          if (cell.id == "action_cell"){
+            cell.remove()
+          }
+        })
+        var cells = table.querySelectorAll('td')
+        cells.forEach(cell => {
+          if (cell.cellIndex==operator_col_index || cell.cellIndex==inspection_col_index){
+            cell.removeAttribute("class")
+            cell.removeAttribute("ondrop")
+            cell.removeAttribute("ondragover")
+            cell.removeAttribute("ondragenter")
+            cell.removeAttribute("ondragleave")
+            delete_icon = cell.querySelector('i')
+            if (delete_icon){
+              delete_icon.remove()
+              inputs = cell.querySelectorAll('input')
+              inputs.forEach(input => {
+                input.removeAttribute("disabled")
+              })
+              selects = cell.querySelectorAll('select')
+              selects.forEach(select => {
+                select.removeAttribute("disabled")
+              })
+            }
+          }
+          else{
+            cell.removeAttribute("contenteditable")
+          }
+          if (cell.id == "action_cell"){
+            cell.remove()
+          }
+        })
+        return tableContainer.outerHTML
+      }
+
+      uploadButton.addEventListener('click', function(event) {
+        event.preventDefault();
+        if ((!!customRadio_cs_from_pl && !!customRadio_cs_from_excel) && ((customRadio_cs_from_pl.checked && qa_pcs_select.value) || (customRadio_cs_from_excel.checked && validateFile())) || validateFile())
+        {
+          errorMessage.textContent="";
+          var formData = new FormData(fileUploadForm);  
+          fetch('{% url "fetch_qa_pcs_addition_upload" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+            }
+          })
+          .then(response => response.text())
+          .then(data => {
+            if (data.includes('table')){
+              uploadEditField.innerHTML = data;
+              var tableContainer = document.getElementById('tableContainer');
+              var table = tableContainer.querySelector('table')
+              var table_tbody = table.querySelector('tbody')
+
+              table_tbody.setAttribute("onclick", "updateLastClickedRowIndex(event)");
+
+              var rows = table.querySelectorAll('tr')
+              rows.forEach(row => {
+                if (row.rowIndex){
+                  row.appendChild(createActionCell())
+                }
+                else{
+                  const action_cell = document.createElement("th");
+                  action_cell.id = "action_cell"
+                  action_cell.textContent = "ROW ACTION"
+                  row.appendChild(action_cell)
+                }
+              })
+              var header_cells = table.querySelectorAll('th')
+              header_cells.forEach(header_cell => {
+                if (header_cell.cellIndex==operator_col_index || header_cell.cellIndex==inspection_col_index){
+                  header_cell.setAttribute("style", "min-width:200px;")
+                }
+              })
+              var cells = table.querySelectorAll('td')
+              cells.forEach(cell => {
+                if (cell.cellIndex==operator_col_index || cell.cellIndex==inspection_col_index){
+                  addDropCellAttributes(cell)
+                }
+                else{
+                  cell.setAttribute("contenteditable", "plaintext-only")
+                }
+              })
+              updateRowCountActionCell();
+              uploadEditField.innerHTML =uploadEditField.innerHTML +`
+              <div class ="col mt-3">
+                <button id="saveButton" class="btn btn-primary" onclick="saveCSData()">Save Checksheet</button>
+              </div>
+              `
+              ribbonField.style.display="block"
+            }
+            else{
+              errorMessage.innerHTML = data;
+            }
+          })
+          .catch(error => console.error('Error:', error));
+        }
+        else{
+          if ((!customRadio_cs_from_pl && !customRadio_cs_from_excel) || (customRadio_cs_from_excel.checked)){
+            errorMessage.textContent="Only excel file (.xlsx) is allowed";
+          }
+          else if (customRadio_cs_from_pl.checked){
+            errorMessage.textContent="This field is required";
+          }
+        }
+      });
+
+      window.onscroll = function () { stickElements() };
+
+      var ribbonField = document.getElementById("ribbonField");
+      var sticky = ribbonField.offsetTop;
+
+      function stickElements() {
+        if (window.pageYOffset > sticky) {
+          ribbonField.classList.add("sticky");
+        } else {
+          ribbonField.classList.remove("sticky");
+        }
+      }
+
+    </script>
+  {% endif %}
+  
+  <!-- [ Script / Ajax ] end-->
+  
+{% endblock content %}

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+{% load static %}
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <style>
+    body 
+    {
+      margin:0; 
+      padding:0;
+      background:#eef3fb; 
+      font-family:Arial, sans-serif;
+    }
+    .table_header {
+      width: 100%;
+      background: #eef3fb;
+      padding: 25px 0;
+    }
+  </style>
+  <table class="table_header">
+    <tr>
+      <td>
+        <table width="680" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; border:1px solid #d5e2f2;">
+          <tr>
+            <td style="padding:25px; background:#1c76d2; color:#ffffff; border-radius:12px 12px 0 0;">
+              <div style="font-size:22px; font-weight:bold;text-align: center;">4M Approval Request</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:30px; background:#ffffff;">
+              <div style="font-size:18px; font-weight:bold; margin-bottom:18px; color:#0f172a;">
+                Request Information
+              </div>
+              <div style="background:#f7faff; padding:20px; border-radius:10px; border:1px solid #dce6f5;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:12px;width:40%;background:#e8f1ff;font-size:13px;color:#1e3a8a;font-weight:bold;border-radius:6px 0 0 6px;">
+                      Reference ID
+                    </td>
+                    <td style="padding:12px;background:#ffffff;font-size:15px;color:#111827;border-radius:0 6px 6px 0;">
+                      X-a006-{{four_m_data_dict.four_m_form.id}}
+                    </td>
+                  </tr>
+                  <tr><td colspan="2" style="height:10px;"></td></tr>
+                  <tr>
+                    <td style="padding:12px;background:#e8f1ff;font-size:13px;color:#1e3a8a;font-weight:bold;border-radius:6px 0 0 6px;">
+                      Raised User
+                    </td>
+                    <td style="padding:12px;background:#ffffff;font-size:15px;color:#111827;border-radius:0 6px 6px 0;">
+                      {{ four_m_data_dict.four_m_form.raised_user | get_user_display_format }}
+                    </td>
+                  </tr>
+                  <tr><td colspan="2" style="height:10px;"></td></tr>
+                  <tr>
+                    <td style="padding:12px;background:#e8f1ff;font-size:13px;color:#1e3a8a;font-weight:bold;border-radius:6px 0 0 6px;">
+                      Raised On
+                    </td>
+                    <td style="padding:12px;background:#ffffff;font-size:15px;color:#111827;border-radius:0 6px 6px 0;">
+                      {{ four_m_data_dict.four_m_form.raised_datetime }}
+                    </td>
+                  </tr>
+                  <tr><td colspan="2" style="height:10px;"></td></tr>
+                  <tr>
+                    <td style="padding:12px;background:#e8f1ff;font-size:13px;color:#1e3a8a;font-weight:bold;border-radius:6px 0 0 6px;">
+                      Production Lines
+                    </td>
+                    <td style="padding:12px;background:#ffffff;font-size:15px;color:#111827;border-radius:0 6px 6px 0;">
+                      {% for pl in four_m_data_dict.production_lines %}
+                        {{ pl.name }}
+                        {% if not forloop.last %},{% endif %}
+                      {% endfor %}
+                    </td>
+                  </tr>                 
+                  <tr><td colspan="2" style="height:10px;"></td></tr>
+                  <tr>
+                    <td style="padding:12px;background:#e8f1ff;font-size:13px;color:#1e3a8a;font-weight:bold;border-radius:6px 0 0 6px;">
+                      Changing Point
+                    </td>
+                    <td style="padding:12px;background:#ffffff;font-size:15px;color:#111827;border-radius:0 6px 6px 0;">
+                      {{ four_m_data_dict.four_m_form.four_m_point_i.name }}
+                    </td>
+                  </tr>
+                  <tr><td colspan="2" style="height:10px;"></td></tr>
+                  <tr>
+                    <td style="padding:12px;background:#e8f1ff;font-size:13px;color:#1e3a8a;font-weight:bold;border-radius:6px 0 0 6px;">
+                      Change descriptions
+                    </td>
+                    <td style="padding:12px;background:#ffffff;font-size:15px;color:#111827;border-radius:0 6px 6px 0;">
+                      {{ four_m_data_dict.four_m_form.fm_change_desc }}
+                    </td>
+                  </tr>
+                  <tr><td colspan="2" style="height:10px;"></td></tr>
+                  <tr>
+                    <td style="padding:12px;background:#e8f1ff;font-size:13px;color:#1e3a8a;font-weight:bold;border-radius:6px 0 0 6px;">
+                      Approval Needed Departments
+                    </td>
+                    <td style="padding:12px;background:#ffffff;font-size:15px;color:#111827;border-radius:0 6px 6px 0;">
+                      {% for dept in four_m_data_dict.approval_needed_dept %}
+                        {{ dept.name }}{% if not forloop.last %},<br>{% endif %}
+                      {% endfor %}
+                    </td>
+                  </tr>
+                  <tr><td colspan="2" style="height:10px;"></td></tr>
+                  <tr>
+                    <td colspan="2" style="padding:12px;text-align:center;background:#e8f1ff;font-size:14px;border-radius:6px 0 0 6px;">
+                      <a href="{{ four_m_data_dict.xylem_app_url }}"
+                        style="
+                          display:inline-block;
+                          padding:10px 24px;
+                          background:#449281;
+                          color:#ffffff !important;
+                          font-size:14px;
+                          text-decoration:none;
+                          border-radius:50px;
+                          font-family:Arial, sans-serif;
+                          margin-left:12px;">
+                        Approve
+                      </a>
+                       <a href="{{ four_m_data_dict.xylem_app_url }}"
+                        style="
+                          display:inline-block;
+                          padding:10px 24px;
+                          background:#b6281e;
+                          color:#ffffff !important;
+                          font-size:14px;
+                          text-decoration:none;
+                          border-radius:50px;
+                          font-family:Arial, sans-serif;
+                          margin-left:12px;">
+                        Reject
+                      </a>
+                    </td>                                      
+                  </tr>                                 
+                </table>
+              </div>
+            </td>
+          </tr> 
+          <tr align="center">
+            <td style="padding:0px 20px 16px 20px;">
+              <span style="
+                  display:inline-block;
+                  font-size:14px;
+                  font-family:Arial, sans-serif;">
+                For Access Personal Device :
+              </span>
+              <a href="{{ four_m_data_dict.xr_approve_url }}"
+                style="
+                  display:inline-block;
+                  padding:5px 19px;
+                  background:#449281;
+                  color:#ffffff !important;
+                  font-size:13px;
+                  text-decoration:none;
+                  border-radius:50px;
+                  font-family:Arial, sans-serif;
+                  margin-left:8px;">
+                Approve
+              </a>
+              <a href="{{ four_m_data_dict.xr_reject_url }}"
+                style="
+                  display:inline-block;
+                  padding:5px 19px;
+                  background:#b6281e;
+                  color:#ffffff !important;
+                  font-size:13px;
+                  text-decoration:none;
+                  border-radius:50px;
+                  font-family:Arial, sans-serif;
+                  margin-left:8px;">
+                Reject
+              </a>
+            </td>
+          </tr>                          
+        </table>
+      </td>
+    </tr>
+  </table>
+  {% get_xylem_manage_mail_footer_html %}
+</html>

@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+  <html>
+    <body>            
+    <div style="border-radius: 10px;
+      width:fit-content;
+      background-color:rgb(40, 229, 11) ;
+      height: 100%;
+      overflow: auto;
+      margin: auto;">
+    <img src="https://drive.google.com/thumbnail?id=1LMT6hFZXN53ePHpemgdPRhXjM-TLeXNi" style="padding:15px;" width="101" height="42" align="right">
+    <div style="border-radius: 0px;
+      font-family: 'Arial black';
+      padding:10px;
+      background-color: rgb(25, 111, 61);
+      margin-left: 10px;
+      margin-top: 100px;
+      height: fit-content;
+      width: 200px;
+      color: white ;
+      font-size: 14px;
+      position: relative;
+      float: left;
+      text-align: left;">
+      <h3 style ='text-align: center;'>SPR8 BB 70C Sensor Cover Sub Assembly Vision Check - Summary</h3>
+      DATE &nbsp;&nbsp;: {date} <br>
+      SHIFT &nbsp;: {shift}<br>
+      FTR &nbsp;&nbsp; &nbsp;: {ftr_c} ({ftr_p}%)
+    </div>
+    <div style="margin-left: 200px;
+      padding: 10px ;
+      padding-left: 50px;
+      padding-right: 10px;
+      margin-right: 10px;
+      margin-top: 70px;
+      margin-bottom: 10px;
+      background-color: rgb(213, 245, 227);;
+      height: fit-content;
+      width: fit-content;
+      color: black;
+      font-size: 10px;
+      text-align: left;">
+    <h2>PARTS RETESTED: 
+      <label style="background-color: rgb(25, 111, 61);color: white; padding:5px">
+        {len}
+      </label>
+    </h2>
+    <table style="border: 2px solid black;
+      margin-left: 30px;
+      border-collapse:collapse;
+      font-size: 15px;
+      background-color:rgb(250, 215, 160);">
+      <tr>
+        <th style="padding:10px;
+          text-align: center;
+          background-color: white;
+          color: black;
+          border: 1px solid black;
+          white-space: nowrap;
+          background-color: orange;
+          color: white;">
+          PART Barcode data
+        </th>
+        <th style="padding:10px;
+          text-align: center;
+          background-color: white;
+          color: black;
+          border: none;
+          white-space: nowrap;
+          background-color: orange;
+          color: white;">
+          No of times checked
+        </th>
+      </tr>
+      <tr align= "center" >
+        <td style="padding:10px;
+          border: 1px solid black;
+          white-space: nowrap;">
+          {barcode1},
+          {barcode2},
+          {barcode3},
+
+        </td>
+        <td style="padding:10px;
+          border: 1px solid black;
+          white-space: nowrap;">
+          {count1}
+        </td>
+      </tr>
+      <tr align= "center" >
+        <td style="padding:10px;
+          border: 1px solid black;
+          white-space: nowrap;">
+          {barcode4},
+          {barcode5},
+          {barcode6},
+
+        </td>
+        <td style="padding:10px;
+          border: 1px solid black;
+          white-space: nowrap;">
+          {count2}
+        </td>
+      </tr>
+    </table>
+    <h2>FAILED PARTS:
+      <label style="background-color: rgb(25, 111, 61); color: white; padding:5px">
+        {enl}
+      </label>
+    </h2>
+    <table style="border: 2px solid black;
+      margin-left: 30px;
+      border-collapse:collapse;
+      font-size: 15px;
+      background-color:rgb(255, 228, 196);">                
+      <tr >
+        <th style="padding:10px;
+          text-align: center;
+          background-color: white;
+          color: black;
+          border: 1px solid black;
+          white-space: nowrap;
+          background-color: red;
+          color: white;">
+          Part Barcode data
+        </th>
+        <th style="padding:10px;
+          text-align: center;
+          background-color: white;
+          color: black;border: none;
+          white-space: nowrap;
+          background-color: red;
+          color: white;">
+          No of times checked
+        </th>
+      </tr>
+      <tr align= "center" >
+        <td style="padding:10px;
+          border: 1px solid black;
+          white-space: nowrap;">
+          {barcode1}
+          {barcode2}
+          {barcode3}
+        </td>
+        <td style="padding:10px;
+          border: 1px solid black;
+          white-space: nowrap;">
+          {count1}
+        </td>
+      </tr>
+      <tr align= "center" >
+        <td style="padding:10px;
+          border: 1px solid black;
+          white-space: nowrap;">
+          {barcode4}
+          {barcode5}
+          {barcode6}
+        </td>
+        <td style="padding:10px;
+          border: 1px solid black;
+          white-space: nowrap;">
+          {count2}
+        </td>
+      </tr>
+    </table>
+    </div>
+    </div>
+    <hr>
+    <div style="text-align: center; font-size: 10px;">
+      <a href="http://10.173.3.12:7777/manage_mails/">Manage Xylem Mails (Works in Rane network only)</a>
+    </div>
+  </body>
+</html>

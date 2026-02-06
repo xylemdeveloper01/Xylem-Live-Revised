@@ -1,0 +1,238 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [4M Form ] start-->
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>{{ segment }}</h5>
+        </div>
+        <div class="card-body">
+          <form action="{% url 'a006:four_m_form' %}" method="post" id="fourMForm"
+            data-production-lines-url="{% url 'ajax_load_production_lines' %}"
+            data-product-models-pls-url="{% url 'ajax_load_product_models_of_pls' %}"
+            data-part-numbers-pls-ms-url="{% url 'ajax_load_part_numbers_of_pls_ms' %}"
+            data-child-part-numbers-pns-url="{% url 'ajax_load_child_part_numbers_of_pns' %}"
+            data-empty-option-url="{% url 'ajax_load_empty_option' %}">
+            {% csrf_token %}
+            {% for field in form %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [4M Form ] end-->
+  
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    <div class="modal fade" id="customErrorMessageModal" tabindex="-1" role="dialog" aria-labelledby="customErrorMessageModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content card rounded">
+          <div class="modal-header">
+            <h5 class="modal-title"> Notification </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center text-danger" id="custom_error_message"> </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+    $(document).on('change', "#fm_form_id_product_category", function () {
+      const url_eo = $("#fourMForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_pl = $("#fourMForm").attr("data-production-lines-url");  // get the url of the `load_data` view
+      const product_category_id = $(this).val();
+      $.ajax({                       // initialize an AJAX request
+        url: url_pl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {
+          $("#fm_form_id_production_lines").html(data);
+          empty_option_disable();
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#fm_form_id_product_models").html(data);
+          $("#fm_form_id_part_numbers").html(data);
+          $("#fm_form_id_child_part_numbers").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change', "#fm_form_id_production_lines", function () {
+      const url_eo = $("#fourMForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_mpls = $("#fourMForm").attr("data-product-models-pls-url");  // get the url of the `load_data` view
+      var production_line_id_list = [];
+      var selectedOptions = $(this).find('option:selected');
+      selectedOptions.each(function(){
+        production_line_id_list.push($(this).val());
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_mpls,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id_list_str': production_line_id_list.toString()      // GET parameters
+        },
+        success: function (data) {
+          $("#fm_form_id_product_models").html(data);
+          empty_option_disable();
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#fm_form_id_part_numbers").html(data);
+          $("#fm_form_id_child_part_numbers").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change', "#fm_form_id_product_models", function () {
+      const url_pnplsms = $("#fourMForm").attr("data-part-numbers-pls-ms-url");  // get the url of the `load_data` view
+      var production_line_id_list = [];
+      var selectedOptions = $("#fm_form_id_production_lines").find('option:selected');
+      selectedOptions.each(function(){
+        production_line_id_list.push($(this).val());
+      });
+      var model_id_list = [];
+      var selectedOptions = $(this).find('option:selected');
+      selectedOptions.each(function(){
+        model_id_list.push($(this).val());
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_pnplsms,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id_list_str': production_line_id_list.toString(),      // GET parameters
+          'model_id_list_str': model_id_list.toString(),      // GET parameters
+        },
+        success: function (data) {
+          $("#fm_form_id_part_numbers").html(data);
+          empty_option_disable();
+        }
+      });
+    });
+    $(document).on('change', "#fm_form_id_part_numbers", function () {
+      const url_cppns = $("#fourMForm").attr("data-child-part-numbers-pns-url");  // get the url of the `load_data` view
+      var part_number_id_list = [];
+      var selectedOptions = $("#fm_form_id_part_numbers").find('option:selected');
+      selectedOptions.each(function(){
+        part_number_id_list.push($(this).val());
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_cppns,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'part_number_id_list_str': part_number_id_list.toString(),      // GET parameters
+        },
+        success: function (data) {
+          $("#fm_form_id_child_part_numbers").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).ready(function() {
+
+      $('#fm_form_id_child_part_numbers').hide();
+      $('label[for="fm_form_id_child_part_numbers"]').hide();
+      $('#fm_form_id_child_part_numbers').prop("disabled", true); // Hide the child_part_number field and its label initially
+
+      // Function to diable/enable the select child_part_numbers selection based on supplier_change value
+      $('#fm_form_id_supplier_rel_chng').change(function() {
+        if ($(this).val() == '{{YES_OPTION.icode}}' ){
+          $('#fm_form_id_child_part_numbers').show();
+          $('label[for="fm_form_id_child_part_numbers"]').show();
+          $('#fm_form_id_child_part_numbers').prop("disabled", false);
+        } 
+        else {
+          $('#fm_form_id_child_part_numbers').hide();
+          $('label[for="fm_form_id_child_part_numbers"]').hide();
+          $('#fm_form_id_child_part_numbers').prop("disabled", true);
+        }
+      });
+    });
+
+    document.getElementById("fourMForm").addEventListener("submit", function () {
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.innerText = "Submitting...";
+    });
+    
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

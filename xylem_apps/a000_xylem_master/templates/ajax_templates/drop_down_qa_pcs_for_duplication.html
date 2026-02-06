@@ -1,0 +1,8 @@
+{% if options %}
+	<option value="">---------</option>
+	{% for option in options %}
+		<option value="{{ option.id }}">{{ option.part_number_i.name }} - {{option.production_line_i.name}} - V{{option.cs_version}}</option>
+	{% endfor %}
+{% else %}
+	<option value="">-- No data --</option>
+{% endif %}

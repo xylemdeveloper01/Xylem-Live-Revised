@@ -1,0 +1,121 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [ View Data ] start-->
+  <div class="card border">
+    <div class="card-header">
+      <h5>{{ child }}</h5>
+      <a href="{% url 'dp_part' FIRST_PRODUCT_CATEGORY.icode %}">
+        <button class="btn btn-secondary btn-sm float-right">
+          <i class="fa fa-home"></i> Go Home
+        </button>				
+      </a>			
+    </div>  
+    <div class="card-body">
+      <div class="col-auto">
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <tbody>
+              <tr>
+                <th class="table-primary">Production Category</th>
+                <td>{{ part_number | get_pc_name_of_item }}</td>
+              </tr>
+              <tr>
+                <th class="table-primary">Part Number</th>
+                <td>{{ part_number.name }}</td>
+              </tr>
+              <tr>
+                <th class="table-primary">Description</th>
+                <td>{{ part_number.description }}</td>
+              </tr>
+              <tr>
+                <th class="table-primary">Model</th>
+                <td>{{ part_number.pn_pnmt_m.model_i.name }}</td>
+              </tr>
+              <tr>
+                <th class="table-primary">Total Running Production Lines</th>
+                <td>{{ production_lines | length }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-sm-12">
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>Production Line</th>
+                <th>Xylem Icode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for production_line in production_lines %}
+                <tr>
+                  <td>{{ production_line.name }}</td>
+                  <td>{{ production_line.icode }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div> 
+  <!-- [ View Data ] end-->
+  
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+{% endblock content %}

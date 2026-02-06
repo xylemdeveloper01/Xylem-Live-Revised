@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 10px;
+      }
+
+      table {
+        font-family: Arial, Helvetica, sans-serif;
+        margin-top: 20px;
+        font-size: 14px;
+        width: 100%;
+        max-width: 600px;
+        border-collapse: collapse;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      th {
+        border: 1px solid #ddd;
+        padding: 8px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background-color: #F70D1A;
+        color: white;
+        text-align: left;
+      }
+
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        background-color: #f2f2f2;
+        text-align: left;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1 style="text-align: center;">Friction Welding NG Alert (Trial)</h1>
+    {% for friction_welding_ng_obj in friction_welding_ng_obj_list %}                     
+      <table align="center">
+        <tr>
+          <th>Production Station</th>
+          <td>{{ friction_welding_ng_obj.where_id_i | get_pl_ps_name_of_ps }}</td>
+        </tr>
+
+        <tr>
+          <th>Frame Barcode</th>
+          <td>{{ friction_welding_ng_obj.part_barcode_data }}</td>
+        </tr>
+
+        <tr>
+          <th>MGG Barcode</th>
+          <td>{{ friction_welding_ng_obj.mgg_barcode_data }}</td>
+        </tr>
+
+        <tr>
+          <th>Part Description</th>
+          <td>
+            {{ friction_welding_ng_obj.part_description}}
+          </td>
+        </tr>
+
+         <tr>
+          <th>NG Description</th>
+          <td>
+            {{ friction_welding_ng_obj.ng_description}}
+          </td>
+        </tr>
+
+        <tr>
+          <th>Time of Running</th>
+          <td>{{ friction_welding_ng_obj.logged_dt }}</td>
+        </tr>
+      </table>
+		{% endfor %}
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

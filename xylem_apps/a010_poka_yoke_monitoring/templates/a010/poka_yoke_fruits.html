@@ -1,0 +1,260 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <style>
+    .note-label {
+      color: black;
+      background-color: #E7F3FE;
+      font-size: 12px;
+      font-family:Arial, Helvetica, sans-serif;
+      padding: 2%;
+      border-left: 6px solid #2196F3;
+    }
+    .note-label2{
+      font-family:Georgia, 'Times New Roman', Times, serif;
+    }
+    .shadowed-link {
+      color: #1a0215;   
+      font-family :'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 16px;
+      word-wrap: break-word;
+      word-break: break-word;
+      white-space: normal;
+      font-weight: 500;
+    }
+    .leval{
+      color:black;
+      font-size: 13px;
+      font-family: Arial, Helvetica, sans-serif
+    }
+    .levalc{
+      color:rgb(56, 28, 88);
+      font-weight: 700;
+    }
+    .carddesign{
+      background: linear-gradient(135deg, white, #f3f0f3); 
+      font-family: Arial, Helvetica, sans-serif;
+    }   
+    .head{
+      color:rgb(5, 70, 87);
+      font-weight:700    
+    }
+    .inspec_date{
+      color:gray
+    }
+  </style>
+
+  <!-- [Poka Yoke Fruit ] end-->
+  <div class="col-xl-12"> 
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 head">{{ Child }}</h5>
+      <div class="d-flex gap-2">
+        <a href="{% url 'a010:poka_yoke_fruit_clusters' production_station|get_pl_id_of_ps %}" class="btn btn-secondary btn-sm">
+          <i class="fa fa-arrow-left"></i> Go Back
+        </a>
+        <a href="{% url 'a010:poka_yoke_tree' production_station|get_pc_id_of_item %}" class="btn btn-secondary btn-sm">
+          <i class="fa fa-home"></i> Go Home
+        </a>        
+      </div>
+    </div>
+    <hr class="my-1"> 
+     <div class="row align-items-center mb-2 justify-content-between mt-2">                
+        <div class="col-auto">
+          <label class="general_head_label">
+            Line : {{ production_station | get_pl_ps_name_of_ps }}
+          </label>            
+        </div>  
+        <div class="col-auto">
+          <div class="d-flex align-items-center flex-wrap note-label">          
+            <span  class="badge" style="background-color: #28A745; border:1px solid #28A745;"> &nbsp; &nbsp; </span>
+            <span>Ok Poka yoke </span>
+            <span> &nbsp; &nbsp; &nbsp; </span>
+            <span class="badge" style="background-color: #DC3545; border:1px solid #DC3545;"> &nbsp; &nbsp; </span>
+            <span> Nok Poka yoke </span>
+            <span> &nbsp; &nbsp; &nbsp;</span>
+            <span class="badge" style="background-color: #15b1cc; border:1px solid #15b1cc;"> &nbsp; &nbsp; </span>
+            <span> Waiting Poka yoke </span>
+            <span> &nbsp; &nbsp; &nbsp;</span><br>        
+          </div>
+        </div>
+    </div>
+    <div class="row mt-2">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-body">             
+            <div class="row">                          
+              <div class="col-md-3"> 
+                <div class="card text-dark h-100 rounded shadow-sm mb-0 carddesign"> 
+                  <div class="card-body py-3 px-4 d-flex justify-content-between align-items-center" style="border-left: 4px solid #28A745;">                       
+                    <div>
+                      <h3 class="card-text fw-bold levalc m-0">{{ poka_yoke_tree_pc_summary_dict.t_ok_f }}</h3>
+                      <h6 class="card-title opacity-75 small leval mb-1">Inspected Ok</h6>
+                    </div>
+                    <div>
+                      <i class="bi bi-check-circle-fill f-30 text-success"></i>                     
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3"> 
+                <div class="card text-dark h-100 rounded shadow-sm mb-0 carddesign" style="border-left: 4px solid #DC3545;">
+                  <div class="card-body py-3 px-4 d-flex justify-content-between align-items-center">                       
+                    <div>
+                      <h3 class="card-text fw-bold levalc m-0">{{ poka_yoke_tree_pc_summary_dict.t_nok_f }}</h3>
+                      <h6 class="card-title opacity-75 small leval mb-1">Inspected Nok</h6>
+                    </div>
+                    <div>
+                      <i class="bi bi-x-circle-fill f-30 text-danger"></i>                   
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3"> 
+                <div class="card text-dark h-100 rounded shadow-sm mb-0 carddesign" style="border-left: 4px solid #15b1cc;"> 
+                  <div class="card-body py-3 px-4 d-flex justify-content-between align-items-center">                       
+                    <div>
+                      <h3 class="card-text fw-bold levalc m-0">{{ poka_yoke_tree_pc_summary_dict.t_waiting_f }}</h3>
+                      <h6 class="card-title opacity-75 small leval mb-1">Waiting For Inspection</h6>
+                    </div>
+                    <div>
+                      <i class="bi bi-hourglass-top f-30 text-info"></i>                      
+                    </div>
+                  </div>
+                </div>
+              </div> 
+              <div class="col-md-3"> 
+                <div class="card text-dark h-100 rounded shadow-sm mb-0 carddesign" >  
+                  <div class="card-body py-3 px-4 d-flex justify-content-between align-items-center">                        
+                    <div>
+                      <h3 class="card-text fw-bold levalc m-0">{{ poka_yoke_tree_pc_summary_dict.t_total_nf }}</h3>
+                      <h6 class="card-title opacity-75 small leval mb-1">Total Poka Yoke</h6>
+                    </div>
+                    <div>
+                      <i class="bi  bi-sign-intersection-t-fill f-30"></i>                   
+                    </div>
+                  </div>
+                </div>
+              </div>                              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+     <div class="row">
+      {% for py_maps, ft_value, latest_insp in pokeyoke_data_list %}
+        <div class="col-md-4 mb-2">
+          <div class="card h-100">            
+            <div class="card-body py-1 px-1">
+              <div class="row">
+                <div class="col-10">
+                  <h5 class="shadowed-link ml-1">{{ py_maps.poka_yoke_i.name }}</h5>
+                  <span class="ml-3">
+                     {% if ft_value.ft == True %} 
+                       <span class="rounded-circle d-inline-block me-1 bg-success" style="width: 6px; height: 6px;">
+                      {% elif ft_value.ft == False %}
+                       <span class="rounded-circle d-inline-block me-1 bg-danger" style="width: 6px; height: 6px;">
+                      {% else %}
+                       <span class="rounded-circle d-inline-block me-1 bg-info" style="width: 6px; height: 6px;">
+                      {% endif %} 
+                    </span>
+                    {{ py_maps.criticality_level.name }}
+                  </span>
+                </div> 
+                <div class="col-1 align-self-center mt-1">
+                  <div class="row justify-content-end pr-1">                   
+                    {% if ft_value.ft == True %} 
+                      <h6><i class="bi bi-check-circle-fill f-30 text-success"></i></h6>
+                      {% elif ft_value.ft == False %}
+                      <h6><i class="bi bi-x-circle-fill f-30 text-danger"></i></h6>
+                      {% else %}
+                      <h6><i class="bi bi-hourglass-top f-30 text-info"></i></h6>
+                      {% endif %} 
+                  </div>
+                </div>            
+              </div>
+              <!-- <hr> -->
+              <div class="d-flex justify-content-center flex-wrap gap-2 mt-2">                                            
+                <span class="inspec_date"> latest inspected date : {{ latest_insp.inspection_datetime }}</span>               
+              </div>            
+            </div>
+          </div>
+        </div>        
+      {% endfor %}
+    </div>     
+    <div class="row">
+    </div>  
+  </div>
+  <!-- [Poka Yoke Fruit ] end-->
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>    
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+
+{% endblock content %}

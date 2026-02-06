@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <style>
+      table {
+        font-family:  Arial, Helvetica, sans-serif;
+        margin-top: 20px;
+        font-size: 1.0em;
+        border-radius: 10px 10px 0 0;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+      th.top_head {
+        text-align: center; 
+        background-color: powderblue;;
+        border: none;
+      }
+			th {
+        text-align: left; 
+        padding: 11px;
+        border: 1px solid white;
+        background-color: #FFD700;
+      }
+      td {
+        text-align: left; 
+        padding: 11px;
+        border: 1px solid white;
+        background-color: #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Dear Team,</p>
+    <p>Below are low life tools. Kindly initiate actions before production line stoppage</p>
+		{% for i in alert_tps_map_list %}                     
+			<table>
+				<tr>
+					<th class="top_head" colspan="2">Tool Card: {{ i.tps_map.tool_i.name }}</th>
+				</tr>
+				<tr>
+					<th>Production line</th>
+					<td>{{ i.tps_map.production_station_i | get_pl_ps_name_of_ps }}</td>
+				</tr>                                 
+				<tr>
+					<th>Full life (No's)</th>
+					<td>{{ i.tps_map.full_life | number_with_comma }}</td>          
+				</tr>
+				<tr>
+					<th>Available life (No's)</th>
+					<td> {{ i.avl_tool_life | number_with_comma }}</td>
+				</tr>
+				<tr>
+					<th>Available life (%)</th>
+					<td>{{ i.avl_life_percent }} %</td>             
+				</tr> 
+			</table>
+		{% endfor %}
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

@@ -1,0 +1,348 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+{% load static %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <style>
+    .container{
+      border-radius: 15px;
+    }
+    .table-profile th, .table-profile td {
+      border: none !important;
+      font-size: 20px;
+    }
+    .table-profile th {
+      color:rgb(27, 147, 216);
+    }
+    .img-profile{
+      width:100px;
+    }
+    .profile-background {
+      position: relative;
+      background-color: white; /* Solid background color */
+      overflow: hidden;
+    }
+    /* Bubble styling */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.6; /* Transparency for the bubbles */
+      animation: moveBubble 26s linear infinite;
+    }
+    .bubble1 {
+      background: radial-gradient(circle, #66cf95 40%, transparent 60%);
+      width: 80px;
+      height: 40px;
+      top: 8%;
+      left: 25%;
+      animation-duration: 10s;
+    }
+    .bubble5 {
+      background: radial-gradient(circle, #d687d2 40%, transparent 60%);
+      width: 100px;
+      height: 60px;
+      top: 90%;
+      right: 72%;
+      animation-duration: 10s;
+    }
+    .bubble3 {
+      background: radial-gradient(circle, #95c3e9 40%, transparent 60%);
+      width: 100px;
+      height: 60px;
+      top: 50%;
+      right: 1%;
+      animation-duration: 10s;
+    }
+    .bubble6 {
+      background: radial-gradient(circle, #95c3e9 40%, transparent 60%);
+      width: 100px;
+      height: 60px;
+      top: 50%;
+      right: 96%;
+      animation-duration: 10s;
+    }
+    .bubble4 {
+      background: radial-gradient(circle, #0dd851 40%, transparent 60%);
+      width: 100px;
+      height: 60px;
+      top: 90%;
+      right: 20%;
+      animation-duration: 10s;
+    }
+    .bubble2 {
+      background: radial-gradient(circle, #e9bee9 40%, transparent 60%);
+      width: 100px;
+      height: 60px;
+      top: 5%;
+      right: 10%;
+      animation-duration: 20s;
+    }
+    /* Keyframe animation to move bubbles in a floating motion */
+    @keyframes moveBubble {
+      0% {
+        transform: translateY(0) translateX(0);
+      }
+      50% {
+        transform: translateY(-50px) translateX(20px); /* Move bubbles slightly */
+      }
+      100% {
+        transform: translateY(0) translateX(0);
+      }
+    }
+    .left7-shape {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 220px;
+      background-color: #82b1ff;
+      clip-path: polygon(0 0, 100% 0, 50% 50%, 50% 100%, 0% 100%);
+    }
+    .left73-shape {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 250px;
+      height: 220px;
+      background-color: #82b1ff;
+      clip-path: polygon(100% 100%, 0% 100%, 50% 50%, 50% 0, 100% 0);
+    }
+    .password{      
+      font-size: 17px;       
+    }
+    .label {
+      font-size: 16px; /* Change the font size */
+      font-weight: bold; /* Make the label bold */
+      color: #333; /* Change the text color */
+      margin-bottom: 5px; /* Add some space below the label */
+      display: block; /* Ensure it takes up the full width */
+      text-transform: uppercase; /* Make text uppercase */
+    }
+    .input-group .btn {
+      margin-left: -1px; /* To remove double borders between input and button */
+    }
+    .custom-label {
+      color: #144c88; /* Change label text color */
+      font-weight: bolder; /* Optional: bold the text */
+      font-size: 17px;
+    }
+    /* styles.css */
+    .img-large {
+      width: 125px; 
+      height: 125px; 
+    }
+    .custom-underline {
+      text-decoration: underline;
+      text-decoration-color: #007bff; /* Change this to your desired color */
+    }
+
+  </style>
+
+  <div class="container profile-background rounded" style="background-color: rgb(238, 238, 238);">   
+    <div class="left7-shape"></div>     
+    <div class="left73-shape"></div>     
+    <div class="bubble bubble1"></div>
+    <div class="bubble bubble2"></div>
+    <div class="bubble bubble3"></div> 
+    <div class="bubble bubble4"></div>   
+    <div class="bubble bubble5"></div> 
+    <div class="bubble bubble6"></div> 
+    <div class="container mt-1" >  
+    <div class="row">
+      <div class="col-sm-12">         
+        <div class="row">     
+          <h4 class="ml-3 mt-2">
+            Profile - Edit
+          </h4>
+        </div>     
+      </div>
+    </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card rounded mt-1 ml-3 mr-3 mb-5">
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}                
+              <div class="row">
+                <div class="col-md-4">                                    
+                  <div class="d-flex align-items-center justify-content-center flex-column p-2 mb-2">
+                    {% if request.user.gender_i == MALE  %} 
+                      <img class="rounded-circle img-profile img-large" src="{% static 'assets/images/user/avatar-2.jpg' %}" class="img-radius" alt="User-Profile-Image">
+                    {% else %}
+                      <img class="rounded-circle img-profile img-large" src="{% static 'assets/images/user/avatar-1.jpg' %}" class="img-radius" alt="User-Profile-Image">
+                    {% endif %}                          
+                  </div>                       
+                  <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="custom-label">
+                      {{ form.username.label }}
+                    </label>       
+                    {{ form.username }}
+                  </div>                                        
+                  <div class="form-group d-flex justify-content-center">                                                              
+                    {% if request.user.is_superuser %}
+                      <a href="{% url 'admin:password_change' %}" class="formStatusSelect custom-underline password"> 
+                    {% else %}
+                      <a href="{% url 'password_change' %}" class="formStatusSelect custom-underline password"> 
+                    {% endif %}
+                    change your password
+                    </a>                                         
+                  </div>                                                                                                                                                              
+                </div>
+                <div class="col-md-8">  
+                  <div class="row mt-2">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="{{ form.first_name.id_for_label }}" class="custom-label">
+                          {{ form.first_name.label }}
+                        </label>                                            
+                        {{ form.first_name }}
+                      </div>                       
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="{{ form.last_name.id_for_label }}" class="custom-label">
+                          {{ form.last_name.label }}
+                        </label>  
+                        {{ form.last_name }}
+                      </div>                       
+                    </div>
+                  </div> 
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}" class="custom-label">
+                          {{ form.email.label }}
+                        </label>                              
+                        {{ form.email }}
+                      </div>
+                    </div>
+                  </div> 
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="{{ form.dob.id_for_label }}" class="custom-label">
+                          {{ form.dob.label }}
+                        </label>  
+                        {{ form.dob }}
+                      </div>                       
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="{{ form.gender_i.id_for_label }}" class="custom-label">
+                          {{ form.gender_i.label }}
+                        </label>  
+                        {{ form.gender_i }}
+                      </div>                       
+                    </div>                                
+                  </div>                                                                                                                                                                                                                                                                             
+                </div>                   
+              </div> 
+              <div class="row mt-3">
+                <div class="col-md-12 d-flex justify-content-center">
+                  <label class="border rounded p-2" style="background-color: #82b1ff; color: white; font-size: 16px; font-weight: bold;border-color: #ced4da;">
+                    Please note: If you wish to update the information provided below, kindly reach out to the Development Team for assistance."
+                  </label>
+                </div>
+              </div>                           
+              <div class="row mt-3"> 
+                <div class="col-md-12"> 
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">                        
+                        <label for="formStatusSelect" class="custom-label">Plant Location</label>
+                        <div class="form-control" style="border-color: #ced4da; background-color: #f4f7fa;"> <!-- Add styles for visual appearance -->
+                          {{ user_profile.plant_location_i.name }}
+                        </div>
+                       </div>                                                           
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">                        
+                        <label for="formStatusSelect" class="custom-label">Department</label>
+                        <div class="form-control" style="border-color: #ced4da; background-color: #f4f7fa;"> <!-- Add styles for visual appearance -->
+                          {{ user_profile.dept_i.name }}
+                        </div>
+                      </div>                                             
+                    </div>
+                  </div>  
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">                        
+                        <label for="formStatusSelect" class="custom-label">Designation</label>
+                        <div class="form-control" style="border-color: #ced4da; background-color: #f4f7fa;"> <!-- Add styles for visual appearance -->
+                          {{ user_profile.designation_i.name }}
+                        </div>
+                      </div>                        
+                    </div>                      
+                  </div>                                                                                                                                                                                                 
+                </div>
+              </div>                                                                  
+              <button type="submit" style="background-color:#82b1ff;"; class="btn  float-right mr-0">Update</button>                  
+              <a href="{% url 'profile' %}">
+                <button type="button" style="background-color:#82b1ff;"; class="btn  float-right">Back</button>
+              </a>                  
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+
+{% endblock content %}
+

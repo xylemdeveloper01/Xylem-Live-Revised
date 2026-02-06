@@ -1,0 +1,1272 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+  <script src="{% static 'assets/plugins/select2-develop/dist/js/select2.min.js'%}"></script>
+  <link href="{% static 'assets/plugins/select2-develop/dist/css/select2.min.css'%}" rel="stylesheet">
+
+  <!-- [Product data - Addition Header] start-->
+  <div class="row">
+    <div class="col-sm-12 ml-3  mb-1">
+      <h5 class="mb-3">Production Data - Addition</h5>
+      <hr>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#productCategoryModal">
+        <i class="fa fa-plus-circle"></i>Add Product Category
+      </button>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#technologyModal">
+        <i class="fa fa-plus-circle"></i>Add Technology
+      </button>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#prodLineModal">
+        <i class="fa fa-plus-circle"></i>Add Production Line
+      </button>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#prodStationModal">
+        <i class="fa fa-plus-circle"></i>Add Production Station
+      </button>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modelModal">
+        <i class="fa fa-plus-circle"></i>Add Model
+      </button>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#partNumberModal">
+        <i class="fa fa-plus-circle"></i>Add Part Number
+      </button>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#childPartNumberModal">
+        <i class="fa fa-plus-circle"></i>Add Child Part Number
+      </button>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#rejectionReasonModal">
+        <i class="fa fa-plus-circle"></i>Add Rejection Reasons
+      </button>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#toolModal">
+        <i class="fa fa-plus-circle"></i>Add tools
+      </button>
+      <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#pokaYokeModal">
+        <i class="fa fa-plus-circle"></i>Add Poka Yokes
+      </button>
+    </div>
+  </div>
+  <!-- [Product data - Addition Header] end-->
+
+  <!-- [Product Category Addition Modal] start-->
+  <div class="modal fade" id="productCategoryModal" tabindex="-1" role="dialog" aria-labelledby="productCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Product Category</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'product_category_addition' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_product_category %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Product Category Addition Modal] end-->
+
+  <!-- [Technology Addition Modal] start-->
+  <div class="modal fade" id="technologyModal" tabindex="-1" role="dialog" aria-labelledby="technologyModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Technology</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'tech_addition' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_tech %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Technology Addition Modal] end-->
+
+  <!-- [Production Line Addition Modal] start-->
+  <div class="modal fade" id="prodLineModal" tabindex="-1" role="dialog" aria-labelledby="prodLineModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Production Line</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'prod_line_addition' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_prod_line %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Production Line Addition Modal] end-->
+
+  <!-- [Production Station Addition Modal] start-->
+  <div class="modal fade" id="prodStationModal" tabindex="-1" role="dialog" aria-labelledby="prodStationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Production Station</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'prod_station_addition' current_product_category.icode %}" method="post" id="productionStationForm" data-production-lines-url="{% url 'ajax_load_production_lines' %}">
+            {% csrf_token %}
+            {% for field in form_prod_station %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Production Station Addition Modal] end-->
+
+  <!-- [Model Addition Modal] start-->
+  <div class="modal fade" id="modelModal" tabindex="-1" role="dialog" aria-labelledby="modelModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Model</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'model_addition' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_model %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Model Addition Modal] end-->
+
+  <!-- [Part Number Addition Modal] start-->
+  <div class="modal fade" id="partNumberModal" tabindex="-1" role="dialog" aria-labelledby="partNumberModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Part Number</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'part_number_addition' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_part_number %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Part Number Addition Modal] end-->
+
+  <!-- [Child Part Number Addition Modal] start-->
+  <div class="modal fade" id="childPartNumberModal" tabindex="-1" role="dialog" aria-labelledby="childPartNumberModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Child Part Number</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'cp_number_addition' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_cp_number %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Child Part Number Addition Modal] end-->
+
+  <!-- [Rejection Reason Addition Modal] start-->
+  <div class="modal fade" id="rejectionReasonModal" tabindex="-1" role="dialog" aria-labelledby="rejectionReasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Rejection Reason</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'rejection_reason_addition' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_rejection_reason %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Rejection Reason Addition Modal] end-->
+
+  <!-- Tool Addition Modal] start-->
+  <div class="modal fade" id="toolModal" tabindex="-1" role="dialog" aria-labelledby="toolModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Tool</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'tool_addition' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_tool %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Tool Addition Modal] end-->
+
+  <!-- [Poka Yoke Addition Modal] start-->
+  <div class="modal fade" id="pokaYokeModal" tabindex="-1" role="dialog" aria-labelledby="pokaYokeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Poka Yoke</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'poka_yoke_addition' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_poka_yoke %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Poka Yoke Addition Modal] end-->
+  
+  <!-- [Product data - Mapping Header] end-->
+  <div class="row">
+    <div class="col-sm-12 mt-5 ml-3  mb-1">
+      <h5 class="mb-3">Production Data - Mapping</h5>
+      <hr>
+      <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#pcPlModal">
+        <i class="feather icon-link"></i>Product Category - Plant Location
+      </button>
+      <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#pnMTModal">
+        <i class="feather icon-link"></i>Part Number - Model - Technology
+      </button>
+      <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#pnCpnModal">
+        <i class="feather icon-link"></i>Part Number - Child Part Numbers
+      </button>
+      <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#pnPrlPsModal">
+        <i class="feather icon-link"></i>Part Number - Production line & Stations
+      </button>
+      <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#tPsModal">
+        <i class="feather icon-link"></i>Tool - Production Station
+      </button>
+      <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#pyPsModal">
+        <i class="feather icon-link"></i>Poka Yoke - Production Station
+      </button>
+    </div>
+  </div>
+  <!-- [Product data - Mapping Header] end-->
+
+  <!-- [Product Category - Plant Location Mapping Modal] start-->
+  <div class="modal fade" id="pcPlModal" tabindex="-1" role="dialog" aria-labelledby="pcPlModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Product Category - Plant Location</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'pcpl_mapping' current_product_category.icode %}" method="post">
+            {% csrf_token %}
+            {% for field in form_pcpl_map %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Map</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Product Category - Plant Location Mapping Modal] end-->
+
+  <!-- [Part Number - Model - Technology Mapping Modal] start-->
+  <div class="modal fade" id="pnMTModal" tabindex="-1" role="dialog" aria-labelledby="pnMTModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Part Number - Model - Technology</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'pnmt_mapping' current_product_category.icode %}" method="post" id="pnMTMappingForm"
+          data-part-numbers-url="{% url 'ajax_load_part_numbers' %}" data-product-models-url="{% url 'ajax_load_product_models' %}"
+          data-product-technologies-url="{% url 'ajax_load_product_technologies' %}">
+            {% csrf_token %}
+            {% for field in form_pnmt_map %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Map</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Part Number - Model - Technology Mapping Modal] end-->
+  
+  <!-- [Part Number - Child Part Numbers Mapping Modal] start-->
+  <div class="modal fade" id="pnCpnModal" tabindex="-1" role="dialog" aria-labelledby="pnCpnModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Part Number - Child Part Numbers</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'pncpn_mapping' current_product_category.icode %}" method="post" id="pnCpnMappingForm"
+          data-part-numbers-url="{% url 'ajax_load_part_numbers' %}" data-child-part-numbers-url="{% url 'ajax_load_child_part_numbers' %}">
+            {% csrf_token %}
+            {% for field in form_pncpn_map %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Map</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Part Number - Child Part Numbers Mapping Modal] end-->
+
+  <!-- [Part Number - Production Line - Production Stations Mapping Modal] start-->
+  <div class="modal fade" id="pnPrlPsModal" tabindex="-1" role="dialog" aria-labelledby="pnPrlPsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Part Number - Production Line - Production Stations</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'pnprlps_mapping' current_product_category.icode %}" method="post" id="pnPrlPsMappingForm"
+          data-empty-option-url="{% url 'ajax_load_empty_option' %}" data-part-numbers-url="{% url 'ajax_load_part_numbers' %}"
+          data-production-lines-url="{% url 'ajax_load_production_lines' %}" data-production-stations-url="{% url 'ajax_load_production_stations' %}">
+            {% csrf_token %}
+            {% for field in form_pnprlps_map %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Map</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Part Number - Production Line - Production Stations Mapping Modal] end-->
+
+  <!-- [Tool - Production Station Mapping Modal] start-->
+  <div class="modal fade" id="tPsModal" tabindex="-1" role="dialog" aria-labelledby="tPsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Tool - Production Station</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'tps_mapping' current_product_category.icode %}" method="post" id="tPsMappingForm"  enctype="multipart/form-data"
+          data-empty-option-url="{% url 'ajax_load_empty_option' %}" data-tools-url="{% url 'ajax_load_tools' %}"
+          data-production-lines-url="{% url 'ajax_load_production_lines' %}" data-production-stations-url="{% url 'ajax_load_production_stations' %}">
+            {% csrf_token %}
+            {% for field in form_tps_map %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Map</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Tool - Production Station Mapping Modal] end-->
+
+  <!-- [Poka Yoke - Production Station Mapping Modal] start-->
+  <div class="modal fade" id="pyPsModal" tabindex="-1" role="dialog" aria-labelledby="pyPsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content card rounded">
+        <div class="modal-header">
+          <h5 class="modal-title">Poka Yoke - Production Station</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="{% url 'pyps_mapping' current_product_category.icode %}" method="post" id="pyPsMappingForm"  enctype="multipart/form-data"
+          data-empty-option-url="{% url 'ajax_load_empty_option' %}" data-poka-yokes-url="{% url 'ajax_load_poka_yokes' %}"
+          data-production-lines-url="{% url 'ajax_load_production_lines' %}" data-production-stations-url="{% url 'ajax_load_production_stations' %}">
+            {% csrf_token %}
+            {% for field in form_pyps_map %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Map</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [Poka Yoke - Production Station Mapping Modal] end-->
+
+  <!-- [ Available Data ] start-->
+  <div class="row">
+    <div class="col-sm-12 mt-5 ml-3  mb-1">
+      <h5 class="mb-3">Production Available Data  / Modification</h5>
+      <hr>
+    </div>
+  </div>
+  <div class="col-xl-12 col-md-12 m-b-30">
+    <div class="row">
+      <div class="col">
+        <div class="btn-group mb-2 mr-2">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{ current_product_category.name }}</button>
+          <div class="dropdown-menu">
+            {% for product_category in product_categories %}
+              <a class="dropdown-item {% if product_category == current_product_category %}active{% endif %}" href="{% url 'dp_part' product_category.icode %}"> {{ product_category.name }} </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="col-5 justify-content-end">    
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i class="feather icon-search"></i></span>
+          </div>
+          <input type="text" id="searchInput" class="form-control" placeholder="Search data inside table...">       
+        </div>
+      </div>
+    </div>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link text-uppercase active show" id="tech-tab" data-toggle="tab" href="#tech" role="tab" aria-controls="tech"
+          aria-selected="true">Technologies</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-uppercase" id="prod_line_station-tab" data-toggle="tab" href="#prod_line_station" role="tab"
+          aria-controls="prod_line_station" aria-selected="false">Production Lines & Stations</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-uppercase" id="product_model-tab" data-toggle="tab" href="#product_model" role="tab"
+          aria-controls="product_model" aria-selected="false">Models</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-uppercase" id="part_number-tab" data-toggle="tab" href="#part_number" role="tab"
+          aria-controls="part_number" aria-selected="false">Part Numbers</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-uppercase" id="cp_number-tab" data-toggle="tab" href="#cp_number" role="tab"
+          aria-controls="cp_number" aria-selected="false">Child Part Numbers</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-uppercase" id="rejection_reasons-tab" data-toggle="tab" href="#rejection_reasons" role="tab"
+        aria-controls="rejection_reasons" aria-selected="true">Rejection Reasons</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-uppercase" id="tools-tab" data-toggle="tab" href="#tools" role="tab"
+        aria-controls="tools" aria-selected="true">Tools</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-uppercase" id="poka_yokes-tab" data-toggle="tab" href="#poka_yokes" role="tab"
+        aria-controls="poka_yokes" aria-selected="true">Poka Yokes</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade  active show" id="tech" role="tabpanel" aria-labelledby="tech-tab">
+        {% if tech_avl %}
+          <table class="table table-hover">
+            <tbody>
+              {% for tech in tech_avl %}
+                <tr>
+                  <td>
+                    {{tech.name}}
+                  </td>
+                  <td>
+                    <a href="{% url 'tech_data' tech.icode %}">
+                      <i class="feather icon-eye"> View Data </i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>  
+          </table>
+        {% else %}
+          <div class="alert alert-info" role="alert">
+            No technologies available
+          </div>
+        {% endif %}
+      </div>
+      <div class="tab-pane fade" id="prod_line_station" role="tabpanel" aria-labelledby="prod_line_station-tab">
+        {% if prod_line_stations_avl_dic %}
+          <div class="row ">
+            <div class="col-md-3 col-sm-12">
+              <ul class="nav flex-column nav-pills border border-secondary-subtle" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <h5 class="mb-3">Lines</h5>
+                {% for prod_line, prod_stations_avl in prod_line_stations_avl_dic.items %}
+                  <li><a class="nav-link text-left {% if forloop.first %}active{% endif %} " id="v-pills-{{prod_line.icode}}-tab" data-toggle="pill"
+                      href="#v-pills-{{prod_line.icode}}" role="tab" aria-controls="v-pills-{{prod_line.icode}}" aria-selected="true">{{prod_line.name}}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="col-md-9 col-sm-12">
+              <div class="tab-content border border-secondary-subtle" id="v-pills-tabContent">
+                <h5 class="mb-3">Stations</h5>
+                {% for prod_line, prod_stations_avl in prod_line_stations_avl_dic.items %}
+                  <div class="tab-pane fade {% if forloop.first %}show active{% endif %} " id="v-pills-{{prod_line.icode}}" role="tabpanel"
+                    aria-labelledby="v-pills-{{prod_line.icode}}-tab">
+                    {% if prod_stations_avl %}
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <tbody>
+                            {% for prod_station in prod_stations_avl %}
+                              <tr>
+                                <td>
+                                  {{prod_station.name}}
+                                </td>
+                                <td>
+                                  <a href="{% url 'view_pns_of_ps' prod_station.icode %}">
+                                    <i class="feather icon-eye"> View Part Numbers </i>
+                                  </a> |
+                                  <a href="{% url 'view_tools_of_ps' prod_station.icode  %}">
+                                    <i class="feather icon-eye"> View Tools </i>
+                                  </a> |
+                                  <a href="{% url 'view_pys_of_ps' prod_station.icode  %}">
+                                    <i class="feather icon-eye"> View Poka Yokes </i>
+                                  </a>
+                                </td>
+                              </tr>
+                            {% endfor %}
+                          </tbody>  
+                        </table>
+                      </div>
+                    {% else %}
+                      <div class="alert alert-info" role="alert">
+                        No production stations available
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="alert alert-info" role="alert">
+            No production lines & stations available
+          </div>
+        {% endif %}
+      </div>
+      <div class="tab-pane fade" id="product_model" role="tabpanel" aria-labelledby="product_model-tab">
+        {% if product_models_avl %}
+          <table class="table table-hover">
+            <tbody>
+              {% for product_model in product_models_avl %}
+                <tr>
+                  <td>
+                    {{product_model.name}}
+                  </td>
+                  <td>
+                    <a href="{% url 'view_pns_of_model' product_model.icode %}">
+                      <i class="feather icon-eye"> View Part Numbers </i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>  
+          </table>
+        {% else %}
+          <div class="alert alert-info" role="alert">
+            No product models available
+          </div>
+        {% endif %}
+      </div>
+      <div class="tab-pane fade" id="part_number" role="tabpanel" aria-labelledby="part_number-tab">
+        {% if part_numbers_avl %}
+          <table class="table table-hover">
+            <tbody>
+              <tr>
+                <th>
+                  Part Number
+                </th>
+                <th>
+                  Description
+                </th>
+                <th></th>
+              </tr>
+              {% for part_number in part_numbers_avl %}
+                <tr>
+                  <td>
+                    {{part_number.name}}
+                  </td>
+                  <td>
+                    {{part_number.description}}
+                  </td>
+                  <td>
+                    <a href="{% url 'view_pls_of_pn' part_number.icode %}">
+                      <i class="feather icon-eye"> View Production Lines </i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>  
+          </table>
+        {% else %}
+          <div class="alert alert-info" role="alert">
+            No part numbers available
+          </div>
+        {% endif %}
+      </div>
+      <div class="tab-pane fade" id="cp_number" role="tabpanel" aria-labelledby="cp_number-tab">
+        {% if cp_numbers_avl %}
+          <table class="table table-hover">
+            <tbody>
+              <tr>
+                <th>
+                  Child Part Number
+                </th>
+                <th>
+                  Description
+                </th>
+              </tr>
+              {% for cp_number in cp_numbers_avl %}
+                <tr>
+                  <td>
+                    {{cp_number.name}}
+                  </td>
+                  <td>
+                    {{cp_number.description}}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>  
+          </table>
+        {% else %}
+          <div class="alert alert-info" role="alert">
+            No child part numbers available
+          </div>
+        {% endif %}
+      </div>
+      <div class="tab-pane fade" id="rejection_reasons" role="tabpanel" aria-labelledby="rejection_reasons-tab">
+        {% if rejection_reasons_avl %}
+          <table class="table table-hover">
+            <tbody>
+              {% for reason in rejection_reasons_avl %}
+                <tr>
+                  <td>
+                    {{reason.name}}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>  
+          </table>
+        {% else %}
+          <div class="alert alert-info" role="alert">
+            No rejection reasons available
+          </div>
+        {% endif %}
+      </div>
+      <div class="tab-pane fade" id="tools" role="tabpanel" aria-labelledby="tools-tab">
+        {% if tools_avl_dic %}
+          <div class="row ">
+            <div class="col-md-3 col-sm-12">
+              <ul class="nav flex-column nav-pills border border-secondary-subtle" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <h5 class="mb-3">Tools</h5>
+                {% for tool_type, tool_avl in tools_avl_dic.items %}
+                  <li><a class="nav-link text-left {% if forloop.first %}active{% endif %} " id="v-pills-{{tool_type.icode}}-tab" data-toggle="pill"
+                      href="#v-pills-{{tool_type.icode}}" role="tab" aria-controls="v-pills-{{tool_type.icode}}" aria-selected="true">{{tool_type.name}}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="col-md-9 col-sm-12">
+              <div class="tab-content border border-secondary-subtle" id="v-pills-tabContent">
+                {% for tool_type, tool_avl in tools_avl_dic.items %}
+                  <div class="tab-pane fade {% if forloop.first %}show active{% endif %} " id="v-pills-{{tool_type.icode}}" role="tabpanel"
+                    aria-labelledby="v-pills-{{tool_type.icode}}-tab">
+                    {% if tool_avl %}
+                      <table class="table table-hover">
+                        <tbody>
+                          {% for tool in tool_avl %}
+                            <tr>
+                              <td>
+                                {{tool.name}}
+                              </td>
+                              <td>                              
+                                <a href="{% url 'tool_data' tool.icode  %}">
+                                  <i class="feather icon-eye"> View or Modify Data </i>
+                                </a>                                                           
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>  
+                      </table>
+                    {% else %}
+                      <div class="alert alert-info" role="alert">
+                        No {{tool_type.name}} available
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="alert alert-info" role="alert">
+            No tools available
+          </div>
+        {% endif %}
+      </div>
+      <div class="tab-pane fade" id="poka_yokes" role="tabpanel" aria-labelledby="poka_yokes-tab">
+        {% if poka_yokes_avl %}
+          <table class="table table-hover">
+            <tbody>
+              {% for poka_yoke in poka_yokes_avl %}
+                <tr>
+                  <td>
+                    {{poka_yoke.name}}
+                  </td>
+                  <td>
+                    <a href="{% url 'poka_yoke_data' poka_yoke.icode %}">
+                      <i class="feather icon-eye"> View or Modify Data </i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>  
+          </table>
+        {% else %}
+          <div class="alert alert-info" role="alert">
+            No poka yokes available
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-12">
+    <div class="card Recent-Users">
+      <div class="card-header">
+        <h5>Mapping data</h5>
+      </div>
+      <div class="card-block">
+        <div class="row">
+          <div class="col">
+            <form id="partDataMapViewForm" data-part-number-map-data-url="{% url 'ajax_load_part_number_map_data' %}">
+              <div class="form-group">
+                <label for="partNumberSelect">Select a part number</label>
+                <select class="form-control" id="partNumberSelect">
+                  <option value="">---------</option>
+                  {% for part_number in part_numbers_avl %}
+                    <option value="{{part_number.icode}}">{{part_number.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div id="partDataField">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [ Available Data ] end-->
+      
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+    $(document).on('change',"#psc_id_product_category", function () {
+      const url = $("#productionStationForm").attr("data-production-lines-url");  // get the url of the `load_data` view
+      const product_category_id = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#psc_id_production_line").html(data); 
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change',"#pnmt_id_product_category", function () {
+      const url_pn = $("#pnMTMappingForm").attr("data-part-numbers-url");  // get the url of the `load_data` view
+      const url_model = $("#pnMTMappingForm").attr("data-product-models-url");  // get the url of the `load_data` view
+      const url_tech = $("#pnMTMappingForm").attr("data-product-technologies-url");  // get the url of the `load_data` view
+      const product_category_id = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_pn,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pnmt_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_model,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pnmt_id_product_model").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_tech,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pnmt_id_product_technology").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change',"#pncpn_id_product_category", function () {
+      const url_pn = $("#pnCpnMappingForm").attr("data-part-numbers-url");  // get the url of the `load_data` view
+      const url_cpn = $("#pnCpnMappingForm").attr("data-child-part-numbers-url");  // get the url of the `load_data` view
+      const product_category_id = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_pn,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pncpn_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_cpn,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pncpn_id_child_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change',"#pnprlps_id_product_category", function () {
+      const url_eo = $("#pnPrlPsMappingForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_pn = $("#pnPrlPsMappingForm").attr("data-part-numbers-url");  // get the url of the `load_data` view
+      const url_pl = $("#pnPrlPsMappingForm").attr("data-production-lines-url");  // get the url of the `load_data` view
+      const product_category_id = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#pnprlps_id_production_stations").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_pn,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {
+          $("#pnprlps_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_pl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pnprlps_id_production_line").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change',"#pnprlps_id_production_line", function () {
+      const url_ps = $("#pnPrlPsMappingForm").attr("data-production-stations-url");  // get the url of the `load_data` view
+      const production_line_id = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_ps,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id': production_line_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pnprlps_id_production_stations").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change',"#tps_id_product_category", function () {
+      const url_eo = $("#tPsMappingForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+
+      $("#tps_tool_type").val(['']);
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#tps_id_tool").html(data);
+          $("#tps_id_production_line").html(data);
+          $("#tps_id_production_station").html(data);
+          empty_option_disable()
+        }
+      });
+      // Initially hide the no_of_fixtures field and its label
+      $('#tps_id_parts_freq').hide();
+      $('label[for="tps_id_parts_freq"]').hide();
+      $('#tps_id_parts_freq').prop("disabled", true);
+    });
+    $(document).on('change',"#tps_tool_type", function () {
+      const url_eo = $("#tPsMappingForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_t = $("#tPsMappingForm").attr("data-tools-url");  // get the url of the `load_data` view
+      const url_pl = $("#tPsMappingForm").attr("data-production-lines-url");  // get the url of the `load_data` view
+      const product_category_id = $("#tps_id_product_category").val();  // get the selected country ID from the HTML input
+      const tool_type_id = $(this).val();  
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#tps_id_production_station").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_t,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id,       // GET parameters
+          'tool_type_id': tool_type_id,       // GET parameters
+        },
+        success: function (data) {
+          $("#tps_id_tool").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_pl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#tps_id_production_line").html(data);
+          empty_option_disable()
+        }
+      });
+      if ($(this).val() == '{{tool_fixtures.icode}}') {
+        $('#tps_id_parts_freq').show();
+        $('label[for="tps_id_parts_freq"]').show();
+        $('#tps_id_parts_freq').prop("disabled", false);
+      }
+      else {
+        $('#tps_id_parts_freq').hide();
+        $('label[for="tps_id_parts_freq"]').hide();
+        $('#tps_id_parts_freq').prop("disabled", true);
+      }
+    });
+    $(document).on('change',"#tps_id_production_line", function () {
+      const url_eo = $("#tPsMappingForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_ps = $("#tPsMappingForm").attr("data-production-stations-url");  // get the url of the `load_data` view
+      const production_line_id = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_ps,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id': production_line_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#tps_id_production_station").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change',"#pyps_id_product_category", function () {
+      const url_eo = $("#pyPsMappingForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_py = $("#pyPsMappingForm").attr("data-poka-yokes-url");  // get the url of the `load_data` view
+      const url_pl = $("#pyPsMappingForm").attr("data-production-lines-url");  // get the url of the `load_data` view
+      const product_category_id = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_py,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pyps_id_poka_yoke").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_pl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pyps_id_production_line").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pyps_id_production_station").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change',"#pyps_id_production_line", function () {
+      const url_eo = $("#pyPsMappingForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_ps = $("#pyPsMappingForm").attr("data-production-stations-url");  // get the url of the `load_data` view
+      const production_line_id = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_ps,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id': production_line_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#pyps_id_production_station").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    
+    $(document).on('change',"#partNumberSelect", function () {
+      const url_pnmd = $("#partDataMapViewForm").attr("data-part-number-map-data-url");  // get the url of the `load_data` view
+      const part_number_id = $(this).val();  // get the selected country ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url_pnmd,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'part_number_id': part_number_id       // GET parameters
+        },
+        success: function (data) {   
+          $("#partDataField").html(data);
+        }
+      });
+    });
+
+
+    $(document).ready(function() {
+      // Initially hide the no_of_fixtures field and its label
+      $('#tps_id_parts_freq').hide();
+      $('label[for="tps_id_parts_freq"]').hide();
+      $('#tps_id_parts_freq').prop("disabled", true);
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+      var searchInput = document.getElementById("searchInput");// Function to filter rows based on search input
+      function filterRows() {         
+        var searchTerm = searchInput.value.toLowerCase().trim();
+        var tables = document.querySelectorAll("#myTabContent table"); // Select all table rows in tables within the tab-content
+        tables.forEach(function(table) {
+          var rows = table.querySelectorAll("tbody tr");
+          rows.forEach(function(row) {
+            var rowData = row.textContent.toLowerCase();
+            if (rowData.includes(searchTerm)) {
+              row.style.display = "table-row";
+            } else {
+              row.style.display = "none";
+            }
+          });
+        });
+      }
+      // Attach event listener to search input
+      searchInput.addEventListener("input", filterRows);
+    });
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

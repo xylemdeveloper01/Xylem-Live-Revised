@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <style>
+      table {
+        font-family:  Arial, Helvetica,sans-serif;
+        width: 99%;
+        margin-top: 20px;
+        font-size: 1.0em;
+        min-width: 100px;
+        color: white;
+        border-radius: 10px 10px 0 0;
+        border: 1px solid #ddd;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+      th {
+        text-align: center; 
+        padding: 11px;
+        border: 1px solid #ddd;
+        /* background-color: green; */
+        background-color: {{table_color}};
+      }
+      th.top_head {
+        border: none;
+      }
+      td {
+        text-align: center; 
+        padding: 11px;
+        color: black;
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>**V2.0 testing</h3>
+    <table>
+      <tr>
+        <th class="top_head" colspan="1">
+          <span style="float: left">{{current_date}}<br>{{day_of_week}}</span>
+        </th>
+        <th class="top_head" colspan="3">MAJOR {{no_of_major_losses}} LOSSES REPORT</th>
+        <th class="top_head" colspan="1"></th>
+      </tr>
+      <tr>
+        <th class="unit_head">Production Line</th>
+        <th class="unit_head">Issue</th> 
+        <th class="unit_head">Issue Location</th>
+        <th class="unit_head">Responsible Department</th>
+        <th class="unit_head">Loss Event time</th>
+      </tr>
+      {% for row in rows %}
+        <tr>
+          <td style="text-align: center; background-color: {{row.pl_bg_c}}; color: {{row.pl_txt_c}};">{{row.pl_id | get_name_of_icode}}</td>
+          <td>{{row.what_id | get_name_of_icode}}</td>
+          <td>{{row.where_id | get_name_of_icode}}</td>
+          <td>{{row.dept.name}}</td>
+          <td>{{row.loss_time}}</td>
+        </tr>
+      {% endfor %}
+    </table>
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

@@ -1,0 +1,603 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <!-- [ Main Content ] start -->
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+  <script src="{% static 'assets/plugins/chartjs/4.4.0/package/dist/chart.umd.js' %}"></script>
+  <script src="{% static 'assets/plugins/chartjs/datalabel/datalabels.js' %}"></script>
+
+  <style>
+    .time-text{
+      color: purple;
+      font-family: 'Arial';
+      font-size: 30px;
+      font-weight: bold;  
+      line-height: 1; 
+    }
+    .date-day-shift-text{
+      color: purple;
+      font-family: 'Arial';
+      font-size: 10px;
+      font-weight: bold;  
+      text-align: center;
+    }
+    .head-text {
+      color:blue;
+      font-family: 'Times New Roman';
+      font-size: 35px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .company-logo{
+      width: 100px; 
+      height: 41px;
+    }
+    .xylem-logo{
+      width: 30px; 
+      height: 30px;
+    }
+    .section1{
+      border: 4px solid;
+    }
+    .section2{
+      border: 4px solid;
+    }
+    .section3{
+      border: 4px solid;
+    }
+  </style>
+
+  <div class="row justify-content-center">
+    <div class="col-sm-2">
+      <div class="row" id="maximini">  
+        <a href="#!" onclick="toggleDashboardFullscreen(this)"><i class="feather icon-maximize-2"></i> Minimize</a>
+      </div>
+      <div class="row justify-content-center mt-1">  
+        <span id="tt" class="time-text"> 00:00:00 AA </span>
+      </div>
+      <div class="row justify-content-center">  
+        <span id="ddst" class="date-day-shift-text"> 00-AAA-0000 AAA A</span>
+      </div>
+    </div>
+    <div class="col-sm-8 justify-content-center">
+      <div class="row justify-content-center">  
+        <span class="head-text"> POWER CONSUMPTION LIVE DASHBOARD (TRIAL) </span>
+      </div>
+    </div>
+    <div class="col-sm-2">
+      <div class="row justify-content-end d-flex flex-wrap align-items-center">
+        <img class="company-logo" src="{% static 'assets/images/ZF_Rane.png' %}">
+        <img class="xylem-logo ml-2" src="{% static 'assets/images/xylem-logo.png' %}"></img>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+
+    <!--[ Day Overview] start-->
+    <div class="col-md-12 col-xl-3">
+      <div class="card">
+        <div class="card-block">
+          <h6 class="mb-4" id="dc_n"> AAAAAA </h6>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                Consumption
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                Consumption Rate
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="dc_c"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="dc_cr"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs/hr </span>
+                </div>
+              </div>
+              <div class="row justify-content-center">
+                <i class="f-15" id="dc_crc">0%</i>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-2">
+            Instantaneous Flow:&nbsp; <span class="text-dark font-weight-bold" id="dc_if"> 0 </span> &nbsp;ltrs/hr
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Day Overview] end-->
+
+    <!--[ Consumption section 1] start-->
+    <div class="col-md-12 col-xl-3">
+      <div class="card section1">
+        <div class="card-block">
+          <h6 class="mb-4" id="s1_n"> AAAAAA </h6>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                Consumption
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                Consumption Rate
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="s1_c"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="s1_cr"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs/hr </span>
+                </div>
+              </div>
+              <div class="row justify-content-center">
+                <i class="f-15" id="s1_crc">0%</i>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-2">
+            Instantaneous Flow:&nbsp; <span class="text-dark font-weight-bold" id="s1_if"> 0 </span> &nbsp;ltrs/hr
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Consumption section 1] end-->
+
+    <!--[ Consumption section 2] start-->
+    <div class="col-md-12 col-xl-3">
+      <div class="card section2">
+        <div class="card-block">
+          <h6 class="mb-4" id="s2_n"> AAAAAA </h6>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                Consumption
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                Consumption Rate
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="s2_c"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="s2_cr"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs/hr </span>
+                </div>
+              </div>
+              <div class="row justify-content-center">
+                <i class="f-15" id="s2_crc">0%</i>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-2">
+            Instantaneous Flow:&nbsp; <span class="text-dark font-weight-bold" id="s2_if"> 0 </span> &nbsp;ltrs/hr
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Consumption section 2] end-->
+
+    <!--[ Consumption section 3] start-->
+    <div class="col-md-12 col-xl-3">
+      <div class="card section3">
+        <div class="card-block">
+          <h6 class="mb-4" id="s3_n"> AAAAAA </h6>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                Consumption
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                Consumption Rate
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="s3_c"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="s3_cr"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs/hr </span>
+                </div>
+              </div>
+              <div class="row justify-content-center">
+                <i class="f-15" id="s3_crc">0%</i>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-2">
+            Instantaneous Flow:&nbsp; <span class="text-dark font-weight-bold" id="s3_if"> 0 </span> &nbsp;ltrs/hr
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Consumption section 3] end-->
+    
+    <!--[ Hourly Consumption] start-->
+    <div class="col-md-12 col-xl-9">
+      <div class="card">
+        <div class="card-block">
+          <h6 class="mb-4">Hourly Consumption</h6>
+          <div class="row speedometer-canvas-small justify-content-center" >
+            <canvas id="hrly_canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Hourly Consumption] end-->
+
+    <!--[ Month Consumption, Supply] start-->
+    <div class="col-md-12 col-xl-3">
+      <div class="card">
+        <div class="card-block border-bottom pt-4 pb-1">
+          <div class="row d-flex align-items-center">
+            <div class="col">
+              <span class="d-block text-uppercase">Month Consumption</span>
+              <span class="text-dark font-weight-bold f-30" id="mc_c"> 0 </span>
+              <span class="f-13"> &nbsp;ltrs </span>
+            </div>
+          </div>
+        </div>
+        <div class="card-block pt-4 pb-1">
+          <div class="row d-flex align-items-center">
+            <div class="col">
+              <span class="d-block text-uppercase">Month Consumption Rate</span>
+              <span class="text-dark font-weight-bold f-30" id="mc_cr"> 0 </span>
+              <span class="f-13"> &nbsp;ltrs/day </span>
+              <i class="f-15" id="mc_crc">0%</i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-block">
+          <h6 class="mb-2" id="ic_n"> AAAAAA </h6>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                Day
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                Month
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6 border-right">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="ic_ds"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row justify-content-center">
+                <span class="text-dark font-weight-bold f-30" id="ic_ms"> 0 </span>
+                <div class="d-flex flex-column-reverse mb-2">
+                  <span class="f-13"> &nbsp;ltrs </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-2">
+            Instantaneous Flow:&nbsp; <span class="text-dark font-weight-bold" id="ic_if"> 0 </span> &nbsp;ltrs/hr
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--[ Month Consumption, Supply] end-->
+  </div>
+
+  <script>
+
+    const dtl1 = document.getElementById("dtl1")
+    const dtl2 = document.getElementById("dtl2")
+
+    const dc_n = document.getElementById("dc_n")
+    const dc_c = document.getElementById("dc_c")
+    const dc_cr = document.getElementById("dc_cr")
+    const dc_crc = document.getElementById("dc_crc")
+    const dc_if = document.getElementById("dc_if")
+
+    const s1_n = document.getElementById("s1_n")
+    const s1_c = document.getElementById("s1_c")
+    const s1_cr = document.getElementById("s1_cr")
+    const s1_crc = document.getElementById("s1_crc")
+    const s1_if = document.getElementById("s1_if")
+
+    const s2_n = document.getElementById("s2_n")
+    const s2_c = document.getElementById("s2_c")
+    const s2_cr = document.getElementById("s2_cr")
+    const s2_crc = document.getElementById("s2_crc")
+    const s2_if = document.getElementById("s2_if")
+
+    const s3_n = document.getElementById("s3_n")
+    const s3_c = document.getElementById("s3_c")
+    const s3_cr = document.getElementById("s3_cr")
+    const s3_crc = document.getElementById("s3_crc")
+    const s3_if = document.getElementById("s3_if")
+
+    const mc_c = document.getElementById("mc_c")
+    const mc_cr = document.getElementById("mc_cr")
+    const mc_crc = document.getElementById("mc_crc")
+
+    const ic_n = document.getElementById("ic_n")
+    const ic_ds = document.getElementById("ic_ds")
+    const ic_ms = document.getElementById("ic_ms")
+    const ic_if = document.getElementById("ic_if")
+
+    const hrly_canvas = document.getElementById("hrly_canvas")
+
+    var wc_data
+    var fetch_time_out_in_ms = 5000
+    var max_continous_fetch_errors_for_reload = 5
+    var fetch_error_count = 0
+
+    var hrly_chart_config = {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: "",
+            data: [],
+            backgroundColor: "black",
+          },
+          {
+            label: "",
+            data: [],
+            backgroundColor: "black",
+          },
+          {
+            label: "",
+            data: [],
+            backgroundColor: "black",
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+              display: true
+            }
+        },
+        scales: {
+          x: {
+            stacked: true,
+          },
+          y: {
+            stacked: true,
+            title:{
+              display: true,
+              text: 'Consumption in Liters'
+            }
+          },
+        },
+        maintainAspectRatio: false,
+        aspectRatio: 1
+      },
+    };
+    hrly_chart_config.options.plugins.tooltip = {
+      callbacks: {
+        label: (ctx) => {
+          var label = ctx.dataset.label || '';
+          console.log(ctx.formattedValue )
+          return label+": "+ ctx.formattedValue + " ltrs"
+        }
+      }
+    }
+    var hrly_chart = new Chart(hrly_canvas, hrly_chart_config);    
+
+    function fetch_with_time_out(ms, promise) {
+      return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+          reject(new Error("timeout"))
+        }, ms)
+        promise.then(resolve, reject)
+      })
+    }
+
+    function fetch_wc_data(initial=false) {
+      fetch_with_time_out(
+        fetch_time_out_in_ms,
+        fetch("{{ get_pc_dashboard_data_url }}", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+        })
+        .then(response => response.json())
+        .then(data_dic => {
+          wc_data = data_dic;
+          update_view(initial);
+          fetch_error_count = 0
+        })  
+        .catch( function(error) {
+          console.log(error)
+          fetch_error_count = fetch_error_count + 1
+          if (fetch_error_count>max_continous_fetch_errors_for_reload) {
+            location.reload()
+          }
+        })
+      )  
+    }
+
+    function update_view(initial) {
+      dtl1.textContent = wc_data.dtl1
+      dtl2.textContent = wc_data.dtl2
+      if (initial) {
+        $(".section1").css("border-color",wc_data.s1_bg_c)
+        $(".section2").css("border-color",wc_data.s2_bg_c)
+        $(".section3").css("border-color",wc_data.s3_bg_c)
+        dc_n.textContent = wc_data.dc_n
+        s1_n.textContent = wc_data.s1_n
+        s2_n.textContent = wc_data.s2_n
+        s3_n.textContent = wc_data.s3_n
+        ic_n.textContent = wc_data.ic_n
+        hrly_chart_config.data.labels = wc_data.hrly_x_n
+        hrly_chart_config.data.datasets[0].label = wc_data.s1_n
+        hrly_chart_config.data.datasets[1].label = wc_data.s2_n
+        hrly_chart_config.data.datasets[2].label = wc_data.s3_n
+        hrly_chart_config.data.datasets[0].backgroundColor = wc_data.s1_bg_c
+        hrly_chart_config.data.datasets[1].backgroundColor = wc_data.s2_bg_c
+        hrly_chart_config.data.datasets[2].backgroundColor = wc_data.s3_bg_c
+      }
+      dc_c.textContent = wc_data.dc_c
+      dc_cr.textContent = wc_data.dc_cr
+      dc_crc.textContent = wc_data.dc_crc
+      if (wc_data.dc_crct < 0){
+        dc_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.dc_crct > 0){
+        dc_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        dc_crc.classList = ""
+      }
+      dc_if.textContent = wc_data.dc_if
+
+      s1_c.textContent = wc_data.s1_c
+      s1_cr.textContent = wc_data.s1_cr
+      s1_crc.textContent = wc_data.s1_crc
+      if (wc_data.s1_crct < 0){
+        s1_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.s1_crct > 0){
+        s1_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        s1_crc.classList = ""
+      }
+      s1_if.textContent = wc_data.s1_if
+
+      s2_c.textContent = wc_data.s2_c
+      s2_cr.textContent = wc_data.s2_cr
+      s2_crc.textContent = wc_data.s2_crc
+      if (wc_data.s2_crct < 0){
+        s2_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.s2_crct > 0){
+        s2_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        s2_crc.classList = ""
+      }
+      s2_if.textContent = wc_data.s2_if
+
+      s3_c.textContent = wc_data.s3_c
+      s3_cr.textContent = wc_data.s3_cr
+      s3_crc.textContent = wc_data.s3_crc
+      if (wc_data.s3_crct < 0){
+        s3_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.s3_crct > 0){
+        s3_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        s3_crc.classList = ""
+      }
+      s3_if.textContent = wc_data.s3_if
+
+      hrly_chart_config.data.datasets[0].data = wc_data.hrly_y_s1
+      hrly_chart_config.data.datasets[1].data = wc_data.hrly_y_s2
+      hrly_chart_config.data.datasets[2].data = wc_data.hrly_y_s3
+      hrly_chart.update()  
+      
+      mc_c.textContent = wc_data.mc_c
+      mc_cr.textContent = wc_data.mc_cr
+      mc_crc.textContent = wc_data.mc_crc
+      if (wc_data.mc_crct < 0){
+        mc_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.mc_crct > 0){
+        mc_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        mc_crc.classList = ""
+      }
+
+      ic_n.textContent = wc_data.ic_n
+      ic_ds.textContent = wc_data.ic_ds
+      ic_ms.textContent = wc_data.ic_ms
+      ic_if.textContent = wc_data.ic_if
+    }
+
+    function update_dashboard() {
+      fetch_wc_data();
+    }
+
+    fetch_wc_data(initial=true);
+    window.setInterval(update_dashboard, 1000); 
+    
+    function toggleDashboardFullscreen(element) {
+      if (!card.classList.contains("fullscreen")) {
+        card.classList.add("fullscreen");   
+        card.requestFullscreen();       
+        element.innerHTML=`<i class="feather icon-minimize-2"></i> Minimize `
+      } 
+      else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+          card.classList.remove("fullscreen");
+          element.innerHTML=`<i class="feather icon-maximize-2"></i> Maximize`
+        }
+      }
+    }
+    
+  </script>
+  <!-- [ Main Content ] end -->
+
+{% endblock content %}

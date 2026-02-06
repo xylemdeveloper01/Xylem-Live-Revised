@@ -1,0 +1,319 @@
+{% load static %}
+{% load a000_custom_tags %}
+
+<div class="col-sm-6">
+  <div class="table-responsive">
+    <table class="table table-bordered" id="desc_table_part1">
+      <tbody>
+        <tr>
+          <th>Format number</th>
+          <td style="border-top: 1px solid #ddd;">OSD/IQA/REC/02</td>
+        </tr>
+        <tr>
+          <th>Revision number & date</th>
+          <td>03 & 23-NOV-2018</td>
+        </tr>
+        <tr>
+          <th>Reference ID</th>
+          <td>{{ ref_id }}</td>
+        </tr>
+        <tr>
+          <th>Production Line</th>
+          <td>{{ qa_pcs.production_line_i.name }}</td>
+        </tr>
+        <tr>
+          <th>Model</th>
+          <td>{{ qa_pcs.part_number_i.pn_pnmt_m.model_i.name }}</td>
+        </tr>
+        <tr>
+          <th>Part Number</th>
+          <td>{{ qa_pcs.part_number_i.name }}</td>
+        </tr>
+        <tr>
+          <th>Part Description</th>
+          <td>{{ qa_pcs.part_number_i.description }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="col-sm-6">
+  <div class="table-responsive">
+    <table class="table table-bordered" id="desc_table_part2">
+      <tr>
+        <th>Inspected by</th>
+        <td style="border-top: 1px solid #ddd;">{{ inspected_by }}</td>
+      </tr>
+      <tr>
+        <th>Inspected time</th>
+        <td>{{ inspec_datetime }}</td>
+      </tr>
+      <tr>
+        <th>Shift</th>
+        <td>{{ shift }}</td>
+      </tr>
+      <tr>
+        <th>Check</th>
+        <td> {{ current_inspec }} out of {{ total_inspec }}</td>
+      </tr>
+      <tr>
+        <th>Approval status</th>
+        <td>{{ approval_status }}</td>
+      </tr>
+      <tr>
+        <th>Responded user </th>
+        <td>{{ responded_user }}</td>
+      </tr>
+      <tr>
+        <th>Responsed on </th>
+        <td>{{ response_datetime }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+<div class="col">
+	<div class="table-responsive" id="inspec_table">
+		{{ qa_pcs.checksheet_html | safe }}
+	</div>
+</div>
+
+<script>
+
+	var inspection_data = JSON.parse("{{ inspection_data | escapejs }}");
+	var inspection_data_duplet = JSON.parse("{{ inspection_data_duplet | escapejs }}");
+	var inspection_data_duplet_len = Object.keys(inspection_data_duplet).length;
+  if (inspection_data_duplet_len){
+    var head_rows = document.querySelectorAll("#tableContainer table thead tr")
+    head_rows.forEach((row, rowIndex) => {
+      var cells = row.querySelectorAll("th");
+      var lastCell = cells[cells.length - 1];
+      lastCell.innerHTML = "INSPECTION RESULT S01";
+      var newCell = lastCell.cloneNode(true);
+      newCell.innerHTML = "INSPECTION RESULT S02";
+      row.appendChild(newCell);
+    });
+  }
+  
+  for (var key in inspection_data) {
+    var insp_elem_div = document.getElementById(key + "_div")
+    if (key in inspection_data_duplet){
+      var duplet_cell = document.createElement('td')
+      duplet_cell.textContent = inspection_data_duplet[key]
+      insp_elem_div.closest('tr').appendChild(duplet_cell);
+    }
+    insp_elem_div.outerHTML = inspection_data[key];
+  }
+
+
+  function getImageWidthHeightOfPanel(imgNaturalWidth, imgNaturalHeight, panelWidth, panelHeight){
+    var mf = panelWidth/imgNaturalWidth
+    if (imgNaturalHeight*mf > panelHeight){
+      mf = panelHeight/imgNaturalHeight
+    }
+    var width = imgNaturalWidth*mf;
+    var height = imgNaturalHeight*mf;
+
+    var img_space_hori =  panelWidth - width
+    var img_space_vert =  panelHeight - height
+
+    return [width, height, img_space_hori, img_space_vert]
+  }
+
+
+  function exportPdf(table1Id, table2Id) {
+    var pdf = new jsPDF('l', 'mm', 'a4');
+
+    var table1 = document.getElementById(table1Id);
+    var table2 = document.getElementById(table2Id);
+
+    var xylem_logo = new Image();
+    xylem_logo.src = "{% static 'assets/images/xylem-logo.png' %}";
+
+    var company_logo = new Image();
+    company_logo.src = "{% static 'assets/images/ZF_Rane.png' %}";
+
+    marginTop = 5
+    marginBottom = 5
+    marginLeft = 5
+    marginRight = 5
+    additionalSpace = 5
+    headerHeight = 10
+    footerHeight = 5
+    headerFontSize = 20
+    headerFontColor = 20
+    footerFontSize = 10
+    footerpageNumFontSize = 5
+    headerFooterColor = [52, 58, 64] // '#343A40'
+    headerFooterLineLogoGap = 2
+    headerFooterLineThickness = 0.4
+    dividingLineColor = [136, 136, 136] // '#888888'
+    dividingLineThickness = 0.3
+
+    pdfWidth = pdf.internal.pageSize.width
+    pdfHeight = pdf.internal.pageSize.height
+
+    pdfHeaderText = "QA Patrol Check Report" //Should be less length
+    pdfFooterText = "Xylem - An Inhouse Development" //Should be less length
+
+    full_size_table = {
+      html: null,
+      startY: 0,
+      theme: null,
+      styles: {minCellHeight: 10},
+      tableWidth: pdfWidth - marginLeft - marginRight,
+      columnStyles: {},
+      margin: {
+        top: marginTop + headerHeight + additionalSpace,
+        bottom: marginBottom + footerHeight + additionalSpace,
+        left: marginLeft,
+        right: marginRight
+      },
+      headStyles : null,
+      didParseCell: null,
+      rowPageBreak: "avoid",
+    }
+    half_size_table = structuredClone(full_size_table)
+    half_size_table.tableWidth = (pdfWidth - marginLeft - marginLeft - additionalSpace)/ 2
+
+
+    function CustomHeadStyleBlue(data) {
+      if (data.cell.raw.tagName === 'TH') {              
+        data.cell.styles.fillColor = [45, 131, 188]; // blue background
+        data.cell.styles.textColor = [255, 255, 255]; // White text
+        data.cell.styles.fontStyle = 'bold';                              
+        data.cell.styles.lineWidth = 0.3;                              
+        data.cell.styles.lineColor = [221, 221, 221];          
+        
+        // add extra custom styles below
+      }
+    }
+
+
+    function CustomHeadStyleGreen(data) {
+      if (data.cell.raw.tagName === 'TH') {              
+        data.cell.styles.fillColor = [44, 184, 149]; // blue background
+        data.cell.styles.textColor = [255, 255, 255]; // White text
+        data.cell.styles.fontStyle = 'bold';                              
+        data.cell.styles.lineWidth = 0.3;                              
+        data.cell.styles.lineColor = [221, 221, 221];      
+        
+        // add extra custom styles below
+      }
+    }
+
+
+    function generate_pdf(){
+      X = marginLeft
+      Y = marginTop + headerHeight + additionalSpace
+
+      // table 1
+      tempTableParam = structuredClone(half_size_table)
+      tempTableParam.html = table1
+      tempTableParam.startY = Y
+      tempTableParam.theme = "striped"
+      pdf.autoTable(tempTableParam)
+
+      // table 2
+      X = X + tempTableParam.tableWidth + additionalSpace
+      tempTableParam = structuredClone(half_size_table)
+      tempTableParam.html = table2
+      tempTableParam.startY = Y
+      tempTableParam.margin.left = X
+      tempTableParam.theme = "striped"
+      pdf.autoTable(tempTableParam)
+
+      // line below table 1 & table 2
+      X = marginLeft
+      Y = pdf.autoTable.previous.finalY + additionalSpace
+      pdf.setDrawColor(dividingLineColor[0], dividingLineColor[1], dividingLineColor[2])
+      pdf.setLineWidth(dividingLineThickness)
+      pdf.line(X, Y, pdfWidth - X, Y)
+
+      // table 3
+      Y = Y + dividingLineThickness + additionalSpace
+      tempTableParam = structuredClone(full_size_table)
+      tempTableParam.html = document.getElementById('inspec_table').querySelector('table')
+      tempTableParam.startY = Y
+      pdf.autoTable(tempTableParam)
+
+      var totalPages = pdf.internal.getNumberOfPages()
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i)
+        X = marginLeft
+        Y = marginTop
+        headerPanelHeight = headerHeight - headerFooterLineLogoGap - headerFooterLineThickness
+        footerPanelHeight = footerHeight - headerFooterLineLogoGap - headerFooterLineThickness
+
+        // xylem logo
+        var [img_w, img_h, hori_space, verti_space] = getImageWidthHeightOfPanel(xylem_logo.naturalWidth, xylem_logo.naturalHeight, pdfWidth, headerPanelHeight)
+        pdf.addImage(xylem_logo, 'PNG', X, Y, img_w, img_h)
+        
+        // company logo
+        var [img_w, img_h, hori_space, verti_space] = getImageWidthHeightOfPanel(company_logo.naturalWidth, company_logo.naturalHeight, pdfWidth, headerPanelHeight)
+        pdf.addImage(company_logo, 'PNG', pdfWidth - img_w - marginRight, Y, img_w, img_h)
+
+        // header text
+        Y = Y + headerPanelHeight
+        pdf.setTextColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+        pdf.setFontSize(headerFontSize)
+        pdf.setFontStyle('bold')
+        pdf.text(pdfHeaderText, pdfWidth/2, Y, {align: 'center'})
+
+        // line below header
+        Y = Y + headerFooterLineLogoGap
+        pdf.setDrawColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+        pdf.setLineWidth(headerFooterLineThickness)
+        pdf.line(X, Y, pdfWidth - X, Y)
+
+        // adding rectangle to hide if any overflow occured inside footer
+        space_height = footerHeight + headerFooterLineLogoGap + marginBottom
+        Y = pdfHeight - space_height
+        pdf.setFillColor(255, 255, 255)
+        pdf.rect(0, Y, pdfWidth, space_height, "F")
+
+        // line above footer
+        Y = Y + headerFooterLineLogoGap
+        pdf.setDrawColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+        pdf.setLineWidth(headerFooterLineThickness)
+        pdf.line(X, Y, pdfWidth - X, Y)
+
+        // footer text
+        Y = Y + footerHeight
+        pdf.setTextColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+        pdf.setFontSize(footerFontSize)
+        pdf.setFontStyle('bold')
+        pdf.text(pdfFooterText, pdfWidth / 2, Y, {align: 'center'})
+
+        // page number
+        pdf.setFontSize(footerpageNumFontSize)
+        pdf.text(`Page ${i} of ${totalPages}`, pdfWidth - marginRight, Y, {align: 'right'})
+      }
+
+      var today = new Date();
+      var offset = today.getTimezoneOffset()
+      today = new Date(today.getTime() - (offset * 60 * 1000))
+
+      // Save the PDF with a specified filename
+      pdf.save(`xylem_a005_qa_patrol_check_${today.toISOString().split('.')[0]}.pdf`)
+    }
+    
+
+    let loadedImages = 0
+    images = [xylem_logo, company_logo]
+    images.forEach(function(image) {
+      if (image.complete) {
+        loadedImages++;
+        if (loadedImages === images.length){
+          generate_pdf()
+        }
+      } else {
+        image.onload = function(){
+          loadedImages++;
+          if (loadedImages === images.length){
+            generate_pdf()
+          }
+        }
+      }
+    })
+  }
+</script>

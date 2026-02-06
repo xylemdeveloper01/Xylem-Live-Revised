@@ -1,0 +1,35 @@
+.field-group-element{
+    background-color: #E7F3FE;
+    font-family: 'Arial';
+    font-weight: bold;
+    padding: 10px;
+    border-left: 6px solid #2196F3;
+}
+.head-text {
+    background-color: #85dff0;
+    color: white ;
+    font-size: 16px;
+}
+.cell-hover {
+    background-color: #E7F3FE;
+}
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+    supported by Chrome, Edge, Opera and Firefox */
+}
+.total-cp-text {
+    font-size: 16px;
+    font-family: 'Arial';
+    font-weight: bold;
+}
+.sticky {
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+    height: 140px;
+}

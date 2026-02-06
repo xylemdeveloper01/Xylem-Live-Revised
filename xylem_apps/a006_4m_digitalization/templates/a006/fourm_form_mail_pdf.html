@@ -1,0 +1,136 @@
+{% load a000_custom_tags %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>    
+      .odd{
+        text-align: left; 
+        padding: 11px;
+        border: 1px solid #eff0f0;
+        background-color:#eff9fc;
+        font-size: 15px;        
+      }
+      .even{
+        text-align: left; 
+        padding: 11px;
+        border: 1px solid #eff0f0;
+        background-color: white;
+        font-size: 15px;        
+      } 
+      p{
+        font-size: 15px;
+      } 
+      td {
+        word-break: break-all;
+      }  
+    </style>
+  </head>
+  <body>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+      <tr>
+        <!-- Left logo -->
+        <td width="20%" align="left" valign="middle">
+          <img src="{{ xylem_logo_path }}"
+            alt="Xylem Logo"
+            width="40"
+            height="40"
+            style="display:block;">
+        </td>
+        <!-- Center title -->
+        <td width="60%" align="center" valign="middle">
+          <div style="font-weight:bold; font-size:17px; line-height:22px;">
+            4M CHANGE REPORT
+          </div>
+          <div style="font-weight:bold; font-size:12px; line-height:20px;">
+            XYLEM INHOUSE DEVELOPMENT
+          </div>
+        </td>
+        <!-- Right logo -->
+        <td width="20%" align="right" valign="middle">
+          <img src="{{ zf_rane_logo_path }}"
+            alt="ZF Rane Logo"
+            width="90"
+            style="display:block; height:auto;">
+        </td>
+      </tr>
+    </table>
+    <hr style="margin: 0;">
+    <br>
+    <p><strong>Reference ID : </strong> X-A006-{{four_m_data_dict.four_m_form.id}}</p> 
+    <p><strong>Raised User : </strong> {{ four_m_data_dict.four_m_form.raised_user | get_user_display_format }}</p>
+    <p><strong> Raised on : </strong> {{ four_m_data_dict.four_m_form.raised_datetime }}</p>
+    <table>
+      <tr class="odd">
+        <th>Production Lines</th>
+        <td colspan="2"> 
+          {% for pl in four_m_data_dict.production_lines %}
+            {{ pl.name }}
+            {% if not forloop.last %},{% endif %}
+          {% endfor %}
+        </td>
+      </tr>
+      <tr class="even">
+        <th>Models</th>
+        <td colspan="2"> 
+          {% for pm in four_m_data_dict.product_models %}
+            {{ pm.name }}
+            {% if not forloop.last %},{% endif %}
+          {% endfor %}
+        </td>
+      </tr>
+      <tr class="odd">
+        <th>Part Numbers</th>
+        <td colspan="2">
+          {% for pn in four_m_data_dict.part_numbers %}
+            {{ pn.name }}
+            {% if not forloop.last %},{% endif %}
+          {% endfor %}
+        </td>
+      </tr>
+      <tr class="even">
+        <th>4M Point</th>
+        <td colspan="2"> {{ four_m_data_dict.four_m_form.four_m_point_i.name }}</td>
+      </tr>
+      <tr class="odd">
+        <th>4M Change Date</th>
+        <td colspan="2"> {{ four_m_data_dict.four_m_form.fm_change_datetime }}</td>
+      </tr>
+      <tr class="even">
+        <th>Before Description</th>
+        <td colspan="2" style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal;">
+          {{ four_m_data_dict.four_m_form.fm_before_desc }}</td>
+      </tr>
+      <tr class="odd">
+        <th>After Description</th>
+        <td colspan="2" style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal;">
+          {{ four_m_data_dict.four_m_form.fm_after_desc }}</td>
+      </tr>
+      <tr class="even">
+        <th>Change Description</th>
+        <td colspan="2" style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal;">
+          {{ four_m_data_dict.four_m_form.fm_change_desc }}</td>
+      </tr>
+      <tr class="odd">
+        <th>Is supplier Related Change</th>
+        <td colspan="2">  
+          {% if four_m_data_dict.four_m_form.supplier_rel_chng == 0 %}
+            No
+          {% elif four_m_data_dict.four_m_form.supplier_rel_chng == 1 %}
+            Yes
+          {% endif %}</td>
+      </tr>
+      {% if four_m_data_dict.four_m_form.supplier_rel_chng == 1 %}
+      <tr class="even">
+        <th>Child Partnumber</th>
+        <td colspan="2">
+          {% for cp in four_m_data_dict.child_part_numbers %}
+            {{ cp.name }}
+            {% if not forloop.last %},{% endif %}
+          {% endfor %}</td>
+      </tr> 
+      {% endif %}     
+    </table>       
+  </body>
+</html>

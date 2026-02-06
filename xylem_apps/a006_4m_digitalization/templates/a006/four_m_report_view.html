@@ -1,0 +1,393 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+ 
+  <script src="{% static 'assets/plugins/jspdf/jspdf.min.js' %}"></script>
+  <script src="{% static 'assets/plugins/jspdf/jspdf.plugin.autotable.min.js' %}"></script>
+
+  <style>
+		td{
+			white-space: normal !important;
+			word-wrap: break-word;
+		}
+  </style>
+
+  <!--[4M Forms Reports Data ] start-->
+  <div class="col-sm-12">
+    <div class="card">
+      <div class="card-header">
+        <h5>{{ child }}</h5>
+        <a href="{% url 'a006:four_m_report_filter' %}">
+          <button class="btn btn-secondary btn-sm float-right">
+            <i class="fa fa-home"></i> Go Home
+          </button>
+          </a>
+      </div>      
+      <div class="card-block">
+        <div class="table-responsive">
+          <table class="table table-striped" id="table1{{ four_m_form.id }}">
+            <tbody class="border">
+              <tr> 
+                <th>Reference ID : {{xylem_code}}-{{app_name}}-{{four_m_form.id}}</th>                 
+              </tr>
+              <tr>                        
+                <th> Raised User : {{ four_m_form.raised_user | get_user_display_format }}</th> 
+              </tr>
+              <tr>                        
+                <th> Raised on : {{ four_m_form.raised_datetime }}</th>
+              </tr>   
+            </tbody>
+          </table>       
+        </div> 
+        <div class="table-responsive">
+          <table class="table table-striped" id="table2{{ four_m_form.id }}">
+            <tbody class="border">                
+              <tr>                        
+                <th>Production Lines</th>
+                <td colspan="2">
+                  {% for pl in production_lines %}
+                    {{ pl.name }}
+                    {% if not forloop.last %},{% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              <tr>
+                <th>Models</th>
+                <td colspan="2">
+                  {% for pm in product_models %}
+                    {{ pm.name }}
+                    {% if not forloop.last %},{% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              <tr>
+                <th>Part Numbers</th>
+                <td colspan="2">
+                  {% for pn in part_numbers %}
+                    {{ pn.name }}
+                    {% if not forloop.last %},{% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              <tr>
+                <th>4M Point</th>
+                <td colspan="2">{{ four_m_form.four_m_point_i.name }}</td>
+              </tr>
+              <tr>
+                <th>4M Change Date</th>
+                <td colspan="2"> {{ four_m_form.fm_change_datetime }}</td>
+              </tr>
+              <tr>
+                <th>Before Description</th>
+                <td colspan="2">{{ four_m_form.fm_before_desc }}</td>
+              </tr>
+              <tr>
+                <th>After Description</th>
+                <td colspan="2">{{ four_m_form.fm_after_desc }}</td>
+              </tr>
+              <tr>
+                <th>Change Description</th>
+                <td colspan="2" >{{ four_m_form.fm_change_desc }}</td>
+              </tr>
+              <tr>
+                <th>Is supplier Related Change</th>
+                <td colspan="2">
+                  {% if four_m_form.supplier_rel_chng == 0 %}
+                    No
+                  {% elif four_m_form.supplier_rel_chng == 1 %}
+                    Yes
+                  {% endif %}
+                </td>
+              </tr>
+              {% if child_part_numbers %}
+              <tr>
+                <th>Child Part Numbers</th>
+                <td colspan="2">
+                  {% for cp in child_part_numbers %}
+                    {{ cp.name }}
+                    {% if not forloop.last %},{% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              {% endif %}
+              <tr>
+                <th>Overall Status</th>
+                <td colspan="2">{{ overall_status }}</td>
+              </tr>
+            </tbody>
+          </table>                
+        </div> 
+        <div class="table-responsive">
+          <table class="table table-striped" id="table3{{ four_m_form.id }}">
+            <tr class="border">
+              <th colspan="{{approval_list_depts.0 | length}}" class="text-center">Approvals</th>
+              <tr class="border">
+                <th class="border">Department</th> 
+                <th class="border">Responsed User</th>
+                <th class="border">Response</th>
+                <th class="border">Response Time</th>
+                <th class="border">Comments</th>
+                {% for i in approval_list_depts %}
+                  <tr class="border">
+                    {% for j in i %}
+                    <td class="border">{{ j }}</td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tr> 
+            </tr>
+          </table>                                                                            
+        </div> 
+        <button class="btn btn-primary" onclick="exportPdf('table1{{ four_m_form.id }}', 'table2{{ four_m_form.id }}', 'table3{{ four_m_form.id }}')">
+          <i class="fa fa-download"></i> Download 4M
+        </button>
+        </div>                         
+      </div>      
+    </div>
+  </div>                 
+  <!--[ 4M Forms Reports Data ] end-->
+
+  <!-- [ Script / Print table as Pdf ] start-->
+  <script>   
+   
+    function getImageWidthHeightOfPanel(imgNaturalWidth, imgNaturalHeight, panelWidth, panelHeight){
+      var mf = panelWidth/imgNaturalWidth
+      if (imgNaturalHeight*mf > panelHeight){
+        mf = panelHeight/imgNaturalHeight
+      }
+      var width = imgNaturalWidth*mf;
+      var height = imgNaturalHeight*mf;
+
+      var img_space_hori =  panelWidth - width
+      var img_space_vert =  panelHeight - height
+
+      return [width, height, img_space_hori, img_space_vert]
+    }
+
+
+
+    function exportPdf(table1Id, table2Id, table3Id) {
+      var pdf = new jsPDF('l', 'mm', 'a4');
+
+      var table1 = document.getElementById(table1Id);
+      var table2 = document.getElementById(table2Id);
+      var table3 = document.getElementById(table3Id);
+
+      var xylem_logo = new Image();
+      xylem_logo.src = "{% static 'assets/images/xylem-logo.png' %}";
+
+      var company_logo = new Image();
+      company_logo.src = "{% static 'assets/images/ZF_Rane.png' %}";
+
+      marginTop = 5
+      marginBottom = 5
+      marginLeft = 5
+      marginRight = 5
+      additionalSpace = 5
+      headerHeight = 10
+      footerHeight = 5
+      headerFontSize = 20
+      headerFontColor = 20
+      footerFontSize = 10
+      footerpageNumFontSize = 5
+      headerFooterColor = [52, 58, 64] // '#343A40'
+      headerFooterLineLogoGap = 2
+      headerFooterLineThickness = 0.4
+      dividingLineColor = [136, 136, 136] // '#888888'
+      dividingLineThickness = 0.3
+
+      pdfWidth = pdf.internal.pageSize.width
+      pdfHeight = pdf.internal.pageSize.height
+
+      pdfHeaderText = "4M Report" //Should be less length
+      pdfFooterText = "Xylem - An Inhouse Development" //Should be less length
+
+      full_size_table = {
+        html: null,
+        startY: 0,
+        theme: null,
+        styles: {minCellHeight: 10},
+        tableWidth: pdfWidth - marginLeft - marginRight,
+        columnStyles: {},
+        margin: {
+          top: marginTop + headerHeight + additionalSpace,
+          bottom: marginBottom + footerHeight + additionalSpace,
+          left: marginLeft,
+          right: marginRight
+        },
+        headStyles : null,
+        didParseCell: null,
+        rowPageBreak: "avoid",
+      }
+      half_size_table = structuredClone(full_size_table)
+      half_size_table.tableWidth = (pdfWidth - marginLeft - marginLeft - additionalSpace)/ 2
+
+
+      function CustomHeadStyleBlue(data) {
+        if (data.cell.raw.tagName === 'TH') {              
+          data.cell.styles.fillColor = [45, 131, 188]; // blue background
+          data.cell.styles.textColor = [255, 255, 255]; // White text
+          data.cell.styles.fontStyle = 'bold';                              
+          data.cell.styles.lineWidth = 0.3;                              
+          data.cell.styles.lineColor = [221, 221, 221];          
+          
+          // add extra custom styles below
+        }
+      }
+
+
+      function CustomHeadStyleGreen(data) {
+        if (data.cell.raw.tagName === 'TH') {              
+          data.cell.styles.fillColor = [44, 184, 149]; // blue background
+          data.cell.styles.textColor = [255, 255, 255]; // White text
+          data.cell.styles.fontStyle = 'bold';                              
+          data.cell.styles.lineWidth = 0.3;                              
+          data.cell.styles.lineColor = [221, 221, 221];      
+          
+          // add extra custom styles below
+          data.cell.styles.halign = 'center';
+        }
+      }
+      
+
+      function generate_pdf(){
+        X = marginLeft
+        Y = marginTop + headerHeight + additionalSpace
+
+        // table 1
+        tempTableParam = structuredClone(full_size_table)
+        tempTableParam.html = table1
+        tempTableParam.startY = Y
+        tempTableParam.theme = "striped"
+        pdf.autoTable(tempTableParam)
+
+        // line below table 1
+        X = marginLeft
+        Y = pdf.autoTable.previous.finalY + additionalSpace
+        pdf.setDrawColor(dividingLineColor[0], dividingLineColor[1], dividingLineColor[2])
+        pdf.setLineWidth(dividingLineThickness)
+        pdf.line(X, Y, pdfWidth - X, Y)
+
+        // table 2
+        Y = Y + dividingLineThickness + additionalSpace
+        tempTableParam = structuredClone(full_size_table)
+        tempTableParam.html = table2
+        tempTableParam.startY = Y
+        tempTableParam.theme = "striped"
+        tempTableParam.columnStyles = {0: {cellWidth: 60},}
+        tempTableParam.didParseCell = CustomHeadStyleBlue
+        pdf.autoTable(tempTableParam)
+
+        // line below table 2
+        X = marginLeft
+        Y = pdf.autoTable.previous.finalY + additionalSpace
+        pdf.setDrawColor(dividingLineColor[0], dividingLineColor[1], dividingLineColor[2])
+        pdf.setLineWidth(dividingLineThickness)
+        pdf.line(X, Y, pdfWidth - X, Y)
+
+        // table 3
+        Y = Y + dividingLineThickness + additionalSpace
+        tempPageNum = pdf.internal.getCurrentPageInfo().pageNumber
+        tempStartY = marginTop + headerHeight + additionalSpace
+        tempTableParam = structuredClone(full_size_table)
+        tempTableParam.html = table3
+        tempTableParam.startY = tempStartY
+        tempTableParam.theme = "striped"
+        tempTableParam.didParseCell = CustomHeadStyleGreen
+        pdf.addPage()
+        pdf.autoTable(tempTableParam)
+        remainingSpace = pdfHeight - Y - footerHeight - additionalSpace - marginBottom
+        if (remainingSpace > pdf.autoTable.previous.finalY - tempStartY) {
+          pdf.deletePage(tempPageNum + 1)
+          tempTableParam.startY = Y
+          pdf.autoTable(tempTableParam)
+        }
+
+        const totalPages = pdf.internal.getNumberOfPages()
+        for (let i = 1; i <= totalPages; i++) {
+          pdf.setPage(i)
+          X = marginLeft
+          Y = marginTop
+          headerPanelHeight = headerHeight - headerFooterLineLogoGap - headerFooterLineThickness
+          footerPanelHeight = footerHeight - headerFooterLineLogoGap - headerFooterLineThickness
+
+          // xylem logo
+          var [img_w, img_h, hori_space, verti_space] = getImageWidthHeightOfPanel(xylem_logo.naturalWidth, xylem_logo.naturalHeight, pdfWidth, headerPanelHeight)
+          pdf.addImage(xylem_logo, 'PNG', X, Y, img_w, img_h)
+          
+          // company logo
+          var [img_w, img_h, hori_space, verti_space] = getImageWidthHeightOfPanel(company_logo.naturalWidth, company_logo.naturalHeight, pdfWidth, headerPanelHeight)
+          pdf.addImage(company_logo, 'PNG', pdfWidth - img_w - marginRight, Y, img_w, img_h)
+
+          // header text
+          Y = Y + headerPanelHeight
+          pdf.setTextColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+          pdf.setFontSize(headerFontSize)
+          pdf.setFontStyle('bold')
+          pdf.text(pdfHeaderText, pdfWidth/2, Y, {align: 'center'})
+
+          // line below header
+          Y = Y + headerFooterLineLogoGap
+          pdf.setDrawColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+          pdf.setLineWidth(headerFooterLineThickness)
+          pdf.line(X, Y, pdfWidth - X, Y)
+
+          // adding rectangle to hide if any overflow occured inside footer
+          space_height = footerHeight + headerFooterLineLogoGap + marginBottom
+          Y = pdfHeight - space_height
+          pdf.setFillColor(255, 255, 255)
+          pdf.rect(0, Y, pdfWidth, space_height, "F")
+
+          // line above footer
+          Y = Y + headerFooterLineLogoGap
+          pdf.setDrawColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+          pdf.setLineWidth(headerFooterLineThickness)
+          pdf.line(X, Y, pdfWidth - X, Y)
+
+          // footer text
+          Y = Y + footerHeight
+          pdf.setTextColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+          pdf.setFontSize(footerFontSize)
+          pdf.setFontStyle('bold')
+          pdf.text(pdfFooterText, pdfWidth / 2, Y, {align: 'center'})
+
+          // page number
+          pdf.setFontSize(footerpageNumFontSize)
+          pdf.text(`Page ${i} of ${totalPages}`, pdfWidth - marginRight, Y, {align: 'right'})
+        }
+        
+        var today = new Date();
+        const offset = today.getTimezoneOffset()
+        today = new Date(today.getTime() - (offset * 60 * 1000))
+
+        // Save the PDF with a specified filename
+        pdf.save(`xylem_a006_4M_report_${today.toISOString().split('.')[0]}.pdf`)
+      }
+
+
+      let loadedImages = 0
+      images = [xylem_logo, company_logo]
+      images.forEach(function(image) {
+        if (image.complete) {
+          loadedImages++;
+          if (loadedImages === images.length){
+            generate_pdf()
+          }
+        } else {
+          image.onload = function(){
+            loadedImages++;
+            if (loadedImages === images.length){
+              generate_pdf()
+            }
+          }
+        }
+      })
+    }
+  </script>
+  <!-- [ Script / Print table as Pdf ] end-->
+
+{% endblock content %}

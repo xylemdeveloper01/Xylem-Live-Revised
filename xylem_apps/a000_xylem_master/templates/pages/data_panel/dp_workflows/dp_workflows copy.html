@@ -1,0 +1,142 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [Workflows ] start-->
+  <div class="row">
+    <div class="col-sm-12 ml-3 mb-1">
+      <h5 class="mb-3">Workflows - Available</h5>
+      <hr>
+      <a href="{% url 'workflows_form_addition' current_dept_i.icode %}" class="btn btn-sm btn-primary">
+        <i class="fa fa-plus-circle"></i> Create Workflows
+      </a>
+    </div>
+    <div class="col-sm-12 ml-3 mb-1">
+      <div class="btn-group mb-2 mr-2">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true"
+          aria-expanded="false">Active Forms</button>
+      </div>
+    </div>
+  </div>
+  {% if workflows %}
+    <div class="row">
+      <div class="col-md-12 ml-3 mb-1">
+        <div class="tab-content border border-secondary-subtle p-3 rounded" id="v-pills-tabContent">
+          <div class="table-responsive mb-4">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Form Name</th>
+                  <th>Version</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+							<tbody>
+								{% for wf in workflows %}
+									<tr>
+										<td>{{ wf.form_name }}</td>
+										<td>{{ wf.fs_version }}</td>
+										<td>
+											{% if wf.status_flag == 1 %}
+												<i class="text-success fa fa-check-circle"> Active </i>
+											{% elif wf.status_flag == 0 %}
+												<i class="text-danger fa fa-times-circle"> Deactivated </i>
+											{% elif wf.status_flag == 2 %}
+												<i class="text-warning fa fa-pause-circle"> Hold </i>
+											{% endif %}
+										</td>
+										<td>
+											<a href="{% url 'wf_fm_view' wf.id %}">
+												<i class="feather icon-eye"> View </i>
+											</a>
+											{% if wf.status_flag == 1 %}
+												| <a href="{% url 'a011:raise_form' wf.id %}">
+														<i class="text-secondary feather icon-upload"> Raise </i>
+													</a>
+												| <a href="{% url 'wf_fm_modify' wf.id %}">
+														<i class="text-info feather icon-edit"> Modify </i>
+													</a>
+												| <a href="{% url 'wf_fm_hold' wf.id %}">
+														<i class="text-warning feather icon-pause"> Hold </i>
+													</a>
+												| <a href="{% url 'wf_fm_deactivate' wf.id %}">
+														<i class="text-danger feather icon-power"> Deactivate </i>
+													</a>
+											{% elif wf.status_flag == 2 %}
+												| <a href="{% url 'wf_fm_release' wf.id %}">
+														<i class="text-success feather icon-check-circle"> Release </i>
+													</a>
+												| <a href="{% url 'wf_fm_deactivate' wf.id %}">
+														<i class="text-danger feather icon-power"> Deactivate </i>
+													</a>
+											{% endif %}
+										</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info" role="alert">
+      No Workflows available
+    </div>
+  {% endif %}
+
+  
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+{% endblock content %}

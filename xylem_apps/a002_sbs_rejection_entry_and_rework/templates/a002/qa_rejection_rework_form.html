@@ -1,0 +1,343 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <style>
+    .total-label{
+      color: white;
+      background-color: #2196F3;
+      font-family: 'Arial';
+      font-size: 15px;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 5px;
+      padding: 5px;
+      margin: 1px;
+    }
+  </style>
+
+  <!-- [QA Rejection and Rework Form ] start-->
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>{{ segment }}</h5>
+        </div>
+        <div class="card-body">
+          <form action="{% url 'a002:qa_rejection_rework_form' %}" method="post" id="rejectionReworkEntryForm"
+            data-empty-option-url="{% url 'ajax_load_empty_option' %}"
+            data-rejection-reasons-url="{% url 'ajax_load_product_rejection_reasons' %}"
+            data-production-lines_pc_url="{% url 'ajax_load_production_lines' %}"
+            data-production-stations-pl-url="{% url 'ajax_load_production_stations' %}" 
+            data-product-models-ps-url ="{% url 'ajax_load_product_models_of_ps' %}"                          
+            data-part-numbers-ps-m-url="{% url 'ajax_load_part_numbers_of_ps_m' %}">
+            {% csrf_token %}
+            {% for field in form %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <div class="form-group">
+              <label for="bar_text">Scan the Barcode</label>
+              <input type="text" class="form-control" placeholder="scan the barcode" id="entry_form_id_barcode_text" onkeydown="preventEnter(event)">
+            </div>
+            <button type="submit" class="btn btn-primary" id="entry_form_id_add_barcode_button" onclick="addBarcodeText()">Add</button>
+            <div class="form-group">
+              <label for="added_barcodes">Added barcodes</label> <span class="total-label" id="total_barcodes_count"> 0 </span>
+              <textarea class="form-control" id="entry_form_id_barcodes_textarea" rows="5" disabled></textarea>
+              <textarea id="entry_form_id_barcodes_textarea_hidden" name="added_barcodes" required hidden></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [QA Rejection and Rework Form ] end-->
+  
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    <div class="modal fade" id="customErrorMessageModal" tabindex="-1" role="dialog" aria-labelledby="customErrorMessageModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content card rounded">
+          <div class="modal-header">
+            <h5 class="modal-title"> Notification </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center text-danger" id="custom_error_message"> </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+    const entry_form_id_barcode_text = document.getElementById('entry_form_id_barcode_text')
+    const rre_form_id_part_number = document.getElementById('rre_form_id_part_number')
+    const total_barcodes_count = document.getElementById('total_barcodes_count')
+    const entry_form_id_barcodes_textarea = document.getElementById('entry_form_id_barcodes_textarea')
+    const entry_form_id_barcodes_textarea_hidden = document.getElementById('entry_form_id_barcodes_textarea_hidden')
+    const custom_error_message = document.getElementById('custom_error_message')
+    const entry_form_id_add_barcode_button = document.getElementById('entry_form_id_add_barcode_button')
+    const refresh_delay_in_ms = 1000;
+    let lastKeyPressTime = 0;
+    let refreshTimeout;
+
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+    function handlePaste(event) {
+      event.preventDefault();
+    }
+    entry_form_id_barcode_text.addEventListener('paste', handlePaste);
+
+    function preventEnter(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+      } 
+      else if (event.key === 'Enter' && event.target.id === 'bar_text') {
+        event.preventDefault();
+      }
+      else if (event.key !== 'Enter' && event.target.id === 'bar_text') {
+        event.preventDefault();
+      } 
+    }
+
+    function handleInput(event) {
+      const currentTime = new Date().getTime();
+      if (currentTime - lastKeyPressTime > refresh_delay_in_ms) {
+        entry_form_id_barcode_text.value = event.data
+      }
+      lastKeyPressTime = currentTime;
+    }
+
+    entry_form_id_barcode_text.addEventListener('input', handleInput);
+    entry_form_id_add_barcode_button.addEventListener('click', function(event) {
+      event.preventDefault();
+    });
+
+    function addBarcodeText() {
+      var inputValue = entry_form_id_barcode_text.value
+      if (inputValue){
+        if (rre_form_id_part_number.value){
+          var existingData = entry_form_id_barcodes_textarea_hidden.value.split("\n").filter(e => {
+            return e !== "";
+          });
+          if (existingData.includes(inputValue)){
+            custom_error_message.innerHTML = "Barcode already scanned: " + inputValue
+            entry_form_id_barcode_text.value = "";
+            $(document).ready(function() {
+              $("#customErrorMessageModal").modal('show')
+            })
+          }
+          else{
+          fetch(`{% url 'a002:rre_validate_barcode' %}?bc=${inputValue}&pn_id=${rre_form_id_part_number.value}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.barcode_pn_check){
+              if (data.barcode_exists) {
+                custom_error_message.innerHTML = "Barcode already exists in the database: " + inputValue
+                entry_form_id_barcode_text.value = "";
+                $(document).ready(function() {
+                  $("#customErrorMessageModal").modal('show')
+                })
+              }
+              else {
+                existingData.push(inputValue)
+                entry_form_id_barcodes_textarea.value = existingData.join("\n")
+                entry_form_id_barcodes_textarea_hidden.value = existingData.join("\n")
+                entry_form_id_barcode_text.value = "";
+                total_barcodes_count.textContent = existingData.length;
+              }
+            }
+            else {
+              custom_error_message.innerHTML = "Invaild barcode scanned against the selected partnumber " + inputValue
+              entry_form_id_barcode_text.value = "";
+              $(document).ready(function() {
+                $("#customErrorMessageModal").modal('show')
+              })
+            }
+          })
+          .catch(error => {
+              console.error("Error rre validating barcode:", error);
+          });
+        }
+        }
+        else{
+        custom_error_message.innerHTML = "Kindly select the part number"
+        $(document).ready(function() {
+          $("#customErrorMessageModal").modal('show')
+        })
+      }
+      }
+      else{
+        custom_error_message.innerHTML = "Kindly scan the barcode"
+        $(document).ready(function() {
+          $("#customErrorMessageModal").modal('show')
+        })
+      }
+    }
+    $(document).on('change', "#rre_form_id_product_category", function () {
+      const url_eo = $("#rejectionReworkEntryForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_pl = $("#rejectionReworkEntryForm").attr("data-production-lines_pc_url");  // get the url of the `load_data` view
+      const url_rr = $("#rejectionReworkEntryForm").attr("data-rejection-reasons-url");  // get the url of the `load_data` view
+      const product_category_id = $(this).val();
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#rre_form_id_production_station").html(data);
+          $("#rre_form_id_product_model").html(data);
+          $("#rre_form_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_pl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {
+          $("#rre_form_id_production_line").html(data);
+          empty_option_disable();
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_rr,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {
+          $("#rre_form_id_rejection_reasons").html(data);
+          empty_option_disable();
+        }
+      });
+    });
+    $(document).on('change', "#rre_form_id_production_line", function () {
+      const url_eo = $("#rejectionReworkEntryForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_ps_pl = $("#rejectionReworkEntryForm").attr("data-production-stations-pl-url");  // get the url of the `load_data` view
+      const production_line_id = $(this).val();
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#rre_form_id_product_model").html(data);          
+          $("#rre_form_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_ps_pl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id': production_line_id       // GET parameters
+        },
+        success: function (data) {
+          $("#rre_form_id_production_station").html(data);
+          empty_option_disable();
+        }
+      });      
+    });
+    $(document).on('change',"#rre_form_id_production_station", function () {
+      const url_m_ps = $("#rejectionReworkEntryForm").attr("data-product-models-ps-url");  // get the url of the `load_data` view
+      const production_station_id = $(this).val();  // get the selected country ID from the HTML input
+      const url_eo = $("#rejectionReworkEntryForm").attr("data-empty-option-url");  // get the url of the `load_data` view
+      $.ajax({                      
+        url: url_eo,                    
+        data: {},
+        success: function (data) {
+          $("#rre_form_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });    
+      $.ajax({                       // initialize an AJAX request
+        url: url_m_ps,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_station_id': production_station_id       // GET parameters
+        },
+        success: function (data) {
+          $("#rre_form_id_product_model").html(data);
+          empty_option_disable();
+        }
+      });
+    });   
+    $(document).on('change',"#rre_form_id_product_model", function () {
+      const production_station_id = $("#rre_form_id_production_station").val();
+      const model_id = $(this).val();  // get the selected country ID from the HTML input
+      const url_pn_ps_m = $("#rejectionReworkEntryForm").attr("data-part-numbers-ps-m-url");  // get the url of the `load_data` view
+      $.ajax({                       // initialize an AJAX request
+        url: url_pn_ps_m,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_station_id': production_station_id,       // GET parameters
+          'model_id': model_id
+        },
+        success: function (data) {   
+          $("#rre_form_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });  
+    });
+    
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

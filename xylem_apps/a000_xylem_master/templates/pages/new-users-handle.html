@@ -1,0 +1,239 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!--[ Recent Users ] start-->
+  {% if new_users_pagination %}
+    <div class="row justify-content-between">
+      <div class="col-auto">
+        <h5>{{segment}}</h5>
+      </div>
+      <div class="col-auto align-self-end">
+        <form class="form-inline">
+          <span class="mr-2">{{ new_users_pagination.start_index }}-{{ new_users_pagination.end_index }} of {{ new_users_pagination.paginator.count }}</span>
+          <a {% if new_users_pagination.has_previous %} href="{% url 'new_users_handle' current_pagination_option.icode 1 %}" {% endif %}><i class="feather icon-chevrons-left"></i></a>
+          <a {% if new_users_pagination.has_previous %} href="{% url 'new_users_handle' current_pagination_option.icode new_users_pagination.previous_page_number %}" {% endif %}><i class="feather icon-chevron-left"></i></a>
+          <a href="#">Page {{ new_users_pagination.number }} of {{ new_users_pagination.paginator.num_pages }}</a>
+          <a {% if new_users_pagination.has_next %} href="{% url 'new_users_handle' current_pagination_option.icode new_users_pagination.next_page_number %}" {% endif %}><i class="feather icon-chevron-right"></i></a>
+          <a {% if new_users_pagination.has_next %} href="{% url 'new_users_handle' current_pagination_option.icode new_users_pagination.paginator.num_pages %}" {% endif %}><i class="feather icon-chevrons-right"></i></a>
+          <label for="rowCountSelection" class="ml-2">Show:</label> 
+          <select class="form-control ml-1 p-0" style="height: 20px;" id="rowCountSelection" onchange="changePaginationRows(this)">
+            {% for pagination_option in pagination_options %}
+              <option value="{% url 'new_users_handle' pagination_option.icode 1 %}" {% if pagination_option == current_pagination_option %} selected {% endif %}>{{pagination_option.name}}</option>
+            {% endfor %}
+          </select>
+          <label class="ml-1">Users</label>
+        </form>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="row justify-content-end align-items-end mb-2">
+          <div class="col-5 justify-content-end">    
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="feather icon-search"></i></span>
+              </div>
+              <input type="text" id="searchInput" class="form-control" placeholder="Search data inside table...">       
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-12">
+        <div class="card Recent-Users">
+          <div class="card-block">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <tbody>
+                  {% for new_user in new_users_pagination %}
+                    <tr class="unread">
+                      <td>
+                        <img class="rounded-circle" style="width:40px;" 
+                          {% if new_user.gender_i == MALE  %} 
+                            src="{% static 'assets/images/user/avatar-2.jpg' %}"
+                          {% else %}
+                            src="{% static 'assets/images/user/avatar-1.jpg' %}"
+                          {% endif %}
+                          alt="activity-user">
+                      </td>
+                      <td>  
+                        <h6 class="mb-1">{{ new_user.first_name }} {{ new_user.last_name }}</h6>
+                        <p class="m-0"> {{ new_user.dept_i.name }} - {{ new_user.username }}</p>
+                      </td>
+                      <td>
+                        <h6 class="text-muted" data-toggle="tooltip" title="Date of Registration">
+                          <i class="fas fa-circle text-c-green f-10 m-r-15"></i> 
+                          {{ new_user.date_joined }}
+                        </h6>
+                      </td>
+                      <td>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#viewUserModal{{new_user.id}}">view</button>
+                        <div class="modal fade" id="viewUserModal{{new_user.id}}" tabindex="-1" role="dialog" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content card rounded">
+                              <div class="modal-header">
+                                <h5 class="modal-title">View User Details</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form method="post">
+                                  {% csrf_token %}
+                                  <dl class="row">
+                                    <dt class="col-sm-4">Full Name</dt>
+                                    <dd class="col-sm-8">{{new_user.first_name}} {{new_user.last_name}}</dd>
+                                  </dl>
+                                  <dl class="row">
+                                    <dt class="col-sm-4">User Name / Employee ID</dt>
+                                    <dd class="col-sm-8">{{new_user.username}}</dd>
+                                  </dl>
+                                  <dl class="row">
+                                    <dt class="col-sm-4">Email ID</dt>
+                                    <dd class="col-sm-8">{{new_user.email}}</dd>
+                                  </dl>
+                                  <dl class="row">
+                                    <dt class="col-sm-4">Gender</dt>
+                                    <dd class="col-sm-8">{{new_user.gender_i.name}}</dd>
+                                  </dl>
+                                  <dl class="row">
+                                    <dt class="col-sm-4">Plant Location</dt>
+                                    <dd class="col-sm-8">{{new_user.plant_location_i.name}}</dd>
+                                  </dl>
+                                  <dl class="row">
+                                    <dt class="col-sm-4">Department</dt>
+                                    <dd class="col-sm-8">{{new_user.dept_i.name}}</dd>
+                                  </dl>
+                                  <dl class="row">
+                                    <dt class="col-sm-4">Designation Level</dt>
+                                    <dd class="col-sm-8">{{new_user.designation_i.name}}
+                                    <div class="custom-control custom-checkbox">
+                                      <input type="checkbox" class="custom-control-input" id="customcheck{{new_user.id}}" required>
+                                      <label class="custom-control-label" for="customcheck{{new_user.id}}">I have Checked the Designation</label>
+                                    </div>
+                                  </dd>
+                                  </dl>
+                                  <dl class="row">
+                                    <dt class="col-sm-4">Date of Birth</dt>
+                                    <dd class="col-sm-8">{{new_user.dob}}</dd>
+                                  </dl>
+                                  <dl class="row">
+                                    <dt class="col-sm-4">Date of Registration</dt>
+                                    <dd class="col-sm-8">{{new_user.date_joined}}</dd>
+                                  </dl>
+                                  <button type="submit" name="approver_response" class="btn btn-success" value="1:{{ new_user.id }}">Approve</button>
+                                  <button type="submit" name="approver_response" class="btn btn-danger" value="0:{{ new_user.id }}">Reject</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-sm-12 ml-3">
+      <div class="alert alert-info" role="alert">
+        No new users available
+      </div>  
+    </div>
+  {% endif %}
+  <!--[ Recent Users ] end-->
+
+  <!--[ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!--[ messages ] end-->
+
+
+   <!-- [ Script / Ajax ] start-->
+   <script>
+
+    // Empty option selection disabled
+    function empty_option_disable() {
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+
+    function changePaginationRows(element) {
+      window.location.href = element.value;
+    }
+
+
+    var filteredRows = document.querySelectorAll("table.table-hover tbody tr");						
+    document.getElementById("searchInput").addEventListener("input", function () {
+      var searchTerm = this.value.toLowerCase().trim();
+      filteredRows.forEach(function (row) {
+        var rowData = row.textContent.toLowerCase();
+        if (rowData.includes(searchTerm)) {
+          row.style.display = "table-row";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    });
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+  
+{% endblock content %}

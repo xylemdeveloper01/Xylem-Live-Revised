@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      table {
+        font-family:  Arial, Helvetica,sans-serif;
+        width: 99%;
+        margin-top: 20px;
+        font-size: 1.0em;
+        min-width: 100px;
+        color: white;
+        border-radius: 10px 10px 0 0;
+        border: 1px solid #ddd;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+      th {
+        text-align: center; 
+        padding: 11px;
+        border: 1px solid #ddd;
+        /* background-color: green; */
+        background-color: {{table_color}};
+      }
+      th.top_head {
+        border: none;
+      }
+      td {
+        text-align: center; 
+        padding: 11px;
+        color: black;
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>**V2.0 testing</h3>
+    <table>
+      <tr>
+        <th class="top_head" colspan="2">
+          <span style="float: left">{{current_date}}<br>{{day_of_week}}</span>
+        </th>
+        {% if shift_name %}
+          <th class="top_head" colspan="9">DOWNTIME SHIFT REPORT</th>
+        {% else %}
+          <th class="top_head" colspan="9">DOWNTIME DAY REPORT</th>
+        {% endif %}
+        <th class="top_head" colspan="2">
+          <span style="float: right">{{shift_name}}</span>
+        </th>
+      </tr>
+      <tr>
+        <th rowspan="2">Production Line</th>
+        <th colspan="6">Captured Distribution (Mins)</th>
+        <th colspan="6">Accepted Distribution (Mins)</th>
+      </tr>
+      <tr>
+        <th>{{dept_list.0}}</th>
+        <th>{{dept_list.1}}</th>
+        <th>{{dept_list.2}}</th>
+        <th>{{dept_list.3}}</th>
+        <th>{{dept_list.4}}</th>
+        <th>{{dept_list.5}}</th>
+        <th>{{dept_list.0}}</th>
+        <th>{{dept_list.1}}</th>
+        <th>{{dept_list.2}}</th>
+        <th>{{dept_list.3}}</th>
+        <th>{{dept_list.4}}</th>
+        <th>{{dept_list.5}}</th>
+      </tr>
+      </tr>
+      {% for row in rows %}
+        <tr>
+          <td style="background-color: {{row.0.pl_bg_c}}; color: {{row.0.pl_txt_c}};">{{row.0.pl_n}}</td>
+          <td>{{row.1.0}}</td>
+          <td>{{row.1.1}}</td>
+          <td>{{row.1.2}}</td>
+          <td>{{row.1.3}}</td>
+          <td>{{row.1.4}}</td>
+          <td>{{row.1.5}}</td>
+          <td style="background-color: {{row.2.0.dt_bg_c}}; color: {{row.2.0.dt_txt_c}};">{{row.2.0.dt}}</td>
+          <td style="background-color: {{row.2.1.dt_bg_c}}; color: {{row.2.1.dt_txt_c}};">{{row.2.1.dt}}</td>
+          <td style="background-color: {{row.2.2.dt_bg_c}}; color: {{row.2.2.dt_txt_c}};">{{row.2.2.dt}}</td>
+          <td style="background-color: {{row.2.3.dt_bg_c}}; color: {{row.2.3.dt_txt_c}};">{{row.2.3.dt}}</td>
+          <td style="background-color: {{row.2.4.dt_bg_c}}; color: {{row.2.4.dt_txt_c}};">{{row.2.4.dt}}</td>
+          <td style="background-color: {{row.2.5.dt_bg_c}}; color: {{row.2.5.dt_txt_c}};">{{row.2.5.dt}}</td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <th style="text-align: left;"colspan="13"> 
+          <b>Note:</b>
+          <ul>
+            <li>All Decimal place holders are rounded into one digit</li>
+            <li>
+              Accepted down time color code : <label style="background-color: {{color_code_dict.pc_hbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp;No variation with the captured down time, &nbsp;&nbsp;
+              <label style="background-color: {{color_code_dict.pc_lbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp;Has variation with the captured down time&nbsp;&nbsp;
+            </li>
+          </ul>
+        </th>
+      </tr>
+    </table>
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

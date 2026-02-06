@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <style>
+      table {
+        font-family:  Arial, Helvetica,sans-serif;
+        width: 99%;
+        margin-top: 20px;
+        font-size: 1.0em;
+        min-width: 100px;
+        color: white;
+        border-radius: 10px 10px 0 0;
+        border: 1px solid #ddd;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+      th {
+        text-align: center; 
+        padding: 11px;
+        border: 1px solid #ddd;
+        /* background-color: green; */
+        background-color: {{table_color}};
+      }
+      th.top_head {
+        border: none;
+      }
+      td {
+        text-align: center; 
+        padding: 11px;
+        color: black;
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>**V2.0 testing</h3>
+    <table>
+      <tr>
+        <th class="top_head" colspan="1">
+          <span style="float: left">{{current_date}}<br>{{day_of_week}}</span>
+        </th>
+        <th class="top_head" colspan="2">PART NUMBER REPORT</th>
+        <th class="top_head" colspan="1"></th>
+      </tr>
+      <tr>
+        <th class="unit_head">Part Number</th>
+        <th class="unit_head">Technology</th> 
+        <th class="unit_head">Description</th>
+        <th class="unit_head">Actual</th>
+      </tr>
+      {% for row in rows %}
+        <tr>
+          <td>{{row.pn_name}}</td>
+          <td>{{row.pn_tech_name}}</td>
+          <td>{{row.pn_desc}}</td>
+          <td>{{row.pn_actual}}</td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <th style="text-align: left;"colspan="4"> 
+          <b>Note:</b>
+          <ul>
+            <li>All Decimal place holders are rounded into one digit</li>
+            <li>
+              Actual color with respect to the plan : <label style="background-color: {{color_code_dict.pc_hbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp;{{color_code_dict.pc_ht}}&nbsp;&nbsp;
+              <label style="background-color: {{color_code_dict.pc_mbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp; {{color_code_dict.pc_mt}}&nbsp;&nbsp;
+              <label style="background-color: {{color_code_dict.pc_lbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp; {{color_code_dict.pc_lt}}&nbsp;&nbsp;
+            </li>
+          </ul>
+        </th>
+      </tr>
+    </table>
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

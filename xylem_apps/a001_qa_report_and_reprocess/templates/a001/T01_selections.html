@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- [ Main Content ] start -->
+<div class="row">
+  <div class="col-sm-12">
+    <div class="card">
+      <div class="card-header">
+        <h5>{{ child }}</h5>
+      </div>
+      <div class="card-block">
+        {% if selection_list %}
+          {% for selection in selection_list %}
+            <div class="row justify-content-center">
+              <div class="col-sm-5">
+                <a href="{{ selection.url }}">
+                  <button type="button" class="btn btn-primary" style="white-space: normal; width:100%"> {{ selection.name }} </button>
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        {%else %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+          No selection was added
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<!-- [ Main Content ] end -->
+
+{% endblock content %}

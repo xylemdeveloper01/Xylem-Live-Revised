@@ -1,0 +1,376 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  <script src="{% static 'assets/plugins/jspdf/jspdf.min.js' %}"></script>
+  <script src="{% static 'assets/plugins/jspdf/jspdf.plugin.autotable.min.js' %}"></script>
+
+  <!-- [ View Data ] start-->
+  <div class="card border">
+    <div class="card-header">
+      <h5>{{ child }}</h5>
+      <a href="{% url 'dp_part' FIRST_PRODUCT_CATEGORY.icode %}">
+        <button class="btn btn-secondary btn-sm float-right">
+          <i class="fa fa-home"></i> Go Home
+        </button>                
+      </a>            
+    </div>  
+    <div class="card-body">
+      <div class="col-auto">
+        <div class="table-responsive">
+          <table class="table table-bordered" id="table1">
+            <tbody>
+              <tr>
+                <th class="table-primary">Production Category</th>
+                <td>{{ technology | get_pc_name_of_item }}</td>
+              </tr>
+              <tr>
+                <th class="table-primary">Technology</th>
+                <td>{{ technology.name }}</td>
+              </tr>
+              <tr>
+                <th class="table-primary">Total Production lines</th>
+                <td>{{ production_lines | length }}</td>
+              </tr>
+              <tr>
+                <th class="table-primary">Total Part Numbers</th>
+                <td>{{ part_numbers | length }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- [ Available Production Lines ] start-->
+      <div class="col-sm-12">
+        <h5 class="mt-4">Available Production Lines</h5>
+        <hr>
+      </div>
+      <div class="col-sm-12">
+        <div class="table-responsive">
+          <table class="table table-bordered" id="table2">
+            <thead>
+              <tr>
+                <th>Production Line Name</th>
+                <th>Xylem Icode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for production_line in production_lines %}
+                <tr>
+                  <td>{{ production_line.name }}</td>
+                  <td>{{ production_line.icode }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- [ Available Production Lines ] end-->
+
+      <!-- [ Available Part Numbers ] start-->
+      <div class="col-sm-12">
+        <h5 class="mt-4">Available Part Numbers</h5>
+        <hr>
+      </div>
+      <div class="col-sm-12">
+        <div class="table-responsive">
+          <table class="table table-bordered" id="table3">
+            <thead>
+              <tr>
+                <th>Part Number</th>
+                <th>Description</th>
+                <th>Xylem Icode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for part_number in part_numbers %}
+                <tr>
+                  <td>{{ part_number.name }}</td>
+                  <td>{{ part_number.description }}</td>
+                  <td>{{ part_number.icode }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- [ Available Part Numbers ] end-->
+
+      <div class="col-sm-12">
+        <button class="btn btn-primary" onclick="exportPdf('table1','table2', 'table3')">
+          <i class="fa fa-download"></i> Download pdf
+        </button>
+      </div> 
+
+    </div> 
+  </div>
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST %}
+          <!-- Popup Modal -->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    function getImageWidthHeightOfPanel(imgNaturalWidth, imgNaturalHeight, panelWidth, panelHeight){
+      var mf = panelWidth/imgNaturalWidth
+      if (imgNaturalHeight*mf > panelHeight){
+        mf = panelHeight/imgNaturalHeight
+      }
+      var width = imgNaturalWidth*mf;
+      var height = imgNaturalHeight*mf;
+    
+      var img_space_hori =  panelWidth - width
+      var img_space_vert =  panelHeight - height
+    
+      return [width, height, img_space_hori, img_space_vert]
+    }
+    
+    
+    function exportPdf(table1Id, table2Id,table3Id) {
+      var pdf = new jsPDF('l', 'mm', 'a4');
+    
+      var table1 = document.getElementById(table1Id);
+      var table2 = document.getElementById(table2Id);
+      var table3 = document.getElementById(table3Id);
+      
+    
+      var xylem_logo = new Image();
+      xylem_logo.src = "{% static 'assets/images/xylem-logo.png' %}";
+    
+      var company_logo = new Image();
+      company_logo.src = "{% static 'assets/images/ZF_Rane.png' %}";
+    
+      marginTop = 5
+      marginBottom = 5
+      marginLeft = 5
+      marginRight = 5
+      additionalSpace = 5
+      headerHeight = 10
+      footerHeight = 5
+      headerFontSize = 20
+      headerFontColor = 20
+      footerFontSize = 10
+      footerpageNumFontSize = 5
+      headerFooterColor = [52, 58, 64] // '#343A40'
+      headerFooterLineLogoGap = 2
+      headerFooterLineThickness = 0.4
+      dividingLineColor = [136, 136, 136] // '#888888'
+      dividingLineThickness = 0.3
+    
+      pdfWidth = pdf.internal.pageSize.width
+      pdfHeight = pdf.internal.pageSize.height
+    
+      pdfHeaderText = "Xylem Master" //Should be less length
+      pdfFooterText = "Xylem - An Inhouse Development" //Should be less length
+    
+      full_size_table = {
+        html: null,
+        startY: 0,
+        theme: null,
+        styles: {minCellHeight: 10},
+        tableWidth: pdfWidth - marginLeft - marginRight,
+        columnStyles: {},
+        margin: {
+          top: marginTop + headerHeight + additionalSpace,
+          bottom: marginBottom + footerHeight + additionalSpace,
+          left: marginLeft,
+          right: marginRight
+        },
+        headStyles : null,
+        didParseCell: null,
+        rowPageBreak: "avoid",
+      }
+      half_size_table = structuredClone(full_size_table)
+      half_size_table.tableWidth = (pdfWidth - marginLeft - marginLeft - additionalSpace)/ 2
+
+
+      function generate_pdf() {
+        let X = marginLeft;
+        let Y = marginTop + headerHeight + additionalSpace;
+      
+        // table 1 header title
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(14);
+        pdf.setFontStyle('bold');
+        pdf.text('Data Overview - Technology', X, Y);
+
+        // Table 1
+        let tempTableParam = structuredClone(half_size_table);
+        tempTableParam.html = table1;
+        tempTableParam.startY = Y + additionalSpace;
+        tempTableParam.theme = "striped";
+        pdf.autoTable(tempTableParam);
+
+        // Line Below Table 1
+        X = marginLeft;
+        Y = pdf.autoTable.previous.finalY + additionalSpace;
+        pdf.setDrawColor(dividingLineColor[0], dividingLineColor[1], dividingLineColor[2]);
+        pdf.setLineWidth(dividingLineThickness);
+        pdf.line(X, Y, pdfWidth - X, Y);
+
+        // Table 2 Header Title
+        Y += dividingLineThickness + additionalSpace;
+        pdf.setFontSize(14);
+        pdf.setFontStyle('bold');
+        pdf.text('Available Production Lines', X, Y);
+
+        // Table 2
+        tempTableParam = structuredClone(full_size_table);
+        tempTableParam.html = table2;
+        tempTableParam.startY = Y + additionalSpace;
+        tempTableParam.theme = "striped";
+        tempTableParam.columnStyles = { 2: { cellWidth: 73 } };
+        pdf.autoTable(tempTableParam);
+
+        // Update Y position after Table 2
+        Y = pdf.autoTable.previous.finalY + additionalSpace;
+
+        // Line Below Table 2
+        pdf.setDrawColor(dividingLineColor[0], dividingLineColor[1], dividingLineColor[2]);
+        pdf.setLineWidth(dividingLineThickness);
+        pdf.line(X, Y, pdfWidth - marginLeft, Y);
+        // Table 3 Header Title
+        Y += dividingLineThickness + additionalSpace; // Ensure proper spacing
+        pdf.setFontSize(14);
+        pdf.setFontStyle('bold');
+        pdf.text('Available Part Numbers', X, Y);
+
+        // Table 3
+        tempTableParam = structuredClone(full_size_table);
+        tempTableParam.html = table3;
+        tempTableParam.startY = Y + additionalSpace;
+        tempTableParam.theme = "striped";
+        tempTableParam.columnStyles = { 1: { cellWidth: 120 }, 2: { cellWidth: 80 } };
+        pdf.autoTable(tempTableParam);
+
+        // Line Below Table 3
+        Y = pdf.autoTable.previous.finalY + additionalSpace;
+        pdf.line(X, Y, pdfWidth - X, Y);
+
+        const totalPages = pdf.internal.getNumberOfPages()
+        for (let i = 1; i <= totalPages; i++) {
+          pdf.setPage(i)
+          X = marginLeft
+          Y = marginTop
+          headerPanelHeight = headerHeight - headerFooterLineLogoGap - headerFooterLineThickness
+          footerPanelHeight = footerHeight - headerFooterLineLogoGap - headerFooterLineThickness
+    
+          // xylem logo
+          var [img_w, img_h, hori_space, verti_space] = getImageWidthHeightOfPanel(xylem_logo.naturalWidth, xylem_logo.naturalHeight, pdfWidth, headerPanelHeight)
+          pdf.addImage(xylem_logo, 'PNG', X, Y, img_w, img_h)
+          
+          // company logo
+          var [img_w, img_h, hori_space, verti_space] = getImageWidthHeightOfPanel(company_logo.naturalWidth, company_logo.naturalHeight, pdfWidth, headerPanelHeight)
+          pdf.addImage(company_logo, 'PNG', pdfWidth - img_w - marginRight, Y, img_w, img_h)
+    
+          // header text
+          Y = Y + headerPanelHeight
+          pdf.setTextColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+          pdf.setFontSize(headerFontSize)
+          pdf.setFontStyle('bold')
+          pdf.text(pdfHeaderText, pdfWidth/2, Y, {align: 'center'})
+    
+          // line below header
+          Y = Y + headerFooterLineLogoGap
+          pdf.setDrawColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+          pdf.setLineWidth(headerFooterLineThickness)
+          pdf.line(X, Y, pdfWidth - X, Y)
+    
+          // adding rectangle to hide if any overflow occured inside footer
+          space_height = footerHeight + headerFooterLineLogoGap + marginBottom
+          Y = pdfHeight - space_height
+          pdf.setFillColor(255, 255, 255)
+          pdf.rect(0, Y, pdfWidth, space_height, "F")
+    
+          // line above footer
+          Y = Y + headerFooterLineLogoGap
+          pdf.setDrawColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+          pdf.setLineWidth(headerFooterLineThickness)
+          pdf.line(X, Y, pdfWidth - X, Y)
+    
+          // footer text
+          Y = Y + footerHeight
+          pdf.setTextColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+          pdf.setFontSize(footerFontSize)
+          pdf.setFontStyle('bold')
+          pdf.text(pdfFooterText, pdfWidth / 2, Y, {align: 'center'})
+    
+          // page number
+          pdf.setFontSize(footerpageNumFontSize)
+          pdf.text(`Page ${i} of ${totalPages}`, pdfWidth - marginRight, Y, {align: 'right'})
+        }
+    
+        var today = new Date();
+        const offset = today.getTimezoneOffset()
+        today = new Date(today.getTime() - (offset * 60 * 1000))
+    
+        // Save the PDF with a specified filename
+        pdf.save(`xylem_a00_Xylem_master_technology_${today.toISOString().split('.')[0]}.pdf`)
+      }
+    
+      let loadedImages = 0
+      images = [xylem_logo, company_logo]
+      images.forEach(function(image) {
+        if (image.complete) {
+          loadedImages++;
+          if (loadedImages === images.length){
+            generate_pdf()
+          }
+        } else {
+          image.onload = function(){
+            loadedImages++;
+            if (loadedImages === images.length){
+              generate_pdf()
+            }
+          }
+        }
+      })
+    }
+    
+  </script>
+  <!-- [ Script / Ajax ] end-->
+{% endblock content %}

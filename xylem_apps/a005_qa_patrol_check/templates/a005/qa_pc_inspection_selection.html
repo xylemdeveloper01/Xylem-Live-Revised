@@ -1,0 +1,164 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [QA Patrol Checksheet Addition] start-->
+  <div class="col-sm-12">
+    <div class="card Recent-Users">
+      <div class="card-header">
+        <h5>{{child}}</h5>
+      </div>
+      <div class="card-body">
+        <form id="PnMPlSelection" action="{% url 'a005:qa_patrol_inspection_selection' %}" method="post"
+            data-production-lines-qa-pcs-url="{% url 'ajax_load_production_lines_of_qa_pcss' %}"
+            data-product-models-pl-qa-pcs-url="{% url 'ajax_load_product_models_of_pl_qa_pcs' %}"
+            data-part-numbers-pl-m-qa-pcs-url="{% url 'ajax_load_part_numbers_of_pl_m_qa_pcs' %}"
+            data-empty-option-url="{% url 'ajax_load_empty_option' %}">
+            {% csrf_token %}
+            {% for field in form_plpn_selection %}
+              <div class="form-group">
+                {{ field.label_tag }} {{ field }}
+                <small class="form-text">{{ field.help_text }}</small>
+              </div>
+              <span class="text-danger d-block text-left">{{ field.errors }}</span>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Proceed</button>
+          </form>
+      </div>
+    </div>
+  </div>
+  <!-- [QA Patrol Checksheet Addition ] end-->
+  
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+    $(document).on('change', "#plmpn_id_product_category", function () {
+      const url_eo = $("#PnMPlSelection").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_pl = $("#PnMPlSelection").attr("data-production-lines-qa-pcs-url");  // get the url of the `load_data` view
+      const product_category_id = $(this).val();
+      $.ajax({                       // initialize an AJAX request
+        url: url_pl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'product_category_id': product_category_id       // GET parameters
+        },
+        success: function (data) {
+          $("#plmpn_id_production_line").html(data);
+          empty_option_disable();
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#plmpn_id_product_model").html(data);
+          $("#plmpn_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change', "#plmpn_id_production_line", function () {
+      const url_eo = $("#PnMPlSelection").attr("data-empty-option-url");  // get the url of the `load_data` view
+      const url_mpl = $("#PnMPlSelection").attr("data-product-models-pl-qa-pcs-url");  // get the url of the `load_data` view
+      const production_line_id = $(this).val();
+      $.ajax({                       // initialize an AJAX request
+        url: url_mpl,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id': production_line_id      // GET parameters
+        },
+        success: function (data) {
+          $("#plmpn_id_product_model").html(data);
+          empty_option_disable();
+        }
+      });
+      $.ajax({                       // initialize an AJAX request
+        url: url_eo,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {},
+        success: function (data) {
+          $("#plmpn_id_part_number").html(data);
+          empty_option_disable()
+        }
+      });
+    });
+    $(document).on('change', "#plmpn_id_product_model", function () {
+      const url_pnplm = $("#PnMPlSelection").attr("data-part-numbers-pl-m-qa-pcs-url");  // get the url of the `load_data` view
+      const production_line_id = $("#plmpn_id_production_line").val();
+      const model_id = $(this).val();
+      $.ajax({                       // initialize an AJAX request
+        url: url_pnplm,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'production_line_id': production_line_id,      // GET parameters
+          'model_id': model_id      // GET parameters
+        },
+        success: function (data) {
+          $("#plmpn_id_part_number").html(data);
+          empty_option_disable();
+        }
+      });
+    });
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+  
+{% endblock content %}

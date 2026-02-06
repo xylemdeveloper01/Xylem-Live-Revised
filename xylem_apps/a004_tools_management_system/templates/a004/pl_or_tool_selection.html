@@ -1,0 +1,33 @@
+<!-- [ Selection ] start-->
+<div class="row justify-content-center">
+  <div class="col-sm-6">
+    <div class="form-group">
+      <label for="pl_or_tool_select">Select {{selection}}</label>
+      <select class="form-control" id="pl_or_tool_select">
+        {% for pl_or_tool in pls_or_tools %}
+          <option value="{{pl_or_tool.icode}}">{{pl_or_tool.name}}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+<!-- [ Selection ] end-->
+
+<!-- [ Scripts ] start-->
+  <script>
+    $(document).on('change',"#pl_or_tool_select", function () {
+      const url_t_tr =  '{% url "a004:ajax_tool_cards_of_pl" %}';  // get the url of the `load_data` view
+      console.log($(this).val())
+      $.ajax({                       // initialize an AJAX request
+        url: url_t_tr,                    // set the url of the request (= /members/ajax/load-data/ )
+        data: {
+          'pl_or_tool_id': $(this).val(),       // GET parameters
+			    'tool_type_id': '{{tool_type_id}}'
+        },
+        success: function (data) {   
+          $("#tool_cards").html(data.tool_cards_html);
+        }
+      });
+    });
+  </script>
+<!-- [ Scripts ] end-->

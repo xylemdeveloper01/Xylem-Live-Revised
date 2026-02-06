@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <style>
+      table {
+        font-family:  Arial, Helvetica, sans-serif;
+        margin-top: 20px;
+        font-size: 1.0em;
+        border-radius: 10px 10px 0 0;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+      th.top_head {
+        border: none;
+        color: white;
+        background-color: #03293b;
+        text-align: center;
+        padding-top: 11px;
+        padding-left: 11px;
+        padding-right: 11px;
+      }
+      td.date_head {
+        border: none;
+        color: white;
+        background-color: #03293b;
+        text-align: center;
+        padding: 0px;
+        padding-bottom: 11px;
+      }
+      td {
+        text-align: center; 
+        padding: 11px;
+        color: black;
+        border: 1px solid #ddd;
+      }
+      th.tr_head{
+        background-color: #03293b;
+        color: white;
+        border: 1px solid #ddd;
+        padding: 11px;
+      }
+      td.no_pl{
+  		  color: white;
+        background-color: #03293b; 
+      }
+    </style>
+  </head>
+  <body>
+    <table>     
+      <thead>
+         <tr>
+          <th class="top_head" colspan="5">PRODUCTION DAY SUMMARY REPORT</th>
+        </tr>
+        <tr>
+          <td class="date_head" colspan="5">{{current_date}} {{day_of_week}}</td>
+        </tr>
+        <tr >
+          <th class="tr_head">Production Line</th>
+          <th class="tr_head">Shift A</th>
+          <th class="tr_head">Shift B</th>
+          <th class="tr_head">Shift C</th>
+          <th class="tr_head">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pl, data in prod_day_sum_dict.items %}
+          <tr>
+            <td style="background-color: {{ data.bg_color }}; color: {{ data.txt_color }};"><b>{{ pl.name }}</b></td>
+            <td>{{ data.shiftA.pq_ok_p | default:"0" }}</td>
+            <td>{{ data.shiftB.pq_ok_p | default:"0" }}</td>
+            <td>{{ data.shiftC.pq_ok_p | default:"0" }}</td>
+            <td>{{ data.total.pq_ok_p | default:"0" }}</td>    
+          </tr>
+        {% endfor %}
+        {% if no_production_lines %}
+          <tr style=" background-color: #03293b;color:white">
+            <td class="no_pl" colspan="11">No Production Lines: {{no_production_lines}}</td>
+          </tr>
+        {% endif %}
+      </tbody>                                     	     						
+    </table>
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

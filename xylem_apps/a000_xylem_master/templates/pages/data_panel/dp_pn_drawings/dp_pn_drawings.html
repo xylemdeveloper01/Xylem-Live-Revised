@@ -1,0 +1,211 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+  
+  <!--[ Partnumber drawings ] start-->
+  <div class="row justify-content-between">
+    <div class="col">
+      <h5>{{segment}}</h5>
+    </div>
+    <div class="col-auto align-self-end">
+      <form class="form-inline">
+        <span class="mr-2">{{ part_numbers_pagination.start_index }}-{{ part_numbers_pagination.end_index }} of {{ part_numbers_pagination.paginator.count }}</span>
+        <a {% if part_numbers_pagination.has_previous %} href="{% url 'dp_pn_drawings' current_product_category.icode current_part_drawing_status.icode current_pagination_option.icode 1 %}" {% endif %}><i class="feather icon-chevrons-left"></i></a>
+        <a {% if part_numbers_pagination.has_previous %} href="{% url 'dp_pn_drawings' current_product_category.icode current_part_drawing_status.icode current_pagination_option.icode part_numbers_pagination.previous_page_number %}" {% endif %}><i class="feather icon-chevron-left"></i></a>
+        <a href="#">Page {{ part_numbers_pagination.number }} of {{ part_numbers_pagination.paginator.num_pages }}</a>
+        <a {% if part_numbers_pagination.has_next %} href="{% url 'dp_pn_drawings' current_product_category.icode current_part_drawing_status.icode current_pagination_option.icode part_numbers_pagination.next_page_number %}" {% endif %}><i class="feather icon-chevron-right"></i></a>
+        <a {% if part_numbers_pagination.has_next %} href="{% url 'dp_pn_drawings' current_product_category.icode current_part_drawing_status.icode current_pagination_option.icode part_numbers_pagination.paginator.num_pages %}" {% endif %}><i class="feather icon-chevrons-right"></i></a>
+        <label for="rowCountSelection" class="ml-2">Show:</label> 
+        <select class="form-control ml-1 p-0" style="height: 20px;" id="rowCountSelection" onchange="changePaginationRows(this)">
+          {% for pagination_option in pagination_options %}
+            <option value="{% url 'dp_pn_drawings' current_product_category.icode current_part_drawing_status.icode pagination_option.icode 1 %}" {% if pagination_option == current_pagination_option %} selected {% endif %}>{{pagination_option.name}}</option>
+          {% endfor %}
+        </select>
+        <label class="ml-1">Partnumbers</label>
+      </form>
+    </div>     
+  </div>
+  <hr>
+  <div class="row  mb-1">
+    <div class="col-sm-12">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">         
+        <div class="d-flex flex-wrap">
+          <div class="btn-group mr-2 mb-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              {{ current_product_category.name }}
+            </button>
+            <div class="dropdown-menu">
+              {% for product_category in product_categories %}
+                <a class="dropdown-item {% if product_category == current_product_category %}active{% endif %}"
+                  href="{% url 'dp_pn_drawings' product_category.icode current_part_drawing_status.icode current_pagination_option.icode current_page_num %}">
+                  {{ product_category.name }}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+          <!-- Drawing Status Dropdown -->
+          <div class="btn-group mb-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              <i class="feather icon-filter"></i>{{ current_part_drawing_status.name }}
+            </button>
+            <div class="dropdown-menu">
+              {% for part_drawing in part_drawing_status %}
+                <a class="dropdown-item {% if part_drawing == current_part_drawing_status %}active{% endif %}"
+                  href="{% url 'dp_pn_drawings' current_product_category.icode part_drawing.icode current_pagination_option.icode current_page_num %}">
+                  {{ part_drawing.name }}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-2" style="max-width: 350px;">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i class="feather icon-search"></i></span>
+          </div>
+          <input type="text" id="searchInput" class="form-control" placeholder="Search data inside table...">
+        </div>            
+      </div>
+    </div>    
+  </div>
+  <div class="row mb-1">
+    <div class="col-sm-12">
+      <div class="card">     
+        <div class="card-block">
+          {% if part_numbers_pagination %}
+          <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th>Partnumber</th>
+                  <th>Model</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for pn in part_numbers_pagination %}
+                <tr>
+                  <td>{{ pn.name }}</td>
+                  <td>{{ pn|get_model_of_pn }}</td>
+                  <td>                   
+                    {% if pn|get_draw_status_of_pn %} 
+                     <a href="{% url 'update_pn_drawings' pn.icode %}">
+                      <i class="text-warning feather icon-plus-circle"> Update Drawings</i> 
+                    </a> |
+                    <a href="{% url 'view_pn_drawings' pn.icode %}">
+                      <i class="feather icon-eye"></i> View Drawings
+                    </a>
+                    {% else %}
+                    <a href="{% url 'add_pn_drawings' pn.icode %}">
+                      <i class="text-success feather icon-plus-circle"> Add Drawings</i> 
+                    </a>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="col-sm-12 ml-3">
+            <div class="alert alert-info" role="alert">
+              No partnumbers available
+            </div>  
+          </div>
+
+          {% endif %}
+        </div> 
+      </div>
+    </div>
+  </div>    
+  <!--[ Partnumber drawings ] end-->
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+    // Empty option selection disabled
+    function empty_option_disable() {
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+
+
+    function changePaginationRows(element) {
+      window.location.href = element.value;
+    }
+
+    var filteredRows = document.querySelectorAll(".table tbody tr");						
+    document.getElementById("searchInput").addEventListener("input", function () {
+      var searchTerm = this.value.toLowerCase().trim();
+      filteredRows.forEach(function (row) {
+        var rowData = row.textContent.toLowerCase();
+        if (rowData.includes(searchTerm)) {
+          row.style.display = "table-row";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    });
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}
+

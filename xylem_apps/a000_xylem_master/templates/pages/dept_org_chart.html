@@ -1,0 +1,192 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+
+  <style>
+    .triangle-title {
+      position: relative;
+      padding: 6px;
+      color: white;
+      font-weight: bolder;
+      font-size: 16px;
+      background-color: rgb(51, 157, 184);
+      text-align: center;
+      flex: 1;
+      margin: auto; /* Ensures centering inside the container */
+    }
+    .triangle-title::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      margin-top: -7.5px;
+      border-left: 15px solid rgb(13, 72, 107);
+      border-top: 7.5px solid transparent;
+      border-bottom: 7.5px solid transparent;
+    }
+  </style>
+
+  <!-- [ Main Content ] start -->
+  <div class="col-sm-12">
+    <div class="row justify-content-between align-items-end">
+      <div class="col-auto">
+        <h5>{{ segment }}</h5>
+      </div>
+      <div class="col-auto">
+        <div class="btn-group">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{ current_dept.name }}</button>
+          <div class="dropdown-menu">
+            {% for dept in depts %}
+              <a class="dropdown-item {% if dept == current_dept %}active{% endif %}" href="{% url 'dept_org_chart' dept.icode %}"> {{ dept.name }} </a>
+            {% endfor %}
+          </div>
+        </div>       
+      </div>
+    </div>
+    <hr>
+    {% for designation, dept_users in filtered_dept_users.items %}
+      <div class="row">
+        <div class="col-sm-3">  
+          <div class="triangle-title">
+            {{ designation }}
+          </div>
+        </div>                    
+        <div class="col-sm-9">
+          <div class="card border card-body">
+            <div class="row">
+            {% for dept_user in dept_users %}
+              <div class="col-sm-6">
+                <a class="h6" href="#" data-toggle="modal" data-target="#viewUserModal{{ dept_user.id }}" style="font-family: 'Times New Roman', Times, serif;">
+                  <i class="feather icon-user"></i> {{ dept_user.first_name }} {{ dept_user.last_name }}
+                </a>
+              </div>									
+            {% endfor %}
+            </div>
+          </div>							
+        </div>
+      </div>
+      {% for dept_user in dept_users %}
+        <div class="modal fade" id="viewUserModal{{ dept_user.id }}" tabindex="-1" role="dialog" aria-labelledby="viewUserModalLabel{{ dept_user.id }}" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content card rounded">
+              <div class="modal-header">
+                <h5 class="modal-title">User Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form action="{% url 'dept_org_chart' current_dept.icode %}" method="post">
+                  {% csrf_token %}
+                  <dl class="row">
+                    <dt class="col-sm-4">Full Name</dt>
+                    <dd class="col-sm-8">{{ dept_user.first_name }} {{ dept_user.last_name }}</dd>
+                  </dl>
+                  <dl class="row">
+                    <dt class="col-sm-4">User Name / Employee ID</dt>
+                    <dd class="col-sm-8">{{ dept_user.username }}</dd>
+                  </dl>
+                  <dl class="row">
+                    <dt class="col-sm-4">Email ID</dt>
+                    <dd class="col-sm-8">{{ dept_user.email }}</dd>
+                  </dl>
+                  <dl class="row">
+                    <dt class="col-sm-4">Gender</dt>
+                    <dd class="col-sm-8">{{ dept_user.gender_i.name }}</dd>
+                  </dl>
+                  <dl class="row">
+                    <dt class="col-sm-4">Plant Location</dt>
+                    <dd class="col-sm-8">{{ dept_user.plant_location_i.name }}</dd>
+                  </dl>
+                  <dl class="row">
+                    <dt class="col-sm-4">Department</dt>
+                    <dd class="col-sm-8">{{ dept_user.dept_i.name }}</dd>
+                  </dl>
+                  <dl class="row">
+                    <dt class="col-sm-4">Designation Level</dt>
+                    <dd class="col-sm-8">{{ dept_user.designation_i.name }}</dd>
+                  </dl>
+                  <dl class="row">
+                    <dt class="col-sm-4">Date of Birth</dt>
+                    <dd class="col-sm-8">{{ dept_user.dob }}</dd>
+                  </dl>
+                  <dl class="row">
+                    <dt class="col-sm-4">Date of Registration</dt>
+                    <dd class="col-sm-8">{{ dept_user.date_joined }}</dd>
+                  </dl>
+                  {% if dept_user.dept_i != serve_depts.Development_team and user.dept_i == serve_depts.Development_team or dept_user.dept_i != serve_depts.Development_team and user.dept_i == dept_user.dept_i and user.designation_i.icode > dept_user.designation_i.icode and user.designation_i.icode > serve_desigantions.Deputy_Engineer_or_Executive.icode or dept_user.dept_i == serve_depts.Development_team and user.dept_i == serve_depts.Development_team and user.designation_i.icode > dept_user.designation_i.icode and user.designation_i.icode > serve_desigantions.Deputy_Engineer_or_Executive.icode %}                
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" class="custom-control-input" id="customcheck{{ dept_user.id }}" required>
+                      <label class="custom-control-label" for="customcheck{{ dept_user.id }}">By this, I am confirming the deactivation. After this, the respected user will no longer be able to use Xylem</label>
+                    </div>
+                    <div class="row justify-content-end">
+                      <button type="submit" name="user_response" class="btn btn-danger ml-auto" value="0:{{ dept_user.id }}">Deactivate</button>
+                    </div>
+                  {% endif %}						
+                </form>						
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+  <!-- [ Main Content ] end -->
+
+  
+  <!--[ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!--[ messages ] end-->
+
+{% endblock content %}

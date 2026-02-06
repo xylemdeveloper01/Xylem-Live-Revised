@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <style>
+      table {
+        font-family:  Arial, Helvetica, sans-serif;
+        margin-top: 20px;
+        font-size: 1.0em;
+        border-radius: 10px 10px 0 0;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+			th {
+        text-align: center; 
+        padding: 11px;
+        border: 1px solid white;
+        color: white;
+        background-color: #5f9eA0;
+      }
+      td {
+        text-align: left; 
+        padding: 11px;
+        border: 1px solid white;
+        background-color: #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <th colspan="3">Water Consumption for {{current_date}} (in ltrs)</th>
+      </tr>
+      <tr>
+        <th>Area</th>
+        <th>Day</th>
+        <th>Month</th>
+      </tr>
+      {% for data in section_data %}
+        <tr style="border-bottom: 4px solid {{data.bg_c}};">
+          <td>{{data.name}}</td>
+          <td>{{data.day_c | number_with_comma}}</td>
+          <td>{{data.month_c | number_with_comma}}</td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <th>Total</th>
+        <th>{{tot_data.day | number_with_comma}}</th>
+        <th>{{tot_data.month | number_with_comma}}</th>
+      </tr> 
+    </table>
+    <p>Inlet water for the day: {{inlet_data.day | number_with_comma}} ltrs</p>
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

@@ -1,0 +1,111 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [ TPS life paramaeters edit] start-->
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>Update Pokeyoke Parameters</h5>
+          <a href="{% url 'dp_part' FIRST_PRODUCT_CATEGORY.icode %}">
+            <button class="btn btn-secondary btn-sm float-right">
+              <i class="fa fa-home"></i> Go Home
+            </button>
+          </a>
+          <a href="{% url 'py_data' pyps_map.poka_yoke_i.icode  %}">
+            <button class="btn btn-secondary btn-sm float-right">
+              <i class="fa fa-arrow-left"></i> Go Back
+            </button>
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <label class="general_head_label">
+                Pokeyoke Name : {{ pyps_map.poka_yoke_i.name }}
+              </label>
+              <label class="general_head_label">
+               Pokeyoke Location : {{ pyps_map.production_station_i | get_pl_ps_name_of_ps  }}
+              </label>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-sm-12">
+              <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                  {{ field.label_tag }} <br> {{ field }}
+                  <small class="form-text">{{ field.help_text }} </small>
+                </div>
+                {% endfor %}
+                {% if form.non_field_errors %}
+                  <span class="text-danger d-block my-3">
+                    {% for error in form.non_field_errors %}
+                      <p> {{ error }} </p>
+                    {% endfor %}
+                  </span>
+                {% endif %}
+                <button type="submit" class="btn btn-success">Update</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- [ TPS life paramaeters edit] end-->
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+{% endblock content %}

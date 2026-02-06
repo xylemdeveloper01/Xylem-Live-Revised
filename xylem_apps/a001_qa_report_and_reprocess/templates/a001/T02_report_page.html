@@ -1,0 +1,327 @@
+{% extends "layouts/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<script src="{% static 'assets/plugins/jsxlsx/xlsx.full.min.js' %}"></script>
+
+<!-- [ Main Content ] start -->
+<div class="row">
+	<div class="col-sm-12">
+		<div class="card">
+			<div class="card-header">
+				<h5>{{ child }}</h5>
+				<label class="general_head_label">
+					Line : {{ line.name }}
+				</label>
+				<label class="general_head_label">
+					Station : {{ stn.name }}
+				</label>    
+			</div>
+			<div class="card-block">
+				
+				<div id="optionContainer"></div><br>
+				<div id="inputContainer"></div><br>
+				<div id="reportContainer"></div><br>
+				<div id="infoContainer"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script>
+	// Variable Declarations:
+	var selectedOption = null; // Variable to store the selected radio option
+	var connection_id = null
+	var optionContainer = document.getElementById("optionContainer")
+	var inputContainer = document.getElementById("inputContainer")
+	var reportContainer = document.getElementById("reportContainer")
+	var infoContainer = document.getElementById("infoContainer")
+
+	optionContainer.style.display = "none"
+	inputContainer.style.display = "none"
+	reportContainer.style.display = "none"
+
+	// HTML Element Initialization:
+	infoContainer.className = "alert alert-secondary"
+	infoContainer.innerHTML = "Connecting Server, Please wait..." 
+
+	// Data for Server Request:
+	const send_data = { work_type : "{{ work_type }}", line_id : "{{ line.id }}", stn_id : "{{ stn.id }}" };
+
+	// Fetch Request:
+	fetch("{{ connect_server_url }}", {
+		method : "POST",
+		headers : {
+			"Content-Type": "application/json",
+			"X-CSRFToken": "{{ csrf_token }}",
+		},
+		body: JSON.stringify(send_data),
+	})
+
+	// Handling the Response:
+	.then(response => response.json())
+
+	// Handling the data received from the server
+	.then(data => {
+
+		// If a connection_id is present in the response
+		if (data.connection_id) {
+			optionContainer.innerHTML = `<label> Select an option </label>
+										<div class = "custom-control custom-radio">
+											<input type = "radio" id ="customRadio1" name="customRadio" value="1" class="custom-control-input" onclick="toggleFields()"> </input>
+											<label class = "custom-control-label" for="customRadio1"> Serial No </label>  
+										</div>
+										<div class="custom-control custom-radio">
+											<input type="radio" id="customRadio2" name="customRadio" value="2" class="custom-control-input" onclick="toggleFields()"> </input>
+											<label class="custom-control-label" for="customRadio2"> Date </label>
+										</div>`
+			optionContainer.style.display = "block"
+			inputContainer.style.display = "none"
+			infoContainer.style.display = "none"
+			connection_id = data.connection_id
+		} 
+
+		// If there is no connection_id in the response
+		else {
+			infoContainer.className = "alert alert-danger"
+			infoContainer.innerHTML = "Unable to connect to the server, please refresh the page to reconnect";
+		}
+	})
+
+	// Error Handling:
+	.catch(error => {
+		console.log("An error occurred while connecting to the server:", error);
+		infoContainer.className = "alert alert-danger"
+		infoContainer.innerHTML = "Error acquired while connecting to the server, please refresh the page to reconnect";
+	});
+
+
+	function toggleFields() {
+
+		// Get the selected option
+		var option = getselectedoption()
+
+		// Clear the content of reportContainer and infoContainer
+		reportContainer.style.display = "none"
+		infoContainer.style.display = "none"
+
+		// Check the selected option and update inputContainer accordingly
+		if (option === "1") {
+
+			// If option is "1" (Serial No), update inputContainer with Serial No related inputs
+			inputContainer.innerHTML = `<div class="form-group">
+											<label for="serialNo">Enter Serial No</label>
+											<input type="text" class="form-control" id="serialNo" name="serialNo"> </label>
+										</div>
+										<button type="button" class="btn btn-primary" onclick="showServerData()">Fetch data</button>
+										<button type="button" class="btn btn-outline-warning" onclick="document.getElementById('serialNo').value=''"> Clear </button>`
+			inputContainer.style.display = "block"
+		}
+
+		// If option is "1" (date), update inputContainer with date related inputs          
+		else if (option === "2") {
+			var fromDateInput = `<div class="form-group">
+									<label for="fromDate"> From Date: </label>
+									<input type="datetime-local" class="form-control col-8" id="fromDate" name="fromDate" max="${getCurrentDateTime()}"> </input>
+								</div>`
+			var toDateInput = `<div class="form-group">
+									<label for="toDate"> To Date: </label>
+									<input type="datetime-local" class="form-control col-8" id="toDate" name="toDate" max="${getCurrentDateTime()}"> </input>
+								</div>`;
+
+			// Combine fromDateInput and toDateInput and add buttons
+			inputContainer.innerHTML = fromDateInput + toDateInput +`<button type="button" class="btn btn-primary" onclick="showServerData()" >Fetch data</button>
+																	<button type="button" class="btn btn-outline-warning" onclick="document.getElementById('fromDate').value='';document.getElementById('toDate').value=''"> Clear all </button>`;
+			inputContainer.style.display = "block"
+
+			// Add an event listener to "From Date" input to set the maximum date of "To Date"
+			var fromDateInputEl = document.getElementById("fromDate");
+			var toDateInputEl = document.getElementById("toDate");
+			fromDateInputEl.addEventListener("change", function () {
+				toDateInputEl.min = fromDateInputEl.value;
+			});
+		}
+	}
+
+
+	function getselectedoption() {
+		// Get all radio buttons with the name "option"
+		const radioButtons = document.querySelectorAll(`input[name="customRadio"]`)
+
+		// Initialize a variable to store the selected option
+		var s_option = ""
+
+		// Iterate through the radio buttons to find the checked one
+		for (const radioButton of radioButtons) {
+			if (radioButton.checked) {
+				s_option = radioButton.value;
+				break;
+			}
+		}
+		return s_option
+	}
+
+
+	function showServerData() {
+		var data_option = getselectedoption();
+		var serialNo = null;
+		var fromDate = null;
+		var toDate = null;
+		var fetch_url = false;
+		reportContainer.style.display = "none"
+		infoContainer.style.display = "none"
+
+		if (data_option == "1") {
+			serialNo = document.getElementById("serialNo").value;
+			if (!serialNo) {
+				infoContainer.className = "alert alert-danger"
+				infoContainer.innerHTML = "Please fill serial no"
+				infoContainer.style.display = "block"
+
+			}
+			else {
+				fetch_url = true;
+			}
+		}
+		else if (data_option == "2") {
+			fromDate = document.getElementById("fromDate").value
+			toDate = document.getElementById("toDate").value
+			if (!fromDate) {
+				infoContainer.className = "alert alert-danger"
+				infoContainer.innerHTML = "Please fill from date"
+				infoContainer.style.display = "block"
+			}
+			else if (!toDate) {
+				infoContainer.className = "alert alert-danger"
+				infoContainer.innerHTML = "Please fill to date"
+				infoContainer.style.display = "block"
+			}
+			else {
+				fetch_url = true;
+			}
+		}
+
+		if (fetch_url) {
+			var send_data = { connection_id: connection_id, serialNo: serialNo, fromDate: fromDate, toDate: toDate };
+			infoContainer.className = "alert alert-secondary"
+			infoContainer.innerHTML = "Fetching data, Please wait..."
+			infoContainer.style.display = "block"
+
+			fetch("{{ server_get_data_url }}", {
+				method: "POST",
+				headers: {
+					"Content-Type" : "application/json",
+					"X-CSRFToken" : "{{ csrf_token }}",
+				},
+				body: JSON.stringify(send_data),
+			})
+			.then(response => response.json())
+			.then(data_dic => {
+				if (!data_dic.report_data[0]) {
+					infoContainer.className = "alert alert-info"
+					infoContainer.innerHTML = "No records found"
+					infoContainer.style.display = "block"
+				}
+				else {
+					var obj_length = Object.values(data_dic.report_data[0]).length;
+						temp_str = `<div class="col-xl-12">
+										<div class="card-block table-border-style" style="max-height: 300px; overflow-y: auto;">
+											<div class="table-responsive">
+												<table id="reportTable" class="table table-striped">
+													<tr></tr>`;
+					var head_added = false;
+					for (var key1 in data_dic.report_data) {
+						if (!head_added) {
+							temp_str += `<tr><th colspan="` + obj_length + `"> Line : {{ line.name }} </th></tr>
+										<tr><th colspan="` + obj_length + `"> Station : {{ stn.name }} </th></tr>
+										<tr><th colspan="`  + obj_length + `">` + data_dic.head_msg + `</th></tr>
+										<tr>`
+							for (var head_key in data_dic.report_data[key1]) {
+								temp_str += "<th>" + head_key + "</th>";
+							}
+							temp_str += "</tr>";
+							head_added = true;
+						}
+						temp_str += "<tr>";
+						for (var key2 in data_dic.report_data[key1]) {
+							temp_str += "<td>" + data_dic.report_data[key1][key2] + "</td>";
+						}
+						temp_str += "</tr>";
+					}
+
+					temp_str += `</table> </div> </div> </div> <br>
+										<center>
+											<button onclick="exportTableToExcel()" class="btn btn-primary">
+												<i class="fa fa-download"></i> Download as Excel
+											</button>
+										</center>
+									</div>`
+						infoContainer.style.display = "none"
+						reportContainer.innerHTML = temp_str;
+						reportContainer.style.display = "block"
+				}
+			})
+			.catch(error => {
+				console.log("An error occurred while getting data from the server");
+				infoContainer.className = "alert alert-danger"
+				infoContainer.innerHTML = "Error acqiured while connecting to server, Please refresh the page to reconnect"
+				infoContainer.style.display = "block"
+			})
+		}
+	}
+
+
+	// Function to get the current date in 'YYYY-MM-DDTHH:MM' format
+	function getCurrentDateTime() {
+		var today = new Date()
+        const offset = today.getTimezoneOffset()
+        today = new Date(today.getTime() - (offset*60*1000))
+		return today.toISOString().split('.')[0];
+	}
+
+
+	function exportTableToExcel() {
+		var table = document.getElementById("reportTable");
+		var sheetData = [];
+
+		// Iterate over all rows (excluding the header)
+		for (var i = 1; i < table.rows.length; i++) {
+			var rowData = [];
+			var cells = table.rows[i].cells;
+			for (var j = 0; j < cells.length; j++) {
+				rowData.push(cells[j].textContent);
+			}
+			sheetData.push(rowData);
+		}
+		var sheet = XLSX.utils.aoa_to_sheet(sheetData);
+		var wb = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(wb, sheet, "Sheet1");
+
+		// Apply sheet protection for read-only view
+		wb.Sheets["Sheet1"]["!protect"] = {
+			selectLockedCells: false, // Users can select locked cells (read-only)
+			selectUnlockedCells: false, // Users can select unlocked cells (read-only)
+			sheet: true, // Protect the entire sheet
+			password: "Admin@123",
+		};
+
+		// Set column widths (adjust as needed)
+		wb.Sheets["Sheet1"]["!cols"] = [
+			{ wch: 10 }, // Column A width (in characters)
+			{ wch: 35 }, // Column B width
+			{ wch: 25 }, // Column C width
+			// Add more columns as needed
+		];
+		
+		var today = new Date()
+        const offset = today.getTimezoneOffset()
+        today = new Date(today.getTime() - (offset*60*1000))
+		XLSX.writeFile(wb, `xylem_a001_${today.toISOString().split('.')[0]}.xlsx`);
+	}
+
+</script>
+
+{% endblock content %}

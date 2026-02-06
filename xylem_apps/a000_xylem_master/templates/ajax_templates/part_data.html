@@ -1,0 +1,63 @@
+<div class="table-responsive">
+	<table class="table table-hover">
+		<tr>
+			<th>Part Number</th>
+			<td style="border-top: 1px solid #ddd;">{{part_number.name}}</td>
+		</tr>
+		<tr>
+			<th>Part Description</th>
+			<td>{{part_number.description}}</td>
+		</tr>
+		<tr>
+			<th>Technology</th>
+			{% if pnmt_map %}
+				<td>{{pnmt_map.technology_i.name}}</td>
+			{% else %}
+				<td>No technology mapped</td>
+			{% endif %}
+		</tr>
+		<tr>
+			<th>Model</th>
+			{% if pnmt_map %}
+				<td>{{pnmt_map.model_i.name}}</td>
+			{% else %}
+				<td>No model mapped</td>
+			{% endif %}
+		</tr>
+		<tr>
+			<th>Required child Parts</th>
+			{% if pncpn_map %}
+				<td>
+					{% for obj in pncpn_map %}
+						<li>{{obj.child_part_number_i.name}} [{{obj.child_part_number_i.description}}]</li>
+					{% endfor %}
+				</td>
+			{% else %}
+				<td>No child parts mapped</td>
+			{% endif %}
+		</tr>
+		<tr>
+			<th>Running Production Lines & stations with Cycle time</th>
+			{% if pnprpls_map_dic %}
+				<td style="height: 400px; vertical-align: top">
+					{% for pl_name, line_data in pnprpls_map_dic.items %}
+						<div class="col">
+							<div class="btn-group mb-2 mr-2">
+								<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"
+									aria-haspopup="true" aria-expanded="false">{{pl_name}} <span
+									class="badge badge-light">{{line_data.ct}}s</span></button>
+								<div class="dropdown-menu">
+									{% for station in line_data.stations %}
+										<li class="dropdown-item">{{station}}</li>
+									{% endfor %}
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				</td>
+			{% else %}
+				<td>No production line and station mapped</td>
+			{% endif %}
+		</tr>
+	</table>
+</div>

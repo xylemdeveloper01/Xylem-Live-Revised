@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <style>
+      table {
+        font-family:  Arial, Helvetica,sans-serif;
+        width: 99%;
+        margin-top: 20px;
+        font-size: 1.0em;
+        min-width: 100px;
+        color: white;
+        border-radius: 10px 10px 0 0;
+        border: 1px solid #ddd;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+      th {
+        text-align: center; 
+        padding: 11px;
+        border: 1px solid #ddd;
+        /* background-color: green; */
+        background-color: {{table_color}};
+      }
+      th.top_head {
+        border: none;
+      }
+      th.unit_head {
+        border-top: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        border-left: 1px solid #ddd;
+        border-bottom: none;
+      }
+      th.units {
+        border-top: none;
+        border-right: 1px solid #ddd;
+        border-left: 1px solid #ddd;
+      }
+      td {
+        text-align: center; 
+        padding: 11px;
+        color: black;
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>**V2.0 testing</h3>
+    <table>
+      <tr>
+        <th class="top_head" colspan="2">
+          <span style="float: left">{{current_date}}<br>{{day_of_week}}</span>
+        </th>
+        {% if shift_name %}
+          <th class="top_head" colspan="7">OEE SHIFT REPORT</th>
+        {% else %}
+          <th class="top_head" colspan="7">OEE DAY REPORT</th>
+        {% endif %}
+        <th class="top_head" colspan="2">
+          <span style="float: right">{{shift_name}}</span>
+        </th>
+      </tr>
+      <tr>
+        <th rowspan="2">Production Line</th>
+        <th class="unit_head">OEE</th> 
+        <th class="unit_head">Availability</th>
+        <th class="unit_head">Performance</th>
+        <th class="unit_head">Quality</th>
+        <th class="unit_head">Production Plan</th>
+        <th class="unit_head">Production Actual</th>
+        <th class="unit_head">Total Rejection & Rework</th>
+        <th class="unit_head">Total Planned Down Time</th>
+        <th class="unit_head">Total Unplanned Down Time</th>
+        <th class="unit_head">Total Loss Events</th>
+      </tr>
+      <tr>
+        <th class="units">(%)</th>
+        <th class="units">(%)</th>
+        <th class="units">(%)</th>
+        <th class="units">(%)</th>
+        <th class="units">(Nos)</th>
+        <th class="units">(Nos)</th>
+        <th class="units">(Nos)</th>
+        <th class="units">(Mins)</th>
+        <th class="units">(Mins)</th>
+        <th class="units">(Nos)</th>
+      </tr>
+      {% for row in rows %}
+        <tr> 
+          <td style="background-color: {{row.pl.bg_color}}; color: {{row.pl.txt_color}};">{{row.pl.value}}</td>
+          <td style="background-color: {{row.oee.bg_color}}; color: {{row.oee.txt_color}};">{{row.oee.value}}</td>
+          <td style="background-color: {{row.availability.bg_color}}; color: {{row.availability.txt_color}};">{{row.availability.value}}</td>
+          <td style="background-color: {{row.performance.bg_color}}; color: {{row.performance.txt_color}};">{{row.performance.value}}</td>
+          <td style="background-color: {{row.quality.bg_color}}; color: {{row.quality.txt_color}};">{{row.quality.value}}</td>
+          <td>{{row.pq_plan}}</td>
+          <td style="background-color: {{row.pq_actual.bg_color}}; color: {{row.pq_actual.txt_color}};">{{row.pq_actual.value}}</td>
+          <td>{{row.rej_and_rew_qty}}</td>
+          <td>{{row.tot_pdt}}</td>
+          <td>{{row.tot_updt}}</td>
+          <td>{{row.tot_le}}</td>
+        </tr>
+      {% endfor %}
+      {% if no_production_lines %}
+        <tr>
+          <td colspan="11">No Production Lines: {{no_production_lines}}</td>
+        </tr>
+      {% endif %}
+      <tr>
+        <th style="text-align: left;"colspan="11"> 
+          <b>Note:</b>
+          <ul>
+            <li>All Decimal place holders are rounded into one digit</li>
+            <li>
+              Actual color with respect to the plan : <label style="background-color: {{color_code_dict.pc_hbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp;{{color_code_dict.pc_ht}}&nbsp;&nbsp;
+              <label style="background-color: {{color_code_dict.pc_mbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp; {{color_code_dict.pc_mt}}&nbsp;&nbsp;
+              <label style="background-color: {{color_code_dict.pc_lbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp; {{color_code_dict.pc_lt}}&nbsp;&nbsp;
+            </li>
+          </ul>
+        </th>
+      </tr>
+    </table>
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

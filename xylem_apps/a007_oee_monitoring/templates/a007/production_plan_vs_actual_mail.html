@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <style>
+      body {
+        background-color: #f9f9f9;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      table {
+        margin-top: 20px;
+        width: 99%;
+        font-size: 1.0em;
+        border-radius: 10px;
+        border-collapse: collapse;
+        overflow: hidden;
+        margin-left: 0;
+        margin-right: auto;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      th {
+        text-align: center; 
+        padding: 12px;
+        background-color: #de5c9d;
+        color: #343A40;
+        border: 1px solid #E0E0E0;
+      }
+      th.top_head {
+        border: none;
+      }
+      td {
+        text-align: center; 
+        padding: 12px;
+        border: 1px solid #E0E0E0;
+        background-color: #FFFFFF;
+      }
+      td.bold{
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <th class="top_head" colspan="2">
+          <span style="float: left">{{current_date}}<br>{{day_of_week}}</span>
+        </th>
+        <th class="top_head" colspan="8">Production Plan Vs Actual for {{month_year_text}}</th>
+        <th class="top_head" colspan="2"></th>
+      </tr>
+      <tr>
+        <th>Production Line</th>
+        <th>Day Plan</th> 
+        <th>Day Actual</th> 
+        <th>Month Plan</th> 
+        <th>MTD Plan</th> 
+        <th>MTD Actual</th> 
+        <th>Adherence (%)</th>
+        <th>MTD Gap</th>
+        <th>Balance to be Produced</th>
+        <th>Planned Days</th>
+        <th>Completed Days</th>
+        <th>Remaining Days</th>
+      </tr>
+      {% for row in rows %}
+        <tr>
+          <td style="background-color: {{row.pl.bg_color}}; color: {{row.pl.txt_color}};">{{row.pl.value}}</td>
+          {% if row.day_plan %}
+            <td>{{row.day_plan|number_with_comma}}</td>
+          {% else %}
+            <td>PNR</td>
+          {% endif %}
+          <td class="bold" style="background-color: {{row.day_actual.txt_color}}; color: {{row.day_actual.bg_color}};">{{row.day_actual.value|number_with_comma}}</td>
+          {% if row.month_plan %}
+            <td>{{row.month_plan|number_with_comma}}</td>
+          {% else %}
+            <td>PNR</td>
+          {% endif %}
+          {% if row.mtd_plan %}
+            <td>{{row.mtd_plan|number_with_comma}}</td>
+          {% else %}
+            <td>PNR</td>
+          {% endif %}
+          <td class="bold" style="background-color: {{row.mtd_actual.txt_color}}; color: {{row.mtd_actual.bg_color}};">{{row.mtd_actual.value|number_with_comma}}</td>
+          {% if row.adherence %}
+            <td class="bold" style="background-color: {{row.adherence.bg_color}}; color: {{row.adherence.txt_color}};">{{row.adherence.value}}</td>
+          {% else %}
+            <td>-</td>
+          {% endif %}
+          {% if row.mtd_gap %}
+            <td class="bold" style="background-color: {{row.mtd_gap.txt_color}}; color: {{row.mtd_gap.bg_color}};">{{row.mtd_gap.value}}</td>
+          {% else %}
+            <td>-</td>
+          {% endif %}
+          {% if row.balance %}
+            <td>{{row.balance|number_with_comma}}</td>
+          {% else %}
+            <td>-</td>
+          {% endif %}
+          {% if row.days_dict %}
+            <td>{{row.days_dict.planned}}</td>
+            <td>{{row.days_dict.completed}}</td>
+            <td>{{row.days_dict.remaining}}</td>
+          {% else %}
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+      <tr>
+        <th style="text-align: left;"colspan="12"> 
+          <b>Note:</b>
+          <ul>
+            <li>PNR - Plan Not Released</li>
+            <li>All Decimal place holders are rounded into one digit</li>
+            <li>
+              Adherence color code : <label style="background-color: {{color_code_dict.pc_hbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp;{{color_code_dict.pc_ht}}&nbsp;&nbsp;
+              <label style="background-color: {{color_code_dict.pc_mbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp; {{color_code_dict.pc_mt}}&nbsp;&nbsp;
+              <label style="background-color: {{color_code_dict.pc_lbc}}"> &nbsp;&nbsp;&nbsp; </label> &nbsp; {{color_code_dict.pc_lt}}&nbsp;&nbsp;
+            </li>
+          </ul>
+        </th>
+      </tr>
+    </table>
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

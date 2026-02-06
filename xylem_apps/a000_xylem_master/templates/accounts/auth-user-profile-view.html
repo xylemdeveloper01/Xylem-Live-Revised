@@ -1,0 +1,258 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+  
+  <style>
+
+    .table-profile th, .table-profile td {
+      border: none !important;
+      font-size: 20px;
+    }
+
+    .table-profile th {
+      color:rgb(27, 147, 216);
+    }
+
+    .table-profile td {
+      line-height: normal;
+      vertical-align: bottom;
+    }
+
+    .img-profile{
+      width:100px;
+    }
+
+    .profile-background {
+      position: relative;
+      background-color: white; /* Solid background color */
+      overflow: hidden;
+    }
+
+    /* Bubble styling */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.6; /* Transparency for the bubbles */
+      animation: moveBubble 15s linear infinite;
+    }
+
+    .bubble1 {
+      background: radial-gradient(circle, #66cf95 40%, transparent 60%);
+      width: 80px;
+      height: 40px;
+      top: 10%;
+      left: 20%;
+      animation-duration: 12s;
+    }
+
+    .bubble2 {
+      background: radial-gradient(circle, #d687d2 40%, transparent 60%);
+      width: 100px;
+      height: 60px;
+      top: 50%;
+      left: 30%;
+      animation-duration: 20s;
+    }
+
+    .bubble3 {
+      background: radial-gradient(circle, #95c3e9 40%, transparent 60%);
+      width: 100px;
+      height: 60px;
+      top: 90%;
+      right: 70%;
+      animation-duration: 20s;
+    }
+
+    .bubble4 {
+      background: radial-gradient(circle, #ddcec5 40%, transparent 60%);
+      width: 100px;
+      height: 60px;
+      top: 90%;
+      right: 20%;
+      animation-duration: 20s;
+    }
+
+    .bubble5 {
+      background: radial-gradient(circle, #e9bee9 40%, transparent 60%);
+      width: 100px;
+      height: 60px;
+      top: 10%;
+      right: 15%;
+      animation-duration: 20s;
+    }
+
+    /* Keyframe animation to move bubbles in a floating motion */
+    @keyframes moveBubble {
+      0% {
+        transform: translateY(0) translateX(0);
+      }
+      50% {
+        transform: translateY(-50px) translateX(20px); /* Move bubbles slightly */
+      }
+      100% {
+        transform: translateY(0) translateX(0);
+      }
+    }
+
+    /* Left-7 shape for top-left corner */
+    .left7-shape {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 220px;
+      background-color: #8be1ec;
+      clip-path: polygon(0 0, 100% 0, 50% 50%, 50% 100%, 0% 100%);
+    }
+
+    /* Left-7 shape for bottom-right corner */
+    .left73-shape {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 250px;
+      height: 220px;
+      background-color: #a89ee4;
+      clip-path: polygon(100% 100%, 0% 100%, 50% 50%, 50% 0, 100% 0);
+    }
+
+  </style>
+
+  <!-- [ Main Content ] start --> 
+  <div class="container profile-background rounded" style="background-color: rgb(238, 238, 238);">   
+    <div class="left7-shape"></div>
+    <div class="left73-shape"></div>     
+    <div class="bubble bubble1"></div>
+    <div class="bubble bubble2"></div>
+    <div class="bubble bubble3"></div> 
+    <div class="bubble bubble4"></div>   
+    <div class="bubble bubble5"></div> 
+    <div class="container mt-1" >  
+      <div class="row">
+        <div class="col-sm-12">         
+          <div class="row">                   
+            <h4 class="ml-3 mt-2">
+              Profile
+              <a href="{% url 'edit_user_profile' user.id %}">
+                <i class="text-primary feather icon-edit"></i>
+              </a>
+            </h4>  
+          </div>                     
+          <div class="row mt-1 mb-3">        
+            <div class="col-sm-4">
+              <div class="card rounded">  
+                <div class="card-body">                             
+                  <div class="d-flex align-items-center justify-content-center flex-column">
+                    <div class="w-45 p-3">
+                      {% if request.user.gender_i == MALE  %} 
+                        <img class="rounded-circle img-profile" src="{% static 'assets/images/user/avatar-2.jpg' %}" class="img-radius" alt="User-Profile-Image">
+                      {% else %}
+                        <img class="rounded-circle img-profile" src="{% static 'assets/images/user/avatar-1.jpg' %}" class="img-radius" alt="User-Profile-Image">
+                      {% endif %}
+                    </div>
+                    <div class="text-center">
+                      <h4 class="font-weight-bold h5 mt-3" style="color:black">{{ user.first_name | upper }} {{ user.last_name | upper }}</h4>
+                      <h3 class="font-weight-bold h5 mt-2" style="color:blueviolet">{{ user.designation_i.name }}</h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>       
+            <div class="col-sm-8"> 
+              <div class="card rounded">  
+                <div class="card-body">                    
+                  <div class="row">                
+                    <div class="table-responsive">
+                      <table class="table table-profile"> 
+                        <tr>
+                          <th>Employee ID / Username</th>
+                          <td>{{user.username}}</td>
+                        </tr>     
+                        <tr>
+                          <th>Plant Location</th>
+                          <td>{{user.plant_location_i.name}}</td>
+                        </tr> 
+                        <tr>
+                          <th>Department</th>
+                          <td>{{user.dept_i.name}}</td>
+                        </tr>                                                                                                   
+                        <tr>
+                          <th>EMail</th>
+                          <td>{{user.email}}</td>
+                        </tr> 
+                        <tr>
+                          <th>Gender</th>
+                          <td>{{user.gender_i.name}}</td>
+                        </tr> 
+                        <tr>
+                          <th>DOB</th>
+                          <td>{{user.dob}}</td>
+                        </tr>                                                                                 
+                      </table>
+                    </div>      
+                  </div>
+                </div>
+              </div>            
+            </div>
+          </div>               
+        </div>
+      </div>
+    </div>   
+  </div> 
+  <!-- [ Main Content ] end -->
+
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+{% endblock content %}
+
+

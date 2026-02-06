@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 10px;
+      }
+      table {
+        font-family: Arial, Helvetica, sans-serif;
+        margin-top: 20px;
+        font-size: 14px;
+        width: 100%;
+        max-width: 600px;  
+        border-collapse: collapse;
+        overflow: hidden;
+         white-space: nowrap; 
+      }
+      th {
+        border: 1px solid #ddd;padding: 8px; padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #F70D1A;
+        color: white;
+        text-align: left;
+      }
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        background-color: #f2f2f2;
+        text-align: left;
+      }      
+    </style>
+  </head>
+
+  <body>  
+    <h1 style="text-align: center;">Web Pulling NG Part Data</h1> 
+    <table align="center">
+      <tr>
+        <th>Production Line</th>
+        <td>{{ web_pulg_ng_obj.production_line_i.name }}</td>
+      </tr>
+      <tr>
+        <th>Barcode</th>
+        <td>{{ web_pulg_ng_obj.barcode_data }}</td>
+      </tr>
+      <tr>
+        <th>Part Number</th>
+        <td>{{ web_pulg_ng_obj.part_number_i.name|default:web_pulg_ng_obj.temp_pn }}</td>
+      </tr>
+      <tr>
+        <th>Part Description</th>
+        <td>{{ web_pulg_ng_obj.part_description }}</td>
+      </tr>
+      <tr>
+        <th>Time of Running</th>
+        <td>{{ web_pulg_ng_obj.datetime }}</td>
+      </tr>
+    </table>
+
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

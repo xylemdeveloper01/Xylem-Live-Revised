@@ -1,0 +1,8 @@
+{% if options %}
+	<option value="">---------</option>
+	{% for option in options %}
+		<option value="{{ option.icode }}">{{ option.name }}</option>
+	{% endfor %}
+{% else %}
+	<option value="">-- No data --</option>
+{% endif %}

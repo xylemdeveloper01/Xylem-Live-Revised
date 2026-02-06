@@ -1,0 +1,119 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets\js\jquery-3.6.0.min.js' %}"></script>
+
+  <!--[ 4M Forms Reports filter data through dates] start-->	
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>{{ child }}</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="fromDateInput">From Date</label>
+                <input class="form-control" type="date" id="fromDateInput">
+                <span class="text-danger" id="fromDateError" hidden>Please select from date</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="toDateInput">To Date</label>
+                <input class="form-control" type="date" id="toDateInput" disabled>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="formStatusSelect">Select status</label>
+                <select class="form-control" id="formStatusSelect">
+                  <option value="all">All Forms</option>
+                  <option value="p">Pending</option>
+                  <option value="a">Approved</option>
+                  <option value="r">Rejected</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3 d-flex flex-column-reverse">
+              <div class="form-group">
+                <button type="button" class="btn btn-sm btn-secondary" id="filterBtn">
+                  <i class="feather icon-filter"></i>Filter
+                </button>
+              </div>
+            </div>
+          </div>
+          <div id="reportTableContainer">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--[4M Forms Reports filter data through dates] end-->	
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+    var fromDateInput = document.getElementById("fromDateInput");
+    var toDateInput = document.getElementById("toDateInput");
+    var formStatusSelect = document.getElementById("formStatusSelect");
+    var fromDateError = document.getElementById("fromDateError");
+    
+    // Initialize "From Date" maximum value to today's date
+    var today = new Date()
+    const offset = today.getTimezoneOffset()
+    f_today = new Date(today.getTime() - (offset*60*1000))
+    var formattedToday = f_today.toISOString().split('T')[0];
+    
+    fromDateInput.max = formattedToday;
+    toDateInput.max = formattedToday;
+
+    fromDateInput.addEventListener("change", function () {
+      var fromDate = new Date(fromDateInput.value);
+
+      // Set the minimum value for To Date to be the selected From Date
+      toDateInput.min = fromDateInput.value;
+
+      maxToDate = fromDate
+      maxToDate.setDate(fromDate.getDate() + 30);
+
+      // Ensure To Date doesn't exceed today's date or precede the From Date
+      if (maxToDate > today) {
+        toDateInput.max = formattedToday;
+        toDateInput.value = formattedToday;
+      } 
+      else{
+        toDateInput.max = maxToDate.toISOString().split('T')[0];
+        toDateInput.value = maxToDate.toISOString().split('T')[0];
+      }
+      toDateInput.disabled = false
+    });
+    
+    $(document).on('click',"#filterBtn", function () {
+      if (fromDateInput.value==""){
+        fromDateError.hidden = false
+        return;
+      }
+      fromDateError.hidden = true
+      $.ajax({                      
+        url: '{% url "a006:ajax_report_table" %}',                   
+        data: {
+          'from_date': fromDateInput.value,      
+          'to_date': toDateInput.value,       
+          'form_status': formStatusSelect.value     
+        },
+        success: function (data) {   
+          $("#reportTableContainer").html(data);
+        },
+      });
+    });
+
+  </script>
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}
+ 

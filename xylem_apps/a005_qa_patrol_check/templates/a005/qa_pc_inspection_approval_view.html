@@ -1,0 +1,84 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!--[ New Inspections Approval ] start-->
+  {% if not messages %}
+    <div class="col-sm-12">
+      <div class="card Recent-Users">
+        <div class="card-header">
+          <h5>{{child}}</h5>
+          <a href="{% url 'a005:qa_patrol_inspection_approval' current_pagination_option_id current_page_num %}">
+            <button class="btn btn-secondary btn-sm float-right">
+              <i class="fa fa-home"></i> Go Home
+            </button>
+          </a>
+        </div>
+        <div class="card-block">
+          <div class="row">
+            {{ inspection_table_html | safe}}
+          </div>
+          <form class="mt-2" method="post">
+          {% csrf_token %}
+            <button type="submit" name="approver_response" class="btn btn-success" value="1">Approve</button>
+            <button type="submit" name="approver_response" class="btn btn-danger" value="0">Reject</button>                         
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <!--[ New Inspections Approval] end-->
+
+  <!--[ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hitden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hitden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hitden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!--[ messages ] end-->
+  
+{% endblock content %}

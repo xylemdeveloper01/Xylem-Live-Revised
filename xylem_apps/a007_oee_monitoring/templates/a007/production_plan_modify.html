@@ -1,0 +1,776 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <style>
+    .summary-table-main-head th{
+      white-space: normal !important;
+      word-wrap: break-word;
+    }
+  </style>
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+
+  <!-- [Production Plan Modify] start-->
+  {% if pp_modify %}
+    <div class="col-sm-12">
+      <div class="card Recent-Users">
+        <div class="card-header">
+          <h5>{{child}}</h5>
+          <a href="{% url 'a007:production_plan' production_line|get_pc_id_of_item month.id year.id %}">
+            <button class="btn btn-secondary btn-sm float-right">
+              <i class="fa fa-home"></i> Go Home  
+            </button>
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <tbody>
+                    <tr>
+                      <th>Production Line</th>
+                      <td style="border-top: 1px solid #ddd;">{{ production_line.name }}</td>
+                    </tr>
+                    <tr>
+                      <th>Month & Year</th>
+                      <td>{{ month.name }} - {{ year.name }}</td>
+                    </tr>
+                    <tr>
+                      <th>Last Revision</th>
+                      <td>{{ pp_revision }}</td>
+                    </tr>
+                    <tr>
+                      <th>Day Capacity</th>
+                      <td>{{ day_max }}</td>
+                    </tr>
+                    <tr>
+                      <th>Shift A Capacity</th>
+                      <td>{{ shiftA_max }}</td>
+                    </tr>
+                    <tr>
+                      <th>Shift B Capacity</th>
+                      <td>{{ shiftB_max }}</td>
+                    </tr>
+                    <tr>
+                      <th>Shift C Capacity</th>
+                      <td>{{ shiftC_max }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <label for="monthPlanInput">Change the month plan</label>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <button class="btn btn-primary">
+                    Min: <span id="mp_min_allowed"></span>
+                  </button>
+                </div>
+                <input type="number" class="form-control text-center" name="monthPlanInput" id="monthPlanInput" min=1  value="{{ month_plan }}" onchange="splitToShifts()" placeholder="change the month plan..."
+                  aria-label="Recipient's username" aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                  <button class="btn btn-primary">
+                    Max: <span id="mp_max_allowed"></span>
+                  </button>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr class="summary-table-main-head">
+                      <th>#</th>
+                      <th>Total Plan Quantity</th>
+                      <th>No of Days / Shifts Splited</th>
+                      <th>Planned Efficiency</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th>Day</th>
+                      <td>
+                        <span id="day_p">0</span>
+                      </td>
+                      <td>
+                        <span id="day_ps">0</span>
+                      </td>
+                      <td>
+                        <span id="day_pe">0</span>%
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Shift A</th>
+                      <td>
+                        <span id="shift_a_p">0</span>
+                      </td>
+                      <td>
+                        <span id="shift_a_ps">0</span>
+                      </td>
+                      <td>
+                        <span id="shift_a_pe">0</span>%
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Shift B</th>
+                      <td>
+                        <span id="shift_b_p">0</span>
+                      </td>
+                      <td>
+                        <span id="shift_b_ps">0</span>
+                      </td>
+                      <td>
+                        <span id="shift_b_pe">0</span>%
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>Shift C</th>
+                      <td>
+                        <span id="shift_c_p">0</span>
+                      </td>
+                      <td>
+                        <span id="shift_c_ps">0</span>
+                      </td>
+                      <td>
+                        <span id="shift_c_pe">0</span>%
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col">
+              <div class="row justify-content-end m-0">
+                <div class="col m-0 p-0">
+                  <div class="float-right"> 
+                    *Note: Any change in
+                    <span class="text-primary">Month Plan Input</span> /
+                    <span class="text-success">Plan</span> /
+                    <span class="text-danger">No Plan</span> leads to equal splitup
+                  </div>
+                </div>
+              </div>
+              <div class="table-responsive table-hover">
+                <form onsubmit="savePlanData(event)">
+                  <table class="table" id="planSplitTable">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Shift A</th>
+                        <th>Shift B</th>
+                        <th>Shift C</th>
+                        <th>Day Total</th>
+                        <th>
+                          <span class="text-success">Plan</span> /
+                          <span class="text-danger">No Plan</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for pp_input_data in pp_input_data_list %}
+                        <tr>
+                          <td>{{ pp_input_data.date_str }}</td>
+                          <td>{{ pp_input_data.day_str }}</td>
+                          <td>
+                            <input type="number" min=1 max="{{shiftA_max}}" class="form-control" id="{{pp_input_data.shiftA_input.name}}" value="0" onfocus="updateInputOldValue(this)" onchange="updateToMonth(this, 'A')" required></input>
+                            <span id="{{pp_input_data.shiftA_input.name}}_p">0</span>%
+                          </td>
+                          <td>
+                            <input type="number" min=1 max="{{shiftB_max}}" class="form-control" id="{{pp_input_data.shiftB_input.name}}" value="0" onfocus="updateInputOldValue(this)" onchange="updateToMonth(this, 'B')" required></input>
+                            <span id="{{pp_input_data.shiftB_input.name}}_p">0</span>%
+                          </td>
+                          <td>
+                            <input type="number" min=1 max="{{shiftC_max}}" class="form-control" id="{{pp_input_data.shiftC_input.name}}" value="0" onfocus="updateInputOldValue(this)" onchange="updateToMonth(this, 'C')" required></input>
+                            <span id="{{pp_input_data.shiftC_input.name}}_p">0</span>%
+                          </td>
+                          <td>
+                            <div>
+                              <span class="day_total">0</span>
+                            </div>                      
+                          </td>
+                          <th>
+                            <div class="row mr-0">
+                              <div class="col-2 sa-icon"></div>
+                              <div class="col-2 sb-icon"></div>
+                              <div class="col-2 sc-icon"></div>
+                            </div>
+                          </th>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  <button id="modifyPlanButton" type="submit" class="btn btn-warning">Modify Plan</button>   
+                </form>   
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="capExceedModal" tabindex="-1" role="dialog" aria-labelledby="capExceedModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content card rounded">
+          <div class="modal-header">
+            <h5 class="modal-title"> Capacity limit exceed </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Unable to do splitup this shift plan to another shifts, do you want to discard the excess plan of the shift?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" id="capExceedModalYesButton">Yes</button>
+            <button type="button" class="btn btn-success" data-dismiss="modal">No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="outOfLimitModal" tabindex="-1" role="dialog" aria-labelledby="outOfLimitModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content card rounded">
+          <div class="modal-header">
+            <h5 class="modal-title"> Out of limit </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="outOfLimitModalMsg"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-dismiss="modal">Ok</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  <!-- [Production Plan Modify] end-->
+  
+  <!-- [ messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [ messages ] end-->
+
+  <!-- [ Script / Ajax ] start-->
+  <script>
+
+    // Empty option selection disabled
+    function empty_option_disable(){
+      document.querySelectorAll("option").forEach(opt => {
+        if (opt.value == "") {
+          opt.disabled = true;
+        }
+      });
+    }
+    empty_option_disable()
+  </script>
+
+  {% if pp_modify %}
+    <script>
+
+      const shiftA_max = parseInt("{{shiftA_max}}")
+      const shiftB_max = parseInt("{{shiftB_max}}")
+      const shiftC_max = parseInt("{{shiftC_max}}")
+      const production_plan_modify_save_url = "{% url 'a007:production_plan_modify_save' production_line.icode month.id year.id %}"
+      var pp_input_data_list = JSON.parse("{{ pp_input_data_list | escapejs }}".replace(/'/g, '"').replace(/None/g, 'null').replace(/True/g, 'true').replace(/False/g, 'false'))
+
+      const plan_A_html = `<i style="cursor:pointer;" class="text-success" onclick="disableRow(this, 'A')">A</i>`
+      const plan_B_html = `<i style="cursor:pointer;" class="text-success" onclick="disableRow(this, 'B')">B</i>`
+      const plan_C_html = `<i style="cursor:pointer;" class="text-success" onclick="disableRow(this, 'C')">C</i>`
+      const no_plan_A_html = `<i style="cursor:pointer;" class="text-danger" onclick="enableRow(this, 'A')">A</i>`
+      const no_plan_B_html = `<i style="cursor:pointer;" class="text-danger" onclick="enableRow(this, 'B')">B</i>`
+      const no_plan_C_html = `<i style="cursor:pointer;" class="text-danger" onclick="enableRow(this, 'C')">C</i>`
+      const closed_plan_A_html = `<span class="text-success"><s>A</s></span>`
+      const closed_plan_B_html = `<span class="text-success"><s>B</s></span>`
+      const closed_plan_C_html = `<span class="text-success"><s>C</s></span>`
+      const closed_no_plan_A_html = `<span class="text-danger"><s>A</s></span>`
+      const closed_no_plan_B_html = `<span class="text-danger"><s>B</s></span>`
+      const closed_no_plan_C_html = `<span class="text-danger"><s>C</s></span>`
+      
+      var planSplitTable = document.getElementById("planSplitTable")
+      var modifyPlanButton = document.getElementById("modifyPlanButton")
+      var closed_planned_input_id_dict = {"A": [], "B": [], "C": []}
+      var enabled_input_id_dict = {"A": [], "B": [], "C": []}
+      var disabled_input_id_dict = {"A": [], "B": [], "C": []}
+
+      var daysPlanned = 0
+      var monthPlan = parseInt("{{ month_plan }}")
+      var monthPlanMin = 0
+      var monthPlanMax = 0
+      var shiftA_splitup = 0
+      var shiftB_splitup = 0
+      var shiftC_splitup = 0
+      var temp_dict =  {}
+      var inputValueOld
+      var excessPlanDiscardData
+      var plan_avl_flag
+      var update_summary_init
+      let row
+      modifyPlanButton.disabled = true
+
+      function gcd(a, b) {
+        while (b !== 0) {
+          let temp = b;
+          b = a % b;
+          a = temp;
+        }
+        return a;
+      }
+      
+
+      // Function to simplify the ratio of shifts
+      function simplifyRatio(a, b, c) {
+        let gcdAB = gcd(a, b);
+        let gcdABC = gcd(gcdAB, c);
+        return [a / gcdABC, b / gcdABC, c / gcdABC];
+      }
+      
+      
+      function shift_split_update(shift_split, shift_enabled_id_list, shift_max){
+        shift_splitup_per_day = shift_split/shift_enabled_id_list.length
+        let tempShiftSplitup = [];
+        let plannedSum = 0;
+
+        // Calculate plan splitup for each shift
+        for (let i = shift_enabled_id_list.length-1; i >= 0; i--) {
+          shift_plan = Math.floor(shift_split - shift_splitup_per_day * (i) - plannedSum);
+          $(`#${shift_enabled_id_list[i]}`).val(shift_plan);
+          $(`#${shift_enabled_id_list[i]}_p`).text(Math.round((shift_plan/shift_max)*10000)/100);
+          plannedSum = plannedSum + shift_plan;
+        }
+      }
+
+      
+      function update_summary() {
+        [sum_day, sum_a_closed, sum_a, sum_b_closed, sum_b, sum_c_closed, sum_c] = [0, 0, 0, 0, 0, 0, 0]
+        document.querySelectorAll('span.day_total').forEach(function (element) {
+          sum_day += parseInt(element.textContent)
+        })
+        for (var i = 0; i < closed_planned_input_id_dict.A.length; i++) {
+          sum_a_closed += parseInt($(`#${closed_planned_input_id_dict.A[i]}`).val())
+        }
+        for (var i = 0; i < enabled_input_id_dict.A.length; i++) {
+          sum_a += parseInt($(`#${enabled_input_id_dict.A[i]}`).val())
+        }
+        for (var i = 0; i < closed_planned_input_id_dict.B.length; i++) {
+          sum_b_closed += parseInt($(`#${closed_planned_input_id_dict.B[i]}`).val())
+        }
+        for (var i = 0; i < enabled_input_id_dict.B.length; i++) {
+          sum_b += parseInt($(`#${enabled_input_id_dict.B[i]}`).val())
+        }
+        for (var i = 0; i < closed_planned_input_id_dict.C.length; i++) {
+          sum_c_closed += parseInt($(`#${closed_planned_input_id_dict.C[i]}`).val())
+        }
+        for (var i = 0; i < enabled_input_id_dict.C.length; i++) {
+          sum_c += parseInt($(`#${enabled_input_id_dict.C[i]}`).val())
+        }
+
+        $("#mp_min_allowed").text(monthPlanMin)
+        $("#mp_max_allowed").text(monthPlanMax)
+        $("#day_p").text(sum_day)
+        $("#day_ps").text(daysPlanned)
+        $("#day_pe").text(Math.round((sum_day/((shiftA_max*(closed_planned_input_id_dict.A.length+enabled_input_id_dict.A.length))+(shiftB_max*(closed_planned_input_id_dict.B.length+enabled_input_id_dict.B.length))+(shiftC_max*(closed_planned_input_id_dict.C.length+enabled_input_id_dict.C.length))))*10000)/100)
+        $("#shift_a_p").text(sum_a_closed+sum_a)
+        $("#shift_a_ps").text(closed_planned_input_id_dict.A.length+enabled_input_id_dict.A.length)
+        $("#shift_a_pe").text(Math.round(((sum_a_closed+sum_a)/(shiftA_max*(closed_planned_input_id_dict.A.length+enabled_input_id_dict.A.length)))*10000)/100)
+        $("#shift_b_p").text(sum_b_closed+sum_b)
+        $("#shift_b_ps").text(closed_planned_input_id_dict.B.length+enabled_input_id_dict.B.length)
+        $("#shift_b_pe").text(Math.round(((sum_b_closed+sum_b)/(shiftB_max*(closed_planned_input_id_dict.B.length+enabled_input_id_dict.B.length)))*10000)/100)
+        $("#shift_c_p").text(sum_c_closed+sum_c)
+        $("#shift_c_ps").text(closed_planned_input_id_dict.C.length+enabled_input_id_dict.C.length)
+        $("#shift_c_pe").text(Math.round(((sum_c_closed+sum_c)/(shiftC_max*(closed_planned_input_id_dict.C.length+enabled_input_id_dict.C.length)))*10000)/100)
+        if (monthPlan && update_summary_init){
+          modifyPlanButton.disabled = false
+        }
+        update_summary_init = true
+      }
+
+
+      function update_day_total(){
+        planSplitTable.querySelectorAll("tbody tr").forEach(row =>{
+          let sum = 0
+          row.querySelectorAll("input").forEach(input => {
+            let value = parseInt(input.value);
+            if (!isNaN(value)) {
+              sum += value;
+            }
+          })
+          row.querySelector("span.day_total").textContent = sum;
+        })
+      }
+
+
+      // Function to disable the row
+      function disableRow(icon, action_type) {
+        row = icon.closest('tr')
+        inputs = row.querySelectorAll("input")
+        icons = row.querySelectorAll("i")
+        if (action_type=="A"){
+          if (!excessPlanDiscardData){
+            if ((monthPlan + parseInt(inputs[0].value)) > monthPlanMax) {
+              excessPlanDiscardData = {icon:icon, action_type:action_type}
+              $("#capExceedModal").modal('show')
+              return
+            }
+          }
+          else{
+            $("#monthPlanInput").val(monthPlanMax)
+            excessPlanDiscardData = null
+          }
+          inputs[0].disabled = true
+          inputs[0].value = 0
+          $(`#${inputs[0].id}_p`).text("0")
+          enabled_input_id_dict.A.splice(enabled_input_id_dict.A.indexOf(inputs[0].id),1)
+          disabled_input_id_dict.A.push(inputs[0].id)
+          icons[0].outerHTML = no_plan_A_html
+        }
+        if (action_type=="B"){
+          if (!excessPlanDiscardData){
+            if ((monthPlan + parseInt(inputs[1].value)) > monthPlanMax) {
+              excessPlanDiscardData = {icon:icon, action_type:action_type}
+              $("#capExceedModal").modal('show')
+              return
+            }
+          }
+          else{
+            $("#monthPlanInput").val(monthPlanMax)
+            excessPlanDiscardData = null
+          }
+          inputs[1].disabled = true
+          inputs[1].value = 0
+          $(`#${inputs[1].id}_p`).text("0")
+          enabled_input_id_dict.B.splice(enabled_input_id_dict.B.indexOf(inputs[1].id),1)
+          disabled_input_id_dict.B.push(inputs[1].id)
+          icons[1].outerHTML = no_plan_B_html
+        }
+        if (action_type=="C"){
+          if (!excessPlanDiscardData){
+            if ((monthPlan + parseInt(inputs[2].value)) > monthPlanMax) {
+              excessPlanDiscardData = {icon:icon, action_type:action_type}
+              $("#capExceedModal").modal('show')
+              return
+            }
+          }
+          else{
+            $("#monthPlanInput").val(monthPlanMax)
+            excessPlanDiscardData = null
+          }
+          inputs[2].disabled = true
+          inputs[2].value = 0
+          $(`#${inputs[2].id}_p`).text("0")
+          enabled_input_id_dict.C.splice(enabled_input_id_dict.C.indexOf(inputs[2].id),1)
+          disabled_input_id_dict.C.push(inputs[2].id)
+          icons[2].outerHTML = no_plan_C_html
+        }
+        if (row.querySelectorAll('i.text-danger').length==3){
+          daysPlanned = daysPlanned - 1
+        }
+        monthPlanMax = monthPlanMin + enabled_input_id_dict.A.length*shiftA_max + enabled_input_id_dict.B.length*shiftB_max + enabled_input_id_dict.C.length*shiftC_max
+        splitToShifts()
+      }
+
+
+      // Function to enable the row
+      function enableRow(icon, action_type) {
+        row = icon.closest('tr')
+        inputs = row.querySelectorAll("input")
+        icons = row.querySelectorAll("i")
+        if (action_type=="A"){
+          inputs[0].disabled = false
+          $(`#${inputs[0].id}_p`).text("0")
+          disabled_input_id_dict.A.splice(disabled_input_id_dict.A.indexOf(inputs[0].id),1)
+          enabled_input_id_dict.A.push(inputs[0].id)
+          icons[0].outerHTML = plan_A_html
+        }
+        if (action_type=="B"){
+          inputs[1].disabled = false
+          $(`#${inputs[1].id}_p`).text("0")
+          disabled_input_id_dict.B.splice(disabled_input_id_dict.B.indexOf(inputs[1].id),1)
+          enabled_input_id_dict.B.push(inputs[1].id)
+          icons[1].outerHTML = plan_B_html
+        }
+        if (action_type=="C"){
+          inputs[2].disabled = false
+          $(`#${inputs[2].id}_p`).text("0")
+          disabled_input_id_dict.C.splice(disabled_input_id_dict.C.indexOf(inputs[2].id),1)
+          enabled_input_id_dict.C.push(inputs[2].id)
+          icons[2].outerHTML = plan_C_html
+        }
+        if (row.querySelectorAll('i.text-success').length==3){
+          daysPlanned = daysPlanned + 1
+        }
+        monthPlanMax = monthPlanMin + enabled_input_id_dict.A.length*shiftA_max + enabled_input_id_dict.B.length*shiftB_max + enabled_input_id_dict.C.length*shiftC_max
+        splitToShifts()
+      }
+      
+
+      function splitToShifts() {
+        monthPlan = parseInt($("#monthPlanInput").val() === "" ? 0 : $("#monthPlanInput").val());
+        if (monthPlan > monthPlanMax) {
+          $("#monthPlanInput").val(monthPlanMax)
+          monthPlan = monthPlanMax
+          $('#outOfLimitModalMsg').text(`Given plan is more than the maximum plan, so month maximum plan ${monthPlan} was set`)
+          $('#outOfLimitModal').modal('show')
+        }
+        else if (monthPlan < monthPlanMin) {
+          $("#monthPlanInput").val(monthPlanMin)
+          monthPlan = monthPlanMin
+          $('#outOfLimitModalMsg').text(`Given plan is less than the minimum plan, so month minimum plan ${monthPlan} was set`)
+          $('#outOfLimitModal').modal('show')
+        }
+        monthPlanPartial = monthPlan - monthPlanMin
+
+        // Get simplified ratios for shifts A, B, and C
+        let [ratioA, ratioB, ratioC] = simplifyRatio(
+          shiftA_max*(enabled_input_id_dict.A.length),
+          shiftB_max*(enabled_input_id_dict.B.length),
+          shiftC_max*(enabled_input_id_dict.C.length)
+        );
+
+        let ratioPerUnit = monthPlanPartial / (ratioA + ratioB + ratioC);
+        shiftA_splitup = Math.floor(ratioA * ratioPerUnit)
+        shiftB_splitup = Math.floor(ratioB * ratioPerUnit)
+        shiftC_splitup = monthPlanPartial - shiftA_splitup - shiftB_splitup;
+
+        shift_split_update(shiftA_splitup, enabled_input_id_dict.A, shiftA_max)
+        shift_split_update(shiftB_splitup, enabled_input_id_dict.B, shiftB_max)
+        shift_split_update(shiftC_splitup, enabled_input_id_dict.C, shiftC_max)
+        update_day_total()
+        update_summary()
+      }
+      
+
+      function updateInputOldValue(element){
+        inputValueOld = parseInt(element.value)
+      }
+
+
+      function updateToMonth(element, action_type){
+        var tempValue = parseInt(element.value)
+        if (tempValue == inputValueOld){
+          return;
+        }
+        if (action_type == "A"){
+          shift_max = shiftA_max
+        }
+        else if (action_type == "B"){
+          shift_max = shiftB_max
+        }
+        else if (action_type == "C"){
+          shift_max = shiftC_max
+        }
+        if (tempValue < 1){
+          element.value = 1
+          $('#outOfLimitModalMsg').text(`Given plan is less than the minimum plan, so shift ${action_type} minimum plan ${element.value} was set`)
+          $('#outOfLimitModal').modal('show')
+        }
+        else if (tempValue > shift_max){
+          element.value = shift_max
+          $('#outOfLimitModalMsg').text(`Given plan is more than the maximum plan, so shift ${action_type} maximum plan ${element.value} was set`)
+          $('#outOfLimitModal').modal('show')
+        }
+        var inputValueNew = parseInt(element.value)
+        $(`#${element.id}_p`).text(Math.round((inputValueNew/shift_max)*10000)/100);
+        monthPlan = monthPlan +  inputValueNew - inputValueOld
+        $("#monthPlanInput").val(monthPlan)
+        inputValueOld = inputValueNew
+        update_day_total()
+        update_summary()
+      }
+      
+
+      function savePlanData(event) {
+        event.preventDefault()
+        modifyPlanButton.disabled = true
+        var transfer_dict = {}
+        for (var i = 0; i < closed_planned_input_id_dict.A.length; i++) {
+          transfer_dict[closed_planned_input_id_dict.A[i]] = parseInt($(`#${closed_planned_input_id_dict.A[i]}`).val())
+        }
+        for (var i = 0; i < closed_planned_input_id_dict.B.length; i++) {
+          transfer_dict[closed_planned_input_id_dict.B[i]] = parseInt($(`#${closed_planned_input_id_dict.B[i]}`).val())
+        }
+        for (var i = 0; i < closed_planned_input_id_dict.C.length; i++) {
+          transfer_dict[closed_planned_input_id_dict.C[i]] = parseInt($(`#${closed_planned_input_id_dict.C[i]}`).val())
+        }
+        for (var i = 0; i < enabled_input_id_dict.A.length; i++) {
+          transfer_dict[enabled_input_id_dict.A[i]] = parseInt($(`#${enabled_input_id_dict.A[i]}`).val())
+        }
+        for (var i = 0; i < enabled_input_id_dict.B.length; i++) {
+          transfer_dict[enabled_input_id_dict.B[i]] = parseInt($(`#${enabled_input_id_dict.B[i]}`).val())
+        }
+        for (var i = 0; i < enabled_input_id_dict.C.length; i++) {
+          transfer_dict[enabled_input_id_dict.C[i]] = parseInt($(`#${enabled_input_id_dict.C[i]}`).val())
+        }
+        $.ajax({
+          url: production_plan_modify_save_url,
+          type: "POST",
+          contentType: 'application/json',
+          data: JSON.stringify(transfer_dict),
+          beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
+          },
+          success: function(response) {
+            window.location.href = response.redirect_url;
+          },
+          error: function(xhr, status, error) {
+            console.error("Error: " + error);
+          }
+        });
+      }
+      
+
+      for (var i = 0; i < pp_input_data_list.length; i++) {
+        plan_avl_flag = false
+        temp_dict = pp_input_data_list[i]
+        plan = 0
+        row = $(`#${temp_dict.shiftA_input.name}`).closest("tr")[0]
+        inputs = row.querySelectorAll("input")
+        inputs[2].value = temp_dict.shiftC_input.value
+
+        $(`#${inputs[0].id}`).val(temp_dict.shiftA_input.value)
+        $(`#${inputs[1].id}`).val(temp_dict.shiftB_input.value)
+        $(`#${inputs[2].id}`).val(temp_dict.shiftC_input.value)
+        $(`#${inputs[0].id}_p`).text(Math.round((temp_dict.shiftA_input.value/shiftA_max)*10000)/100)
+        $(`#${inputs[1].id}_p`).text(Math.round((temp_dict.shiftB_input.value/shiftB_max)*10000)/100)
+        $(`#${inputs[2].id}_p`).text(Math.round((temp_dict.shiftC_input.value/shiftC_max)*10000)/100)
+        if (temp_dict.shiftA_input.past_shift_flag){
+          inputs[0].disabled = true
+          if (temp_dict.shiftA_input.plan_state){
+            closed_planned_input_id_dict.A.push(temp_dict.shiftA_input.name)
+            monthPlanMin = monthPlanMin + temp_dict.shiftA_input.value
+            row.querySelector('div.sa-icon').innerHTML = closed_plan_A_html
+            plan_avl_flag = true
+          }
+          else{
+            row.querySelector('div.sa-icon').innerHTML = closed_no_plan_A_html
+          }
+        }
+        else{
+          if (temp_dict.shiftA_input.plan_state){
+            enabled_input_id_dict.A.push(temp_dict.shiftA_input.name)
+            row.querySelector('div.sa-icon').innerHTML = plan_A_html
+            plan_avl_flag = true
+          }
+          else{
+            inputs[0].disabled = true
+            disabled_input_id_dict.A.push(temp_dict.shiftA_input.name)
+            row.querySelector('div.sa-icon').innerHTML = no_plan_A_html
+          }
+        }
+        if (temp_dict.shiftB_input.past_shift_flag){
+          inputs[1].disabled = true
+          if (temp_dict.shiftB_input.plan_state){
+            closed_planned_input_id_dict.B.push(temp_dict.shiftB_input.name)
+            monthPlanMin = monthPlanMin + temp_dict.shiftB_input.value
+            row.querySelector('div.sb-icon').innerHTML = closed_plan_B_html
+            plan_avl_flag = true
+          }
+          else{
+            row.querySelector('div.sb-icon').innerHTML = closed_no_plan_B_html
+          }
+        }
+        else{
+          if (temp_dict.shiftB_input.plan_state){
+            enabled_input_id_dict.B.push(temp_dict.shiftB_input.name)
+            row.querySelector('div.sb-icon').innerHTML = plan_B_html
+            plan_avl_flag = true
+          }
+          else{
+            inputs[1].disabled = true
+            disabled_input_id_dict.B.push(temp_dict.shiftB_input.name)
+            row.querySelector('div.sb-icon').innerHTML = no_plan_B_html
+          }
+        }
+        if (temp_dict.shiftC_input.past_shift_flag){
+          inputs[2].disabled = true
+          if (temp_dict.shiftC_input.plan_state){
+            closed_planned_input_id_dict.C.push(temp_dict.shiftC_input.name)
+            monthPlanMin = monthPlanMin + temp_dict.shiftC_input.value
+            row.querySelector('div.sc-icon').innerHTML = closed_plan_C_html
+            plan_avl_flag = true
+          }
+          else{
+            row.querySelector('div.sc-icon').innerHTML = closed_no_plan_C_html
+          }
+        }
+        else{
+          if (temp_dict.shiftC_input.plan_state){
+            enabled_input_id_dict.C.push(temp_dict.shiftC_input.name)
+            row.querySelector('div.sc-icon').innerHTML = plan_C_html
+            plan_avl_flag = true
+          }
+          else{
+            inputs[2].disabled = true
+            disabled_input_id_dict.C.push(temp_dict.shiftC_input.name)
+            row.querySelector('div.sc-icon').innerHTML = no_plan_C_html
+          }
+        }
+        if (plan_avl_flag) {
+          daysPlanned = daysPlanned + 1
+        }
+      }
+      monthPlanMax = monthPlanMin + enabled_input_id_dict.A.length*shiftA_max + enabled_input_id_dict.B.length*shiftB_max + enabled_input_id_dict.C.length*shiftC_max
+      splitToShifts()
+
+      document.getElementById('capExceedModalYesButton').addEventListener('click', function() {
+        disableRow(excessPlanDiscardData.icon, excessPlanDiscardData.action_type)
+        $('#capExceedModal').modal('hide')
+      })
+      $(document).ready(function() {
+        $('#capExceedModal').on('hidden.bs.modal', function (e) {
+          excessPlanDiscardData = null
+        })
+      })
+
+    </script>
+  {% endif %}
+  <!-- [ Script / Ajax ] end-->
+
+{% endblock content %}

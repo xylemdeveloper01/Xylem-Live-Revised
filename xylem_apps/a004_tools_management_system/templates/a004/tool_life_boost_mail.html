@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+{% load a000_custom_tags %}
+<html>
+  <head>
+    <style>
+      table {
+        font-family:  Arial, Helvetica, sans-serif;
+        margin-top: 20px;
+        font-size: 1.0em;
+        border-radius: 10px 10px 0 0;
+        border-collapse: collapse;
+        overflow: hidden;
+      }
+      th.top_head {
+        text-align: center; 
+        border: none;
+      }
+			th {
+        text-align: left; 
+        padding: 11px;
+        color: white;
+        background-color: #097969;
+        border: 1px solid white;
+      }
+      td {
+        text-align: left; 
+        padding: 11px;
+        border: 1px solid white;
+        background-color: #ece4e4;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Dear Team,</p>
+    <p>Tool Life has been boosted to full life</p>
+    <table>
+      <tr>
+        <th class="top_head" colspan="2">
+          Tool Card: {{ tool_history_log.tps_map.tool_i.name }}
+        </th>
+      </tr>
+      <tr>
+        <th>Production line</th>
+        <td>{{ tool_history_log.tps_map.production_station_i | get_pl_ps_name_of_ps }} </td>
+      </tr> 
+      <tr>
+        <th>Tool's full life (No's)</th>
+        <td>{{ tool_history_log.tps_map.full_life | number_with_comma }}</td>          
+      </tr>                                	
+      <tr>
+        <th>Boosted by</th>
+        <td>{{ tool_history_log.boosted_user | get_user_display_format }}</td>          
+      </tr>	
+      <tr>
+        <th>Boosted time</th>
+        <td>{{ tool_history_log.boosted_time }}</td>          
+      </tr>	
+      <tr>
+        <th>Produced quantity</th>
+        <td>{{ tool_history_log.produced_pq | number_with_comma }}</td>          
+      </tr>								
+    </table>
+    {% get_xylem_manage_mail_footer_html %}
+  </body>
+</html>

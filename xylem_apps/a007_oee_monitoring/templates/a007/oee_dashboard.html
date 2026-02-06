@@ -1,0 +1,1363 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+  <!-- [ Main Content ] start -->
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+  <script src="{% static 'assets/plugins/chartjs/4.4.0/package/dist/chart.umd.js' %}"></script>
+  <script src="{% static 'assets/plugins/chartjs/datalabel/datalabels.js' %}"></script>
+
+  <style>
+    .time-text{
+      color: purple;
+      font-family: 'Arial';
+      font-size: 40px;
+      font-weight: bold;  
+      line-height: 1; 
+    }
+    .date-day-shift-text{
+      color: purple;
+      font-family: 'Arial';
+      font-size: 20px;
+      font-weight: bold;  
+      text-align: center;
+    }
+    .head-text {
+      color: #000080;
+      font-family: 'Times New Roman';
+      font-size: 35px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .production-line-text{
+      font-family: 'Arial';
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 8px;
+      height: fit-content;
+    }
+    .gear-img{
+      width: 60px;
+      height: 60px;
+    }
+    .gear-idle-time-text{
+      color:black;
+      font-family: 'Arial';
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .company-logo{
+      width: 100px; 
+      height: 41px;
+    }
+    .xylem-logo{
+      width: 30px; 
+      height: 30px;
+    }
+    .note-label{
+      color: black;
+      background-color: #E7F3FE;
+      font-size: 10px;
+      font-family: 'Arial';
+      padding: 2%;
+      border-left: 6px solid #2196F3;
+    }
+    .sub-head-text {
+      color:black;
+      font-family: 'Arial';
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .speedometer-canvas-big{
+      margin-top: -60px;
+      margin-bottom: -105px;
+    }
+    .speedometer-canvas-small{
+      margin-top: -40px;
+      margin-bottom: -67px;
+    }
+    .speedometer-text-big{
+      color:black;
+      font-family: 'Arial';
+      font-size: 45px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .speedometer-text-small{
+      color:black;
+      font-family: 'Arial';
+      font-size: 25px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .parameters-text{
+      border: 1px solid black ;
+      background-color: #a4d9f0;
+      color: black;
+      font-family: 'Arial';
+      font-size: 13px;
+      border-radius: 5px;
+      width: 95%;
+      padding-left: 5px;
+    }
+    .loss-text{
+      border: 1px solid #ddd ;
+      font-family: 'Arial';
+      font-size: 15px;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 5px;
+      width: 90%;
+    }
+    .clap-emoji-img{
+      width: 150px; 
+      height: 150px;
+    }
+    .no-loss-img{
+      margin-top: -30px;
+      width: 173px; 
+      height: 69px;
+      position:relative;
+    }
+    .general-table {
+      background-color: #16afaf;
+      color:white;
+      font-family: 'Arial';
+      font-size: 13px;
+      font-weight: bold;
+      border: 1px solid black;
+      border-collapse: collapse;
+      width: 90%;
+    }
+    .small-text {
+      font-size: 13px;
+    }
+    .general-table-ct {
+      background-color: #16afaf;
+      color:white;
+      font-family: 'Arial';
+      font-size: 13px;
+      font-weight: bold;
+      border: 1px solid black;
+      border-collapse: collapse;
+      width: 97%;
+    }
+    .general-table-detail {
+      background-color: #16afaf;
+      color:white;
+      font-family: 'Arial';
+      font-size: 13px;
+      font-weight: bold;
+      border: 1px solid black;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    table.general-table th, table.general-table-ct th, table.general-table-detail th{
+      border: 1px solid black;
+      padding-left: 1%;
+      padding-right: 1%;
+    }
+    table.general-table td, table.general-table-ct td, table.general-table-detail td{
+      background-color: #F7F9F9;
+      border: 1px solid black;
+      color:black;
+      text-align: right;
+      padding-left: 1%;
+      padding-right: 1%;
+    }
+    textarea {
+      resize: none;
+    }
+    .slide {
+      animation-fill-mode: none;
+    }
+    @keyframes fadeInAnimation{
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    .sub-head-text-small{
+      color:black;
+      font-family: 'Arial';
+      font-weight: bold;
+      font-size: 10px;
+    }
+    .loss-color-notations {
+      font-size: 13px;
+      border: 1px solid #ddd;
+    }
+    .loss-color-notations span.square{
+      font-size: 8px;
+    }
+    .loss-color-notations span.text{
+      font-size: 12px;
+    }
+    .progress-bar{
+      cursor: pointer;
+    }
+    .pagination li{
+      white-space: nowrap;
+      margin: 5px;
+      box-shadow: 0 5px 25px rgb(1 1 1 / 10% );
+    }
+    .sub-item{
+      width:100px;
+    }
+    .text-of-ellipse{
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sub-item-dots{
+      width:35px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis; 
+    }
+    .floating-text {
+      position: fixed;           /* Keeps it visible while scrolling */
+      top: 20px;                 /* Distance from top */
+      right: 20px;               /* Distance from right */
+      background-color: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      {% comment %} font-size: 1.5rem; {% endcomment %}
+      z-index: 1050;             /* Higher than Bootstrap modals */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+  </style>
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card slide" id="oee_dashboard_card">
+        <div class="card-body pt-2 pb-2">
+          <div class="row justify-content-center">
+            <div class="col-sm-3">
+              <div class="row" id="maximini">  
+                <a href="#!" onclick="toggleDashboardFullscreen(this)"><i class="feather icon-maximize-2"></i> Maximize </a>
+              </div>
+              <div class="row justify-content-center mt-1">  
+                <span id="tt" class="time-text"> 00:00:00 AA </span>
+              </div>
+              <div class="row justify-content-center">  
+                <span id="ddst" class="date-day-shift-text"> 00-AAA-0000 AAA A </span>
+              </div>
+            </div>
+            <div class="col-sm-6 justify-content-center">
+              <div class="row justify-content-center">  
+                <span class="head-text"> OEE LIVE DASHBOARD </span>
+              </div>
+              <div class="row justify-content-center">
+                <span id="pl_n" class="col-sm-auto production-line-text"> AAAAA </span>
+                <div id="gear_run_mode">
+                  <img class="gear-img" data-toggle="tooltip" title="Line is running" src="{% static 'assets/images/a007/gear.gif' %}">
+                </div>
+                <div id="gear_idle_mode">
+                  <img class="gear-img" data-toggle="tooltip" title="Line is idle" src="{% static 'assets/images/a007/gear.jpg' %}">
+                </div>
+                <div class="d-flex flex-column-reverse">
+                  <span id="it_s" class="gear-idle-time-text" data-toggle="tooltip" title="Line idle time"> AAA </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="row justify-content-end d-flex flex-wrap align-items-center">
+                <img class="company-logo" src="{% static 'assets/images/ZF_Rane.png' %}">
+                <img class="xylem-logo ml-2" src="{% static 'assets/images/xylem-logo.png' %}"></img>
+              </div>
+              <div class="row note-label info mt-1 justify-content-center">
+                <div class="col">
+                  <div class="row">
+                    <span id="pc_lbc" class="badge" style="background-color: none; border:1px solid #ddd ;"> &nbsp; &nbsp; </span>
+                    <span id="pc_lst"> 0% </span>
+                    <span> &nbsp; &nbsp; &nbsp; &nbsp;</span>
+                    <span id="pc_mbc" class="badge" style="background-color: none; border:1px solid #ddd;"> &nbsp; &nbsp; </span>
+                    <span id="pc_mst"> 0% </span>
+                    <span> &nbsp; &nbsp; &nbsp; &nbsp;</span>
+                    <span id ="pc_hbc" class="badge" style="background-color: none; border:1px solid #ddd;"> &nbsp; &nbsp; </span>
+                    <span id ="pc_hst"> 0% </span>
+                    <span> &nbsp; &nbsp; &nbsp; &nbsp;</span><br>
+                    <span> All decimals are rounded, WIP - Work Inprogress </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="row justify-content-center">
+            <div class="col-12">
+              <span> ple:0, me:0, qa:0 </span>
+            </div>
+            <div class="col-12">
+              <canvas id="idle_event_canvas" style="height: 30px;"></canvas>
+            </div>
+          </div> -->
+          <div class="row justify-content-center">
+            <div class="col-sm-3">
+              <div class="row justify-content-center mt-3">
+                <span class="sub-head-text"> OEE </span>
+              </div>
+              <div class="row speedometer-canvas-big justify-content-center">
+                <canvas id="oee_canvas" ></canvas>
+              </div>
+              <div class="row justify-content-center">
+                <span id="oee_ps" class="speedometer-text-big"> 0.0% </span>
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <div class="row justify-content-center mt-3">
+                <span class="sub-head-text"> Availability </span>
+              </div>
+              <div class="row speedometer-canvas-small justify-content-center">
+                <canvas id="avl_canvas"></canvas>
+              </div>
+              <div class="row justify-content-center">
+                <span id="avl_ps" class="speedometer-text-small"> 0.0% </span>
+              </div>
+              <div class="row justify-content-center">
+                <table class="general-table">
+                  <tr>
+                    <th> Plan </th>
+                    <td id="at_pl"> AAA </td>
+                  </tr>
+                  <tr>
+                    <th> Actual </th>
+                    <td id="at_ac"> AAA </td>
+                  </tr>
+                </table>
+              </div>
+              <div class="row justify-content-center mt-1" >
+                <span id="avl_ll" class="col-sm-auto loss-text"> AAAA </span>
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <div class="row justify-content-center mt-3">
+                <span class="sub-head-text"> Performance </span>
+              </div>
+              <div class="row speedometer-canvas-small justify-content-center">
+                <canvas id="perf_canvas"></canvas>
+              </div>
+              <div class="row justify-content-center">
+                <span id="perf_ps" class="speedometer-text-small"> 0.0% </span>
+              </div>
+              <div class="row justify-content-center">
+                <table class="general-table">
+                  <tr>
+                    <th>Plan Qty</th>
+                    <td id="pt_pp"> AAA </td>
+                  </tr>
+                  <tr>
+                    <th>Actual Qty</th>
+                    <td id="pt_pa"> AAA </td>
+                  </tr>
+                </table>
+              </div>
+              <div class="row justify-content-center mt-1" >
+                <span id="perf_ll" class="col-sm-auto loss-text"> AAAA </span>
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <div class="row justify-content-center mt-3">
+                <span class="sub-head-text"> Quality </span>
+              </div>
+              <div class="row speedometer-canvas-small justify-content-center">
+                <canvas id="qa_canvas"></canvas>
+              </div>
+              <div class="row justify-content-center">
+                <span id="qa_ps" class="speedometer-text-small"> 0.0% </span>
+              </div>
+              <div class="row justify-content-center">
+                <table class="general-table">
+                  <tr>
+                    <th> Ok Parts </th>
+                    <td id="qt_okp"> AAA </td>
+                  </tr>
+                  <tr>
+                    <th> Rej. & Rew. </th>
+                    <td id="qt_rej_rew"> AAA </td>
+                  </tr>
+                </table>
+              </div>
+              <div class="row justify-content-center mt-1" >
+                <span id="qa_ll" class="col-sm-auto loss-text"> AAA </span>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="row justify-content-center mt-3">
+                <span class="sub-head-text"> Cumulative Data </span>
+              </div>
+              <div class="row justify-content-center mt-1">
+                <table class="general-table-ct">
+                  <tr>
+                    <th class="text-center"> # </th>
+                    <th class="text-center"> OEE </th>
+                    <th class="text-center small-text"> CT Plan </th>
+                    <th class="text-center"> Actual </th>
+                    <th class="text-center"> PPC Plan </th>
+                  </tr>
+                  <tr>
+                    <th> Shift </th>
+                    <td id="ct_s_oee"> 0.0% </td>
+                    <td class="small-text" id="ct_s_ct_pl"> 0 </td>
+                    <td id="ct_s_ac"> 0 </td>
+                    <td id="ct_s_ppc_pl"> 0 </td>
+                  </tr>
+                  <tr>
+                    <th> Day </th>
+                    <td id="ct_d_oee"> 0.0% </td>
+                    <td class="small-text" id="ct_d_ct_pl"> 0 </td>
+                    <td id="ct_d_ac"> 0 </td>
+                    <td id="ct_d_ppc_pl"> 0 </td>
+                  </tr>
+                  <tr>
+                    <th> Month </th>
+                    <td id="ct_m_oee"> 0.0% </td>
+                    <td class="small-text" id="ct_m_ct_pl"> 0 </td>
+                    <td id="ct_m_ac"> 0 </td>
+                    <td id="ct_m_ppc_pl"> 0 </td>
+                  </tr>
+                </table>
+              </div>
+              <div class="row justify-content-center mt-2">
+                <span class="parameters-text"> Total available time: <span id="tot_avl_t"> AAAA </span></span>
+                <span class="parameters-text"> &nbsp;Planned Stoppage: <span id="pdt"> AAAA </span></span>
+                <span class="parameters-text"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Avg. cycle time: <span id="avg_ct"> AAAA </span></span>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <div class="col-sm-4">
+              <div class="row justify-content-center mt-3">
+                <span class="sub-head-text"> Hourly Production </span>
+              </div>
+              <div class="row justify-content-center">
+                <canvas id="hourly_canvas"></canvas>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="row justify-content-center mt-3">
+                <span class="sub-head-text"> Major 5 Availability Losses </span>
+              </div>
+              <div id="m5_no_loss" class="row ">
+                <div class="col-12 justify-content-center d-flex flex-wrap  align-items-center">
+                  <img class="clap-emoji-img" src="{% static 'assets/images/a007/clap_emoji.gif' %}">
+                </div>
+                <div class="co-12 justify-content-center d-flex flex-wrap  align-items-center">
+                  <img class="no-loss-img" src="{% static 'assets/images/a007/no_loss.png' %}">
+                </div>
+              </div> 
+              <div class="row justify-content-center">
+                <canvas id="m5avl_loss_canvas"></canvas>
+              </div>
+            </div>
+            <div class="col-sm-4">
+              <div class="row justify-content-center mt-3">
+                <span class="sub-head-text"> Loss Time Analysis (Waterfall in Mins) </span>
+              </div>
+              <div class="row justify-content-center">
+                <canvas id="loss_time_wf_canvas"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-between">
+            <div class="col-sm-4 mt-1 pl-1">
+              <table class="general-table-detail">
+                <tr>
+                  <th> Running Part Number </th>
+                  <td id="rt_p_no"> AAAAAAA </td>
+                </tr>
+                <tr>
+                  <th> Running Part Name </th>
+                  <td id="rt_p_na"> AAAAAAA </td>
+                </tr>
+                <tr>
+                  <th> Last Changeover @ </th>
+                  <td id="rt_cho"> AAAAAAA </td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-sm-4 mt-1" hidden>
+              <table class="general-table-detail">
+                <tr>
+                  <th> Workorder Number </th>
+                  <td id="wt_wo_no"> AAAAAAA </td>
+                </tr>
+                <tr>
+                  <th> Workorder Quantity </th>
+                  <td id="wt_wo_qty"> 0 </td>
+                </tr>
+                <tr>
+                  <th> Workorder Actual | Remaining Quantity </th>
+                  <td id="wt_wo_a_r_qty"> 0 </td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-sm-4 mt-1 loss-color-notations">
+              <div class="row p-1" id="loss_color_info">
+                <div class="col-auto m-0 pl-0">
+                  Loss color notations:
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-4 mt-1 pr-0">
+              <table class="general-table-detail">
+                <tr>
+                  <th> Production Split Up (Total Changeovers: <span id="psut_tc">0</span>) </th>
+                </tr>
+                <tr>
+                  <td>
+                    <textarea class="form-control pt-0 pb-0" id="psut_data" rows="2" disabled></textarea>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-auto pl-1 pr-0 sub-head-text-small">Time Bar</div>
+            <div class="col pl-1 mt-1 pr-0">
+              <div class="progress" id="time_bar" style="height: 10px; border: 1px solid #ddd ; border-radius: 5px; overflow: hidden;"></div>  
+            </div>
+          </div>
+          <div class="row justify-content-center align-items-center">
+            <div class="row justify-content-center  align-items-center">
+              <div class="custom-control custom-checkbox mr-3">
+                <input type="checkbox" class="custom-control-input" id="autoNext"  onchange="toggleAutoNext()">
+                <label class="custom-control-label" for="autoNext">Auto Next</label>
+              </div>
+              <nav aria-label="Page navigation example">
+                <ul class="pagination mb-0">
+                  <li class="page-item" id="previous_button"><a class="page-link" href="#!" onclick="showPrevious()">
+                  <i class="fa fa-arrow-alt-circle-left"></i>Previous</a></li>
+                  <li class="page-item sub-item-dots disabled" id="sub_item_dots_start">
+                    <a class="page-link text-of-ellipse" href="#">...</a>
+                  </li>
+                  <span class="pagination" id="sub_pagination"></span>
+                  <li class="page-item sub-item-dots disabled" id="sub_item_dots_end">
+                    <a class="page-link text-of-ellipse" href="#">...</a>
+                  </li>
+                  <li class="page-item" id="next_button"><a class="page-link" href="#!" onclick="showNext()">
+                  <span>Next<i class="fa fa-arrow-alt-circle-right"></i></span></a></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+        <div class="floating-text" id="live_data_update_warning" hidden>
+          ⚠️ Unable to update live data
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    var pl_n = document.getElementById("pl_n")
+    var gear_run_mode = document.getElementById("gear_run_mode")
+    var gear_idle_mode = document.getElementById("gear_idle_mode")
+    var it_s = document.getElementById("it_s")
+    var tt = document.getElementById("tt")
+    var ddst = document.getElementById("ddst")
+    var pc_lbc = document.getElementById("pc_lbc")
+    var pc_lst = document.getElementById("pc_lst")
+    var pc_mbc = document.getElementById("pc_mbc")
+    var pc_mst = document.getElementById("pc_mst")
+    var pc_hbc = document.getElementById("pc_hbc")
+    var pc_hst = document.getElementById("pc_hst")
+    var oee_ps = document.getElementById("oee_ps")
+    var tot_avl_t = document.getElementById("tot_avl_t")
+    var pdt = document.getElementById("pdt")
+    var avg_ct = document.getElementById("avg_ct")
+    var avl_ps = document.getElementById("avl_ps")
+    var at_pl = document.getElementById("at_pl")
+    var at_ac = document.getElementById("at_ac")
+    var avl_ll = document.getElementById("avl_ll")
+    var perf_ps = document.getElementById("perf_ps")
+    var pt_pp = document.getElementById("pt_pp")
+    var pt_pa = document.getElementById("pt_pa")
+    var perf_ll = document.getElementById("perf_ll")
+    var qa_ps = document.getElementById("qa_ps")
+    var qt_okp = document.getElementById("qt_okp")
+    var qt_rej_rew = document.getElementById("qt_rej_rew")
+    var qa_ll = document.getElementById("qa_ll")
+    var ct_s_oee = document.getElementById("ct_s_oee")
+    var ct_s_ct_pl = document.getElementById("ct_s_ct_pl")
+    var ct_s_ac = document.getElementById("ct_s_ac")
+    var ct_s_ppc_pl = document.getElementById("ct_s_ppc_pl")
+    var ct_d_oee = document.getElementById("ct_d_oee")
+    var ct_d_ct_pl = document.getElementById("ct_d_ct_pl")
+    var ct_d_ac = document.getElementById("ct_d_ac")
+    var ct_d_ppc_pl = document.getElementById("ct_d_ppc_pl")
+    var ct_m_oee = document.getElementById("ct_m_oee")
+    var ct_m_ct_pl = document.getElementById("ct_m_ct_pl")
+    var ct_m_ac = document.getElementById("ct_m_ac")
+    var ct_m_ppc_pl = document.getElementById("ct_m_ppc_pl")
+    var rt_p_no = document.getElementById("rt_p_no")
+    var rt_p_na = document.getElementById("rt_p_na")
+    var rt_cho = document.getElementById("rt_cho")
+    var m5_no_loss = document.getElementById('m5_no_loss')
+    var wt_wo_no = document.getElementById("wt_wo_no")
+    var wt_wo_qty = document.getElementById("wt_wo_qty")
+    var wt_wo_a_r_qty = document.getElementById("wt_wo_a_r_qty")
+    var loss_color_info = document.getElementById("loss_color_info")
+    var psut_tc = document.getElementById("psut_tc")
+    var psut_data = document.getElementById("psut_data")
+    var autoNext = document.getElementById("autoNext")
+    var previous_button = document.getElementById("previous_button")
+    var next_button = document.getElementById("next_button")
+    var sub_pagination = document.getElementById("sub_pagination")
+    var sub_item_dots_start = document.getElementById("sub_item_dots_start")
+    var sub_item_dots_end = document.getElementById("sub_item_dots_end")
+    var oee_dashboard_card = document.getElementById("oee_dashboard_card")
+    var time_bar = document.getElementById("time_bar");
+    var live_data_update_warning = document.getElementById("live_data_update_warning");
+    
+    var speedoMeterChartConfig = { 
+      type : 'doughnut',
+      data: {
+        labels: ['Low', 'Medium', 'High'],
+        datasets: [{
+          label: '#NA',
+          data: [0, 0, 0],
+          backgroundColor: [
+              'rgb(0, 0, 0)',
+              'rgb(0, 0, 0)',
+              'rgb(0, 0, 0)'
+            ],
+          circumference: 180,
+          rotation: 270,
+          cutout: '70%'
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: false
+          }
+        },
+        layout:{
+          padding: {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+          },
+        },
+        responsive: false,
+      }
+    }
+
+    var barChartConfig = { 
+      type : 'bar',
+      data: {
+        labels : [],
+        datasets: [{
+          label: '#NA',
+          data: [],
+          backgroundColor:[],
+          barPercentage: 1,
+          datalabels: {
+            color: [],
+            anchor: 'end',
+            align: [],
+            offset: [],
+            font: {
+              weight: 'bold',
+              size: 10,
+            },
+          },
+          order:0,
+        }],
+      },
+      options: {
+        indexAxis: 'x',
+        plugins: {
+          legend: {
+              display: false
+            }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            display: false,
+            
+            grid: {
+              display: false // hide grid lines for the x-axis
+            },
+            ticks:{
+              autoSkip: false,
+              color: 'black',
+              font:{
+                size: 10,
+              },
+            }
+          },
+          y: {
+            beginAtZero: true,
+            display: false,
+            grid: {
+              display: false // hide grid lines for the y-axis
+            },
+            ticks:{
+              autoSkip: false,
+              color: 'black',
+              font:{
+                size: 10,
+              },
+            }
+          }
+        },
+        layout:{
+          padding: {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+        aspectRatio: 1.4
+      }
+    }
+
+    var addOnLineChartConfig={
+      type: 'line',
+      label: '#NA',
+      data: [],
+      backgroundColor: [],
+      borderColor: [],
+      datalabels: {
+        display: false 
+      },
+      tension:0.4, // Adjust the tension value to control the curve
+      order:0,
+    }
+    
+    var line_data = {}  
+    var production_lines_dict_str = "{{production_lines_dict}}"
+    var production_lines_dict = JSON.parse(production_lines_dict_str.replace(/&quot;/g,'"'))
+    var production_line_list = Object.keys(production_lines_dict)
+    var oee_dashboard_color_code_dict_str = "{{oee_dashboard_color_code_dict}}"
+    var oee_dashboard_color_code_dict = JSON.parse(oee_dashboard_color_code_dict_str.replace(/&quot;/g,'"'))
+    var speedometer_default_color = "#ccd1d1"
+    var line_id = production_line_list[0]
+    var current_index = 0
+    var slideTimeout = 10
+    var slideTimeset 
+    var fetch_time_out_in_ms = 5000
+    var max_continous_fetch_errors_for_reload = 5
+    var fetch_error_count = 0
+    var psut_data_isMouseOver = false
+    var psut_data_scroll_wait_count = 0
+
+    oee_chart_config = {
+      type: structuredClone(speedoMeterChartConfig.type),
+      data: structuredClone(speedoMeterChartConfig.data),
+      options: structuredClone(speedoMeterChartConfig.options),
+    }
+    oee_chart_config.data.datasets[0].label="OEE"
+    var oee_chart = new Chart(oee_canvas, oee_chart_config);
+
+    avl_chart_config = {
+      type: structuredClone(speedoMeterChartConfig.type),
+      data: structuredClone(speedoMeterChartConfig.data),
+      options: structuredClone(speedoMeterChartConfig.options),
+    }
+    avl_chart_config.data.datasets[0].label="Availability"
+    var avl_chart = new Chart(avl_canvas, avl_chart_config);
+
+    perf_chart_config = {
+      type: structuredClone(speedoMeterChartConfig.type),
+      data: structuredClone(speedoMeterChartConfig.data),
+      options: structuredClone(speedoMeterChartConfig.options),
+    }
+    perf_chart_config.data.datasets[0].label="Performance"
+    var perf_chart = new Chart(perf_canvas, perf_chart_config);
+
+    qa_chart_config = {
+      type: structuredClone(speedoMeterChartConfig.type),
+      data: structuredClone(speedoMeterChartConfig.data),
+      options: structuredClone(speedoMeterChartConfig.options),
+    }
+    qa_chart_config.data.datasets[0].label="Quality"
+    var qa_chart = new Chart(qa_canvas, qa_chart_config);
+    
+    hourly_chart_config = {
+      type: structuredClone(barChartConfig.type),
+      data: structuredClone(barChartConfig.data),
+      options: structuredClone(barChartConfig.options),
+      plugins: [ChartDataLabels],
+    }
+    hourly_chart_config.data.datasets[0].label = "Production Count"
+    hourly_chart_config.data.datasets[0].order = 1
+    hourly_chart_config.data.datasets[0].datalabels.align = "top"
+    hourly_chart_config.options.scales.x.display = true
+    hourly_chart_config.data.datasets[1] = structuredClone(addOnLineChartConfig)
+    hourly_chart_config.data.datasets[1].label = 'Target'
+    hourly_chart_config.data.datasets[1].order = 0
+    hourly_chart_config.data.datasets[1].borderColor = 'skyblue'
+    hourly_chart_config.data.datasets[1].backgroundColor= 'skyblue'
+    hourly_chart_config.options.layout.padding.top = 25
+    hourly_chart_config.options.plugins.tooltip = {
+      callbacks: {
+        title: (ctx) =>{
+          return ctx[0].label.replaceAll(","," ")
+        },
+        label: (ctx) =>{
+          var label = ctx.dataset.label || '';
+          if (ctx.datasetIndex==0){
+            return label+": "+ line_data.hrly.bntt[ctx.dataIndex]
+          }
+          else if (ctx.datasetIndex==1){
+            return label+": "+ line_data.hrly.ltt[ctx.dataIndex]
+          }
+        }
+      }
+    }
+    var hourly_chart = new Chart(hourly_canvas, hourly_chart_config);
+
+    m5avl_loss_chart_config = {
+      type: structuredClone(barChartConfig.type),
+      data: structuredClone(barChartConfig.data),
+      options: structuredClone(barChartConfig.options),
+      plugins: [ChartDataLabels],
+    }
+    m5avl_loss_chart_config.options.indexAxis='y'
+    m5avl_loss_chart_config.data.datasets[0].label="Loss Time"
+    m5avl_loss_chart_config.data.datasets[0].datalabels.align="right"
+    m5avl_loss_chart_config.options.scales.y.display= true
+    m5avl_loss_chart_config.options.layout.padding.right = 60
+    m5avl_loss_chart_config.options.plugins.tooltip = {
+      callbacks: {
+        title: (ctx) =>{
+          return ctx[0].label.replaceAll(","," ")
+        },
+        label: (ctx) => {
+          var label = ctx.dataset.label || '';
+          return label+": "+ line_data.m5al.bn[ctx.dataIndex]
+        }
+      }
+    }
+    var m5avl_loss_chart = new Chart(m5avl_loss_canvas, m5avl_loss_chart_config)
+
+    loss_time_wf_chart_config = {
+      type: structuredClone(barChartConfig.type),
+      data: structuredClone(barChartConfig.data),
+      options: structuredClone(barChartConfig.options),
+      plugins: [ChartDataLabels]
+    }
+    loss_time_wf_chart_config.data.datasets[0].label="Time"
+    loss_time_wf_chart_config.data.datasets[0].datalabels.align="top"
+    loss_time_wf_chart_config.data.datasets[0].barPercentage = 1.1
+    loss_time_wf_chart_config.options.scales.x.display = true
+    loss_time_wf_chart_config.options.layout.padding.top = 25
+    loss_time_wf_chart_config.options.plugins.tooltip = {
+      callbacks: {
+        title: (ctx) =>{
+          return ctx[0].label.replaceAll(","," ")
+        },
+        label: function (ctx) {
+          if (ctx.dataIndex ===  0 || ctx.dataIndex === ctx.dataset.data.length-1){
+            label ="Time"
+          }
+          else{
+            label ="Loss"
+          }
+          return label+": "+ line_data.wf.bntt[ctx.dataIndex]
+        }
+      }
+    }
+    var loss_time_wf_chart = new Chart(loss_time_wf_canvas, loss_time_wf_chart_config)
+    
+    idle_event_chart_config = {
+      type: structuredClone(barChartConfig.type),
+      data: structuredClone(barChartConfig.data),
+      options: structuredClone(barChartConfig.options),
+    }
+    idle_event_chart_config.options.indexAxis='y'
+    idle_event_chart_config.data.datasets[0].label="Loss Time"
+    idle_event_chart_config.data.datasets[0].datalabels.align="right"
+    idle_event_chart_config.options.plugins.tooltip = {
+      callbacks: {
+        title: (ctx) =>{
+          return ctx[0].label.replaceAll(","," ")
+        },
+        label: (ctx) => {
+          var label = ctx.dataset.label || '';
+          return label+": "+ line_data.m5al.bn[ctx.dataIndex]
+        }
+      }
+    }
+
+    function Timeout(fn, interval) {
+      var id = setTimeout(fn, interval);
+      this.cleared = false;
+      this.clear = function () {
+        this.cleared = true;
+        clearTimeout(id);
+        };
+    }
+
+    function fetch_with_time_out(ms, promise) {
+      return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+          reject(new Error("timeout"))
+        }, ms)
+        promise.then(resolve, reject)
+      })
+    }
+
+    function fetch_line_data(line_id, initial=false){
+      var send_data = { line_id : line_id };
+      fetch_with_time_out( 
+        fetch_time_out_in_ms,
+        fetch("{{ get_dashboard_data_url }}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          body: JSON.stringify(send_data),
+        })
+        .then(response => response.json())
+        .then(data_dic => {
+          line_data = data_dic
+          if (initial){
+            slideTimeset = new Timeout(slideChange, slideTimeout)
+            autoNext.checked = true
+            slideChangeSetup(current_index)
+          }
+          update_view();
+          fetch_error_count = 0
+          live_data_update_warning.hidden = true
+        })
+        .catch( function(error) {
+          console.log(error)
+          fetch_error_count = fetch_error_count + 1
+          if (fetch_error_count > max_continous_fetch_errors_for_reload)
+          { 
+            live_data_update_warning.hidden = false
+          }
+        })
+      )
+    }
+
+    function update_view(){
+      
+      pl_n.textContent = line_data.pl_n
+      pl_n.style.backgroundColor = line_data.pl_bg_c
+      pl_n.style.color = line_data.pl_txt_c
+
+      if (line_data.grr){
+        gear_run_mode.style.display = "block"
+        gear_idle_mode.style.display = "none"
+      }
+      else{ 
+        gear_run_mode.style.display = "none"
+        gear_idle_mode.style.display = "block"
+      }
+
+      it_s.textContent = line_data.it_s
+      tt.textContent = line_data.tt
+      ddst.textContent = line_data.ddst
+      pc_lbc.style.backgroundColor = line_data.color_code_dict.pc_lbc
+      pc_lst.textContent = line_data.color_code_dict.pc_lst
+      pc_mbc.style.backgroundColor = line_data.color_code_dict.pc_mbc
+      pc_mst.textContent = line_data.color_code_dict.pc_mst
+      pc_hbc.style.backgroundColor = line_data.color_code_dict.pc_hbc
+      pc_hst.textContent = line_data.color_code_dict.pc_hst
+      oee_chart_config.data.datasets[0].data =[line_data.oee_p, 100-line_data.oee_p]
+      oee_chart_config.data.datasets[0].backgroundColor = [line_data.oee_p_bc, speedometer_default_color]
+      oee_chart.update('none')  
+      oee_ps.textContent = line_data.oee_ps
+      tot_avl_t.textContent = line_data.tot_avl_t
+      pdt.textContent = line_data.pdt
+      avg_ct.textContent = line_data.avg_ct
+      avl_chart_config.data.datasets[0].data =[line_data.avl_p, 100-line_data.avl_p]
+      avl_chart_config.data.datasets[0].backgroundColor = [line_data.avl_p_bc, speedometer_default_color]
+      avl_chart.update('none')  
+      avl_ps.textContent = line_data.avl_ps
+      at_pl.textContent = line_data.at_pl
+      at_ac.textContent = line_data.at_ac
+      avl_ll.textContent = line_data.avl_ls
+      avl_ll.style.color = line_data.avl_ls_tc
+      avl_ll.style.backgroundColor = line_data.avl_ls_bc
+      perf_chart_config.data.datasets[0].data =[line_data.perf_p, 100-line_data.perf_p]
+      perf_chart_config.data.datasets[0].backgroundColor = [line_data.perf_p_bc, speedometer_default_color]
+      perf_chart.update('none')  
+      perf_ps.textContent = line_data.perf_ps
+      pt_pp.textContent = line_data.pt_pp
+      pt_pa.textContent = line_data.pt_pa
+      perf_ll.textContent = line_data.perf_ls
+      perf_ll.style.color = line_data.perf_ls_tc
+      perf_ll.style.backgroundColor = line_data.perf_ls_bc
+      qa_chart_config.data.datasets[0].data =[line_data.qa_p, 100-line_data.qa_p]
+      qa_chart_config.data.datasets[0].backgroundColor = [line_data.qa_p_bc, speedometer_default_color]
+      qa_chart.update('none')  
+      qa_ps.textContent = line_data.qa_ps
+      qt_okp.textContent = line_data.qt_okp
+      qt_rej_rew.textContent = line_data.qt_rej_rew
+      qa_ll.textContent = line_data.qa_ls
+      qa_ll.style.color = line_data.qa_ls_tc
+      qa_ll.style.backgroundColor = line_data.qa_ls_bc
+      ct_s_oee.textContent = line_data.ct_s_ot
+      ct_s_oee.style.color = line_data.ct_s_otc
+      ct_s_oee.style.backgroundColor = line_data.ct_s_obc
+      ct_s_ct_pl.textContent = line_data.ct_s_ct_pl
+      ct_s_ac.textContent = line_data.ct_s_at
+      ct_s_ac.style.color = line_data.ct_s_atc
+      ct_s_ac.style.backgroundColor = line_data.ct_s_abc
+      ct_s_ppc_pl.textContent = line_data.ct_s_ppc_pl
+      ct_d_oee.textContent = line_data.ct_d_ot
+      ct_d_oee.style.color = line_data.ct_d_otc
+      ct_d_oee.style.backgroundColor = line_data.ct_d_obc
+      ct_d_ct_pl.textContent = line_data.ct_d_ct_pl
+      ct_d_ac.textContent = line_data.ct_d_at
+      ct_d_ac.style.color = line_data.ct_d_atc
+      ct_d_ac.style.backgroundColor = line_data.ct_d_abc
+      ct_d_ppc_pl.textContent = line_data.ct_d_ppc_pl
+      ct_m_oee.textContent = line_data.ct_m_ot
+      ct_m_oee.style.color = line_data.ct_m_otc
+      ct_m_oee.style.backgroundColor = line_data.ct_m_obc
+      ct_m_ct_pl.textContent = line_data.ct_m_ct_pl
+      ct_m_ac.textContent = line_data.ct_m_at
+      ct_m_ac.style.color = line_data.ct_m_atc
+      ct_m_ac.style.backgroundColor = line_data.ct_m_abc
+      ct_m_ppc_pl.textContent = line_data.ct_m_ppc_pl
+      
+      hourly_chart_config.data.labels = line_data.hrly.xn
+      hourly_chart_config.data.datasets[0].data = line_data.hrly.y
+      hourly_chart_config.data.datasets[0].backgroundColor = line_data.hrly.bc
+      hourly_chart_config.data.datasets[1].data = line_data.hrly.t
+      hourly_chart.update('none')
+      if (line_data.m5al.x.length) {
+        m5_no_loss.style.display = "none";
+        m5avl_loss_canvas.style.display = "block";
+      } else {
+        m5_no_loss.style.display = "block";
+        m5avl_loss_canvas.style.display = "none";
+      }
+      m5avl_loss_chart_config.data.datasets[0].data = line_data.m5al.x
+      m5avl_loss_chart_config.data.labels = line_data.m5al.yn
+      m5avl_loss_chart_config.data.datasets[0].backgroundColor = line_data.m5al.bc
+      m5avl_loss_chart_config.options.plugins.datalabels = {
+        formatter: function (value, context) {
+          return line_data.m5al.bn[context.dataIndex]
+        }
+      }
+      m5avl_loss_chart.update('none')
+      loss_time_wf_chart_config.data.labels = line_data.wf.xn
+      loss_time_wf_chart_config.data.datasets[0].data = line_data.wf.y
+      loss_time_wf_chart_config.options.plugins.datalabels = {
+        formatter: function (value, context) {
+          return line_data.wf.bn[context.dataIndex]
+        }
+      }
+      loss_time_wf_chart_config.data.datasets[0].backgroundColor = line_data.wf.bc
+      loss_time_wf_chart.update('none')
+      rt_p_no.textContent = line_data.rt_p_no
+      rt_p_na.textContent = line_data.rt_p_na
+      rt_cho.textContent = line_data.rt_cho
+      wt_wo_no.textContent = line_data.wt_wo_no
+      wt_wo_qty.textContent = line_data.wt_wo_qty
+      wt_wo_a_r_qty.textContent = line_data.wt_wo_a_r_qty
+      psut_tc.textContent = line_data.psut_tc
+      psut_data.textContent = line_data.psut_data
+
+      var temp_str = "";
+      for (let i = 0; i < line_data.time_bar.length; i++) {
+        let tb_data = line_data.time_bar[i];
+        temp_str += `<div class="progress-bar" role="progressbar" style="width:${tb_data.width}; background-color:${tb_data.bg_color};" 
+          data-toggle="tooltip" data-placement="top" title="${tb_data.title}" data-html="true" aria-valuemin="0" aria-valuemax="100"></div>`
+      }
+      time_bar.innerHTML = temp_str
+      $('[data-toggle="tooltip"]').tooltip({
+        container: '#time_bar'
+      });
+        
+
+      slideTimeout = line_data.slide_timeout
+      if (autoNext.checked){
+        if (slideTimeset.cleared){
+          slideTimeset = new Timeout(slideChange, slideTimeout)
+        }
+      }
+    }
+    
+    function update_dashboard(){
+      fetch_line_data(line_id);
+    }
+
+    fetch_line_data(line_id, initial=true)
+    window.setInterval(update_dashboard, 1000);
+
+    function setupPagination(index) {
+      var paginationItems = document.querySelectorAll('.pagination .page-item.sub-item');
+      var pagesShow = 3 ;
+      var equal_split = Math.floor(pagesShow/2);
+      var pagesFront = pagesShow-equal_split-1
+      var pagesBack = equal_split
+      var totalLen = production_line_list.length
+      var pagesShowList = []
+      if (totalLen > pagesShow){
+        if (index-pagesFront <= 0){
+          for (let i = 0; i < pagesShow; i++){
+            pagesShowList.push(i)
+          }
+          sub_item_dots_start.style.display ="none"
+        }
+        else{
+          if (index + pagesBack + 1 >= production_line_list.length){
+            for (let i = production_line_list.length-1; i >= production_line_list.length-pagesShow; i--){
+              pagesShowList.push(i)
+            }
+          }
+          else{
+            for (let i = index-pagesFront ; i < index+pagesBack+1; i++){
+              pagesShowList.push(i)
+            }
+          }
+          
+          sub_item_dots_start.style.display ="block"
+        }
+        if (index + pagesBack + 1 >= production_line_list.length){
+          sub_item_dots_end.style.display ="none"
+        }
+        else{
+          sub_item_dots_end.style.display ="block"
+        }
+      }
+      else{
+        for (let i = index-pagesFront ; i < pagesShow; i++){
+          pagesShowList.push(i)
+        }
+        sub_item_dots_start.style.display ="none"
+        sub_item_dots_end.style.display ="none"
+      }
+      paginationItems.forEach((item, i) => {
+        if (i === index) {
+          item.classList.add('active');
+          // item.style.display='none'
+        } else {
+          item.classList.remove('active');
+        }
+        if (pagesShowList.includes(i)){
+          item.style.display='block'
+        }
+        else{
+          item.style.display='none'
+        }
+      });
+    }
+
+    function slideChangeSetup(change_index){
+      applyFadeAnimation()
+      if ( change_index == production_line_list.length-1)
+      {
+        next_button.className = "page-item disabled"
+      }
+      else{
+        next_button.className = "page-item"
+      }
+      if ( change_index == 0 ){
+        previous_button.className = "page-item disabled"
+      }
+      else{
+        previous_button.className = "page-item"
+      }
+      line_id = production_line_list[change_index]
+      update_dashboard()
+      current_index = change_index
+      setupPagination(current_index);
+      if (!slideTimeset.cleared)
+      {
+        slideTimeset.clear()
+      }
+    }
+    
+    function slideChange(){
+      var index = current_index + 1
+      if (!(index < production_line_list.length)){
+        index = 0
+      }
+      slideChangeSetup(index)
+    }
+
+    function showNext() {
+      var index = current_index + 1
+      slideChangeSetup(index)
+    }
+
+    function showPrevious() {
+      var index = current_index - 1
+      slideChangeSetup(index)
+    }
+
+    function toggleAutoNext(){
+      if (!autoNext.checked){
+        slideTimeset.clear()
+      }
+    }
+    
+    function applyFadeAnimation() {
+      document.querySelector('.slide').style.animation = "none";
+      void document.querySelector('.slide').offsetWidth; // Trigger reflow
+      document.querySelector('.slide').style.animation = "fadeInAnimation ease 1s"; // Set animation duration to 5 seconds
+      document.querySelector('.slide').style.animationDirection = "normal";
+      document.querySelector('.slide').style.animationFillMode = "none"; /* Reset animation-fill-mode */
+    }
+
+    function toggleDashboardFullscreen(element) {
+      if (!oee_dashboard_card.classList.contains("fullscreen")) {
+        oee_dashboard_card.classList.add("fullscreen");
+        oee_dashboard_card.requestFullscreen();
+        element.innerHTML=`<i class="feather icon-minimize-2"></i> Minimize`
+        applyFadeAnimation()  
+      } 
+      else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+          oee_dashboard_card.classList.remove("fullscreen");
+          element.innerHTML=`<i class="feather icon-maximize-2"></i> Maximize`
+          applyFadeAnimation()  
+        }
+      }
+    }
+
+    function generateTimeBarColorInfo() {
+      for (i in oee_dashboard_color_code_dict ) {
+        var element = document.createElement('div');
+        element.classList.add("col-3")
+        element.classList.add("m-0")
+        element.classList.add("p-0")
+        element.innerHTML = `<span class="badge square align-middle" style="background-color: ${oee_dashboard_color_code_dict[i].bg_color};"> &nbsp; &nbsp; </span> <span class="text align-middle">${oee_dashboard_color_code_dict[i].name}</span>`
+        loss_color_info.appendChild(element)
+      }
+    } 
+
+    function generatePagination() {
+      let paginationHTML = '';
+      for (i in production_lines_dict ) {
+        var index = production_line_list.indexOf(i);
+        paginationHTML += `
+          <li class="page-item sub-item ${index === 0 ? 'active' : ''}">
+            <a class="page-link text-of-ellipse" href="#" data-toggle="tooltip" title="${production_lines_dict[i]}" onclick="slideChangeSetup(${index})">${production_lines_dict[i]}</a>
+          </li>
+        `;
+      }
+      sub_pagination.outerHTML = paginationHTML;
+    } 
+
+    function psutDataAutoScroll() {
+      if (psut_data.scrollHeight > psut_data.clientHeight) {
+        if (psut_data.scrollTop + psut_data.clientHeight >= psut_data.scrollHeight && !psut_data_isMouseOver) {
+          if (psut_data_scroll_wait_count < 10){
+            psut_data_scroll_wait_count += 1
+          }
+          else{
+            psut_data.scrollTop = 0;
+            psut_data_scroll_wait_count = 0
+          }
+        } else if (!psut_data_isMouseOver) {
+          psut_data.scrollTop += 1;
+        }
+      }
+    }
+    
+    psut_data.addEventListener('mouseenter', () => {
+      psut_data_isMouseOver = true; // Mouse is over the element, stop scrolling
+    });
+
+    psut_data.addEventListener('mouseleave', () => {
+      psut_data_isMouseOver = false; // Mouse left the element, resume scrolling
+    });
+    setInterval(psutDataAutoScroll, 130);
+
+    generateTimeBarColorInfo();
+    generatePagination();
+    $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip({
+        container: '#oee_dashboard_card'
+      });
+    });
+
+    // for 960x540 TV
+    var screen_width = window.screen.width
+    var screen_height = window.screen.height 
+    // alert(`Width: ${screen_width}, Height: ${screen_height}`)
+
+    if ((screen_width == 960 && screen_height == 540) || (screen_width == 962 && screen_height == 541)){
+
+      $(".time-text").css("font-size","30px")
+      $(".date-day-shift-text").css("font-size","15px")
+      $(".head-text").css("font-size","24px")
+      $(".production-line-text").css("font-size","15px")
+      $(".gear-img").css("width","35px")
+      $(".gear-img").css("height"," 35px")
+      $(".gear-idle-time-text").css("font-size"," 2px")
+      $(".company-logo").css("width","80px")
+      $(".company-logo").css("height","32px")
+      $(".xylem-logo").css("width","25px")
+      $(".xylem-logo").css("height","25px")
+      $(".note-label").css("font-size","9px")
+      $(".sub-head-text").css("font-size","15px")
+      $(".speedometer-canvas-big").css("margin-top","-45px")
+      $(".speedometer-canvas-big").css("margin-bottom","-100px")
+      $(".speedometer-canvas-small").css("margin-top","-33px")
+      $(".speedometer-canvas-small").css("margin-bottom","-55px")
+      $(".speedometer-text-big").css("font-size","45px")
+      $(".speedometer-text-small").css("font-size","20px")
+      $(".parameters-text").css("font-size","9px")
+      $(".loss-text").css("font-size","13px")
+      $(".small-text").css("font-size","8px")
+      $(".general-table").css("font-size","9px")
+      $(".general-table-ct").css("font-size","11px")
+      $(".general-table-detail").css("font-size","9px")
+      $(".clap-emoji-img").css("width","123px")
+      $(".clap-emoji-img").css("height","123px")
+      $(".no-loss-img").css("margin-top","-20px")
+      $(".no-loss-img").css("width","116px")
+      $(".no-loss-img").css("height","46px")
+      $("textarea").addClass("pb-1")
+      $(".loss-color-notations").css("font-size","10px")
+      $(".loss-color-notations span.square").css("font-size","6px")
+      $(".loss-color-notations span.text").css("font-size","9px")
+      $(".pagination li").css("font-size","10px")
+      $(".sub-item").css("width","70px")
+      $('.mt-3').addClass('mt-2').removeClass('mt-3');
+
+      $("#maximini").attr("style","font-size:10px;")
+      $("#oee_canvas").attr("style","height:200px")
+      $("#avl_canvas").attr("style","height:135px")
+      $("#perf_canvas").attr("style","height:135px")
+      $("#qa_canvas").attr("style","height:135px")
+      $("#hourly_canvas").attr("style","height:150px")
+      $("#m5avl_loss_canvas").attr("style","height:150px")
+      $("#loss_time_wf_canvas").attr("style","height:150px")
+      $("#psut_data").attr("style","font-size:8px;")
+      hourly_chart_config.options.scales.x.ticks.font.size = 8
+      hourly_chart_config.data.datasets[0].datalabels.font.size= 10
+      m5avl_loss_chart_config.options.scales.y.ticks.font.size = 8
+      m5avl_loss_chart_config.data.datasets[0].datalabels.font.size= 10
+      loss_time_wf_chart_config.options.scales.x.ticks.font.size = 8
+      loss_time_wf_chart_config.data.datasets[0].datalabels.font.size= 10
+    }
+    else {
+      oee_chart_config.options.responsive = true
+      avl_chart_config.options.responsive = true
+      perf_chart_config.options.responsive = true
+      qa_chart_config.options.responsive = true
+    }
+  </script>
+  <!-- [ Main Content ] end -->
+
+{% endblock content %}

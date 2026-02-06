@@ -1,0 +1,145 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load a000_custom_tags %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+  <script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'assets/plugins/bootstrap-toggle-button/css/bootstrap.css' %}">
+  <script src="{% static 'assets/plugins/bootstrap-toggle-button/js/bootstrap.js' %}"></script>
+
+
+  <!-- [ Main Content ] start -->
+  <div class="col-xl-10 col-md-10">
+    <div class="card Recent-Users">
+      <div class="card-header">
+        <h5>Manage Mails</h5>
+        <span class="float-right">Enabled mails <span id="enabled_mail_count"></span> out of {{mails.count}}</span>
+      </div>
+      <div class="card-block py-3">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <tbody>
+                {% for mail in mails %}
+                  {% with mail.icode|get_mail_prevented_status_of_user:user.id as status %}
+                    <tr>
+                      <td>
+                        <h6 class="mb-1"><i class="feather icon-mail"></i> {{ mail.name }}</h6>
+                      </td>
+                      <td>
+                        {% if status %}
+                          <i class="fas fa-circle text-c-red f-10 m-r-15"></i>
+                        {% else %} 
+                          <i class="fas fa-circle text-c-green f-10 m-r-15"></i>
+                        {% endif %}
+                      </td>               
+                      <td>
+                        <input class="checkbox" onchange="showHideSaveButton(this)" type="checkbox" 
+                          id="{{mail.icode}}" name="{{mail.icode}}" data-toggle = "toggle"
+                          {% if not status %}checked{% endif %} data-size="xs" data-onstyle="success" data-offstyle="danger">                                 
+                      </td>
+                    </tr>
+                  {% endwith %}
+                {% endfor %}
+              </tbody>
+            </table>
+            <button id="save_button" class="btn btn-primary" style="display: none;">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- [ Main Content ] end -->
+
+  <!-- [ Messages ] start-->
+  <div class="col-sm-12">
+    {% if messages %}
+      {% for message in messages %}
+        {% if message.level in CUSTOM_MESSAGE_DISSMISSABLE_LEVELS_LIST %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% elif message.level in CUSTOM_MESSAGE_POPUP_LEVELS_LIST  %}
+          
+          <!-- [Popup Modal] start-->
+          <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content card rounded">
+                <div class="modal-header">
+                  <h5 class="modal-title"> Notification </h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body text-center text-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- [Popup Modal] end-->
+
+          <script>
+            $(document).ready(function() {
+              $("#messageModal").modal('show')
+            })
+          </script>
+
+        {% else %}
+          <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <!-- [Messages ] end-->
+
+  <!-- [ Script ] start -->
+  <script>
+    let initialStates = [];
+
+    $('.checkbox').each(function () {
+      let mail_code = this.id;
+      let state = $(this).prop('checked') ? 'checked' : 'unchecked';
+      initialStates.push(`${mail_code}:${state}`);
+    });
+
+
+    function getCurrentStates() {
+      let currentStates = [];
+
+      $('.checkbox').each(function () {
+        let mail_code = this.id;
+        let state = $(this).prop('checked') ? 'checked' : 'unchecked';
+        currentStates.push(`${mail_code}:${state}`);
+      });
+
+      return currentStates;
+    }
+
+    function showHideSaveButton(changedCheckbox) {
+      let currentStates = getCurrentStates();
+
+      // Convert arrays to strings for simple comparison
+      if (JSON.stringify(currentStates) === JSON.stringify(initialStates)) {
+        $('#save_button').hide();  
+      } else {
+        $('#save_button').show();
+      }
+    }
+    $('#enabled_mail_count').text(initialStates.filter(state => state.includes(':checked')).length);
+
+  </script>
+  <!-- [ Script ] end -->
+
+{% endblock content %}
+
+

@@ -1,0 +1,1581 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}{% endblock breadcrumbs %}
+
+{% block content %}
+
+	<!-- <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css"> -->
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
+	<!-- <script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script> -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script> -->
+
+	<script src="{% static 'assets/plugins/flickity_carousal/bootstrap_carousal.js' %}"></script>
+	<script src="{% static 'assets/plugins/flickity_carousal/flickity_bootstrap_carousal.js' %}"></script>
+	<script src="{% static 'assets/plugins/flickity_carousal/flickity_cloudfare_jquery.js' %}"></script>
+	<!-- E:\01_THIRU_WORKSPACE\Project_Xylem\xylem/xylem_apps/a000_xylem_master/static/ -->
+	<link href="{% static 'assets/plugins/flickity_carousal/flickity_min.css'%}" rel="stylesheet">
+
+
+	<!-- [ Main Content ] start -->
+	<script src="{% static 'assets/plugins/jquery/js/jquery.min.js' %}"></script>
+	<script src="{% static 'assets/plugins/chartjs/4.4.0/package/dist/chart.umd.js' %}"></script>
+	<script src="{% static 'assets/plugins/chartjs/datalabel/datalabels.js' %}"></script>
+
+  <style>
+		.flickity-button {
+			background: rgb(243, 245, 245);
+			/* background: none; */
+		}
+		.carousel-indicators button {
+			width: 12px; /* Adjust size */
+			height: 12px;
+			border-radius: 50%; /* Make it circular */
+			background-color: #cccccc; /* Default color */
+			border: none; /* Remove borders */
+			transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth hover effect */
+			margin: 0 5px; /* Add horizontal spacing between dots */
+		}
+		.carousel-indicators .active {
+			background-color: black; /* Active color */
+			
+		}
+		.carousel-control-prev-icon,
+		.carousel-control-next-icon {
+			display: none; 
+			color: black;
+		}
+		.carousel-control-prev,
+		.carousel-control-next {
+			outline: none; /* Removes focus outline */
+			box-shadow: none; /* Removes any box shadow */
+			background-color: transparent; 
+			border: none;
+		}
+		.carousel-control-prev:hover,
+		.carousel-control-next:hover,
+		.carousel-control-prev:focus,
+		.carousel-control-next:focus {
+			background-color: transparent; /* Prevents hover/focus background */
+			border: none; /* Removes any border effect */
+		}
+		.carousel-cell {
+    width: 45%;
+		margin-right: 10px;
+    }
+		
+    /* cell number */
+    .carousel-cell:before {
+      display: block;
+    }
+    .time-text{
+      color: purple;
+      font-family: 'Arial';
+      font-size: 30px;
+      font-weight: bold;  
+      line-height: 1; 
+    }
+    .date-day-shift-text{
+      color: purple;
+      font-family: 'Arial';
+      font-size: 20px;
+      font-weight: bold;  
+      text-align: center;
+    }
+    .head-text {
+      color:blue;
+      font-family: 'Times New Roman';
+      font-size: 35px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .company-logo{
+      width: 100px; 
+      height: 41px;
+    }
+    .xylem-logo{
+      width: 30px; 
+      height: 30px;
+    }
+    .section1{
+		/* background-color: #fff75d57; */
+      border: 1px solid;
+		border-color: rgb(38, 15, 243);
+    }
+    .section2{
+      border: 4px solid;
+    }
+    .section3{
+      border: 4px solid;
+    }
+    .curr-srce-img{
+      width: 80px;
+      height: 80px;
+    }
+    .income-srce-img{
+      width: 40px;
+      height: 40px;
+    }
+		/* Adjust the dot container (the row of dots) */
+		.flickity-page-dots {
+		padding-bottom: 25px;
+		}
+		
+  </style>
+
+	<div class="row justify-content-center">
+		<div class="col-sm-2">
+			<div class="row" id="maximini">  
+				<a href="#!" onclick="toggleDashboardFullscreen(this)"><i class="feather icon-maximize-2"></i> Minimize</a>
+			</div>
+			<div class="row justify-content-center mt-1">  
+				<span id="tt" class="time-text"> 02:55:09 PM </span>
+			</div>
+			<div class="row justify-content-center">  
+				<span id="ddst" class="date-day-shift-text"> 24-Dec-2024 TUE</span>
+			</div>
+		</div>
+		<div class="col-sm-7 justify-content-center">
+			<div class="row justify-content-center">  
+				<span class="head-text"> POWER CONSUMPTION SAMPLE DASHBOARD (TRIAL) </span>
+			</div>
+		</div>
+		<div class="col-1">
+			<!-- <img class="curr-srce-img" src="{% static 'assets/images/a009/electric_post.png' %}"> -->
+			<!-- <img class="curr-srce-img" src="{% static 'assets/images/a009/diesel_generator.png' %}"> -->
+			<img class="curr-srce-img" src="{% static 'assets/images/a009/ups.png' %}">
+		</div>
+		<div class="col-sm-2">
+			<div class="row justify-content-end d-flex flex-wrap align-items-center">
+				<img class="company-logo" src="{% static 'assets/images/ZF_Rane.png' %}">
+				<img class="xylem-logo ml-2" src="{% static 'assets/images/xylem-logo.png' %}"></img>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<!-- Overview Card Section -->
+		<div class="col-md-12 col-xl-4"> <!-- Adjust column size as needed -->
+			<div class="col-md-12 col-xl-12">
+				<div class="card">
+					<div class="card-block">
+						<h6 class="mb-4" id="dc_n"> Day Overview </h6>
+						<div class="row">
+							<div class="col-6 border-right">
+								<div class="row justify-content-center">
+									Consumption
+								</div>
+							</div>
+							<div class="col-6">
+								<div class="row justify-content-center">
+									Consumption Rate
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-6 border-right">
+								<div class="row justify-content-center">
+									<span class="text-dark font-weight-bold f-30" id="dc_c"> 24.8K </span>
+									<div class="d-flex flex-column-reverse mb-2">
+										<span class="f-13"> &nbsp;units </span>
+									</div>
+								</div>
+							</div>
+							<div class="col-6">
+								<div class="row justify-content-center">
+									<span class="text-dark font-weight-bold f-30" id="dc_cr"> 2.5K </span>
+									<div class="d-flex flex-column-reverse mb-2">
+										<span class="f-13"> &nbsp;units/hr </span>
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<i class="f-15 feather icon-arrow-down text-c-green" id="dc_crc">10.2%</i>
+								</div>
+							</div>
+						</div>
+						<div class="row justify-content-center mt-2">
+							Load:&nbsp; <span class="text-dark font-weight-bold" id="dc_if"> 180.2 </span>A
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-12 col-xl-8"> 
+			<div class="carousel" data-flickity='{ "wrapAround": true, "autoPlay": true }'>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1 text-bg-primary">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 1 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 2 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 3 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 4 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 5 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 6 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 7 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 8 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 9 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 10 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-cell">
+					<div class="col-md-12 col-xl-12">
+						<div class="card section1">
+							<div class="card-block">
+								<div class="row justify-content-between">
+									<div class="col-8">
+										<h6 class="mb-4" id="s1_n"> Area - 11 </h6>
+									</div>
+									<div class="col-3">
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											Consumption
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											Consumption Rate
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-6 border-right">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_c"> 1.2K </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units </span>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="row justify-content-center">
+											<span class="text-dark font-weight-bold f-30" id="s1_cr"> 100.1 </span>
+											<div class="d-flex flex-column-reverse mb-2">
+												<span class="f-13"> &nbsp;units/hr </span>
+											</div>
+										</div>
+										<div class="row justify-content-center">
+											<i class="f-15 feather icon-arrow-up text-c-red" id="s1_crc">5.1%</i>
+										</div>
+									</div>
+								</div>
+								<div class="row justify-content-center mt-2">
+									<div class="col-3 m-0 pl-1">
+										<div class="float-right">Voltage:</div>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+									</div>
+								</div>
+								<div class="row justify-content-center">
+									<div class="col-3 m-0 pl-1">
+										<span class="float-right">Load:</span>
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+									</div>
+									<div class="col-3 m-0 p-0">
+										<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-12 col-xl-9 mt-3">
+			<div class="card">
+				<div class="card-block">
+					<div class="row justify-content-between">
+						<div class="col-8">
+							<h6 class="mb-4" id="s1_n"> Hourly Consumption </h6>
+						</div>
+						<div class="col-3">
+							<div class="form-group row">
+								<label for="areaSelection" class="col-form-label">Area:</label>
+								<div class="col-sm-10">
+									<select class="form-control" id="areaSelection" onchange="sample_update_chart(this.value)"></select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row speedometer-canvas-small justify-content-center" >
+						<canvas id="hrly_canvas"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-12 col-xl-3 mt-3">
+			<div class="card">
+				<div class="card-block border-bottom pt-4 pb-1">
+					<div class="row d-flex align-items-center">
+						<div class="col">
+							<span class="d-block text-uppercase">Month Consumption</span>
+							<span class="text-dark font-weight-bold f-30" id="mc_c"> 2.4M </span>
+							<span class="f-13"> &nbsp;units </span>
+						</div>
+					</div>
+				</div>
+				<div class="card-block pt-4 pb-1">
+					<div class="row d-flex align-items-center">
+						<div class="col">
+							<span class="d-block text-uppercase">Month Consumption Rate</span>
+							<span class="text-dark font-weight-bold f-30" id="mc_cr"> 218.2K </span>
+							<span class="f-13"> &nbsp;units/day</span>
+							<i class="f-15 feather icon-arrow-up text-c-red" id="mc_crc">20.4%</i>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="cardCarousel" class="carousel slide" data-bs-ride="carousel">
+				<!-- Indicators -->
+				<div class="carousel-indicators">
+					<button type="button" data-bs-target="#cardCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+					<button type="button" data-bs-target="#cardCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+				</div>		
+				<!-- Inner Content -->
+				<div class="carousel-inner">
+						<div class="carousel-item active">
+							<div class="card">
+								<div class="card-block">
+									<h6 class="mb-2" id="ic_n"> Income Power Supply (EB) 
+										<img class="income-srce-img" src="{% static 'assets/images/a009/electric_post.png' %}"></img>
+									</h6>
+									<div class="row">
+										<div class="col-6 border-right">
+											<div class="row justify-content-center">
+												Day
+											</div>
+										</div>
+										<div class="col-6">
+											<div class="row justify-content-center">
+												Month
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-6 border-right">
+											<div class="row justify-content-center">
+												<span class="text-dark font-weight-bold f-30" id="ic_ds"> 25.1K </span>
+												<div class="d-flex flex-column-reverse mb-2">
+													<span class="f-13"> &nbsp;units </span>
+												</div>
+											</div>
+										</div>
+										<div class="col-6">
+											<div class="row justify-content-center">
+												<span class="text-dark font-weight-bold f-30" id="ic_ms"> 2.3M </span>
+												<div class="d-flex flex-column-reverse mb-2">
+													<span class="f-13"> &nbsp;units </span>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="row justify-content-center mt-2">
+										<div class="col-3 m-0 pl-1">
+											<div class="float-right">Voltage:</div>
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+										</div>
+									</div>
+									<div class="row justify-content-center">
+										<div class="col-3 m-0 pl-1">
+											<span class="float-right">Load:</span>
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="carousel-item">
+							<div class="card">
+								<div class="card-block">
+									<h6 class="mb-2" id="ic_n"> Income Power Supply (DG) 
+										<img class="income-srce-img" src="{% static 'assets/images/a009/diesel_generator.png' %}"></img>
+									</h6>
+									<!-- <div class="col-3"> -->
+										&#934;<span class="text-dark font-weight-bold f-16" id="">0.9</span>
+									  <!-- </div> -->
+									<div class="row">
+										<div class="col-6 border-right">
+											<div class="row justify-content-center">
+												Day
+											</div>
+										</div>
+										<div class="col-6">
+											<div class="row justify-content-center">
+												Month
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-6 border-right">
+											<div class="row justify-content-center">
+												<span class="text-dark font-weight-bold f-30" id="ic_ds"> 25.1K </span>
+												<div class="d-flex flex-column-reverse mb-2">
+													<span class="f-13"> &nbsp;units </span>
+												</div>
+											</div>
+										</div>
+										<div class="col-6">
+											<div class="row justify-content-center">
+												<span class="text-dark font-weight-bold f-30" id="ic_ms"> 2.3M </span>
+												<div class="d-flex flex-column-reverse mb-2">
+													<span class="f-13"> &nbsp;units </span>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="row justify-content-center mt-2">
+										<div class="col-3 m-0 pl-1">
+											<div class="float-right">Voltage:</div>
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">230.1</span>&nbsp;V
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">229</span>&nbsp;V
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">228.9</span>&nbsp;V
+										</div>
+									</div>
+									<div class="row justify-content-center">
+										<div class="col-3 m-0 pl-1">
+											<span class="float-right">Load:</span>
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-red"></i>&nbsp;<span class="text-dark font-weight-bold" id="">18.1</span>&nbsp;A
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-yellow"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.5</span>&nbsp;A
+										</div>
+										<div class="col-3 m-0 p-0">
+											<i class="fas fa-square text-c-blue"></i>&nbsp;<span class="text-dark font-weight-bold" id="">12.9</span>&nbsp;A
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+				</div>
+				<!-- Controls -->
+				<button class="carousel-control-prev" type="button" data-bs-target="#cardCarousel" data-bs-slide="prev">
+					<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+					<span class="visually-hidden"></span>
+				</button>
+				<button class="carousel-control-next" type="button" data-bs-target="#cardCarousel" data-bs-slide="next">
+					<span class="carousel-control-next-icon" aria-hidden="true"></span>
+					<span class="visually-hidden"></span>
+				</button>	
+			</div>
+		</div>		
+	</div>
+	
+	<script>
+    const dtl1 = document.getElementById("dtl1")
+    const dtl2 = document.getElementById("dtl2")
+
+    const dc_n = document.getElementById("dc_n")
+    const dc_c = document.getElementById("dc_c")
+    const dc_cr = document.getElementById("dc_cr")
+    const dc_crc = document.getElementById("dc_crc")
+    const dc_if = document.getElementById("dc_if")
+
+    const mc_c = document.getElementById("mc_c")
+    const mc_cr = document.getElementById("mc_cr")
+    const mc_crc = document.getElementById("mc_crc")
+
+    const ic_n = document.getElementById("ic_n")
+    const ic_ds = document.getElementById("ic_ds")
+    const ic_ms = document.getElementById("ic_ms")
+    const ic_if = document.getElementById("ic_if")
+
+    const hrly_canvas = document.getElementById("hrly_canvas")
+    const areaSelection = document.getElementById("areaSelection")
+    
+    var wc_data
+    var fetch_time_out_in_ms = 5000
+    var max_continous_fetch_errors_for_reload = 5
+    var fetch_error_count = 0
+
+    var hrly_chart_config = {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: "",
+            data: [],
+            backgroundColor: "black",
+          },
+          {
+            label: "",
+            data: [],
+            backgroundColor: "black",
+          },
+          {
+            label: "",
+            data: [],
+            backgroundColor: "black",
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+              display: true
+            }
+        },
+        scales: {
+          x: {
+            stacked: true,
+          },
+          y: {
+            stacked: true,
+            title:{
+              display: true,
+              text: 'Consumption in Units'
+            }
+          },
+        },
+        maintainAspectRatio: false,
+        aspectRatio: 1
+      },
+    };
+    hrly_chart_config.options.plugins.tooltip = {
+      callbacks: {
+        label: (ctx) => {
+          var label = ctx.dataset.label || '';
+          console.log(ctx.formattedValue )
+          return label+": "+ ctx.formattedValue + " ltrs"
+        }
+      }
+    }
+    var hrly_chart = new Chart(hrly_canvas, hrly_chart_config);    
+
+    function fetch_with_time_out(ms, promise) {
+      return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+          reject(new Error("timeout"))
+        }, ms)
+        promise.then(resolve, reject)
+      })
+    }
+
+    function fetch_wc_data(initial=false) {
+      fetch_with_time_out(
+        fetch_time_out_in_ms,
+        fetch("{{ get_pc_dashboard_data_url }}", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+        })
+        .then(response => response.json())
+        .then(data_dic => {
+          wc_data = data_dic;
+          update_view(initial);
+          fetch_error_count = 0
+        })  
+        .catch( function(error) {
+          console.log(error)
+          fetch_error_count = fetch_error_count + 1
+          if (fetch_error_count>max_continous_fetch_errors_for_reload) {
+            location.reload()
+          }
+        })
+      )  
+    }
+
+    function update_view(initial) {
+      dtl1.textContent = wc_data.dtl1
+      dtl2.textContent = wc_data.dtl2
+      if (initial) {
+        $(".section1").css("border-color",wc_data.s1_bg_c)
+        $(".section2").css("border-color",wc_data.s2_bg_c)
+        $(".section3").css("border-color",wc_data.s3_bg_c)
+        dc_n.textContent = wc_data.dc_n
+        s1_n.textContent = wc_data.s1_n
+        s2_n.textContent = wc_data.s2_n
+        s3_n.textContent = wc_data.s3_n
+        ic_n.textContent = wc_data.ic_n
+        hrly_chart_config.data.labels = wc_data.hrly_x_n
+        hrly_chart_config.data.datasets[0].label = wc_data.s1_n
+        hrly_chart_config.data.datasets[1].label = wc_data.s2_n
+        hrly_chart_config.data.datasets[2].label = wc_data.s3_n
+        hrly_chart_config.data.datasets[0].backgroundColor = wc_data.s1_bg_c
+        hrly_chart_config.data.datasets[1].backgroundColor = wc_data.s2_bg_c
+        hrly_chart_config.data.datasets[2].backgroundColor = wc_data.s3_bg_c
+      }
+      dc_c.textContent = wc_data.dc_c
+      dc_cr.textContent = wc_data.dc_cr
+      dc_crc.textContent = wc_data.dc_crc
+      if (wc_data.dc_crct < 0){
+        dc_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.dc_crct > 0){
+        dc_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        dc_crc.classList = ""
+      }
+      dc_if.textContent = wc_data.dc_if
+
+      s1_c.textContent = wc_data.s1_c
+      s1_cr.textContent = wc_data.s1_cr
+      s1_crc.textContent = wc_data.s1_crc
+      if (wc_data.s1_crct < 0){
+        s1_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.s1_crct > 0){
+        s1_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        s1_crc.classList = ""
+      }
+      s1_if.textContent = wc_data.s1_if
+
+      s2_c.textContent = wc_data.s2_c
+      s2_cr.textContent = wc_data.s2_cr
+      s2_crc.textContent = wc_data.s2_crc
+      if (wc_data.s2_crct < 0){
+        s2_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.s2_crct > 0){
+        s2_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        s2_crc.classList = ""
+      }
+      s2_if.textContent = wc_data.s2_if
+
+      s3_c.textContent = wc_data.s3_c
+      s3_cr.textContent = wc_data.s3_cr
+      s3_crc.textContent = wc_data.s3_crc
+      if (wc_data.s3_crct < 0){
+        s3_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.s3_crct > 0){
+        s3_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        s3_crc.classList = ""
+      }
+      s3_if.textContent = wc_data.s3_if
+
+      hrly_chart_config.data.datasets[0].data = wc_data.hrly_y_s1
+      hrly_chart_config.data.datasets[1].data = wc_data.hrly_y_s2
+      hrly_chart_config.data.datasets[2].data = wc_data.hrly_y_s3
+      hrly_chart.update()  
+      
+      mc_c.textContent = wc_data.mc_c
+      mc_cr.textContent = wc_data.mc_cr
+      mc_crc.textContent = wc_data.mc_crc
+      if (wc_data.mc_crct < 0){
+        mc_crc.classList = "feather icon-arrow-down text-c-green"
+      }
+      else if (wc_data.mc_crct > 0){
+        mc_crc.classList = "feather icon-arrow-up text-danger"
+      }
+      else{
+        mc_crc.classList = ""
+      }
+
+      ic_n.textContent = wc_data.ic_n
+      ic_ds.textContent = wc_data.ic_ds
+      ic_ms.textContent = wc_data.ic_ms
+      ic_if.textContent = wc_data.ic_if
+    }
+
+    function update_dashboard() {
+      fetch_wc_data();
+    }
+
+    fetch_wc_data(initial=true);
+    // window.setInterval(update_dashboard, 1000);
+    
+    const area_array = [
+      "All",
+      "Area - 1",
+      "Area - 2",
+      "Area - 3",
+      "Area - 4",
+      "Area - 5",
+      "Area - 6",
+      "Area - 7",
+      "Area - 8",
+      "Area - 9",
+      "Area - 10",
+      "Area - 11",
+    ]
+    const time_array = [
+        '00:00 - 01:00',
+        '01:00 - 02:00',
+        '02:00 - 03:00',
+        '03:00 - 04:00',
+        '04:00 - 05:00',
+        '05:00 - 06:00',
+        '06:00 - 07:00',
+        '07:00 - 08:00',
+        '08:00 - 09:00',
+        '09:00 - 10:00',
+        '10:00 - 11:00',
+        '11:00 - 12:00',
+        '12:00 - 13:00',
+        '13:00 - 14:00',
+        '14:00 - 15:00',
+        '15:00 - 16:00',
+        '16:00 - 17:00',
+        '17:00 - 18:00',
+        '18:00 - 19:00',
+        '19:00 - 20:00',
+        '20:00 - 21:00',
+        '21:00 - 22:00',
+        '22:00 - 23:00',
+        '23:00 - 24:00'
+      ]
+    const dataset_11 = [
+      [470, 855, 850, 271, 193, 666, 67, 943, 2, 499, 376],
+      [972, 787, 704, 850, 721, 484, 315, 803, 708, 899, 115],
+      [386, 924, 272, 900, 778, 479, 831, 201, 14, 828, 381],
+      [317, 829, 230, 515, 827, 237, 626, 38, 252, 72, 773],
+      [777, 970, 881, 158, 22, 370, 549, 250, 37, 926, 28],
+      [873, 240, 226, 918, 485, 732, 568, 700, 761, 409, 356],
+      [244, 133, 223, 805, 965, 339, 494, 754, 897, 18, 742],
+      [593, 758, 359, 416, 490, 305, 917, 627, 976, 211, 181],
+      [753, 391, 388, 897, 739, 89, 28, 112, 966, 739, 878],
+      [346, 485, 447, 202, 902, 919, 15, 8, 95, 21, 16],
+      [565, 362, 590, 780, 905, 432, 207, 950, 778, 392, 665]
+    ]
+    area_array.forEach((optionText, index) => {
+      const option = document.createElement("option");
+      option.value = index-1;  // Set value (for example, Option 1 -> value 1)
+      option.textContent = optionText;  // Set the text content for the option
+      areaSelection.appendChild(option);  // Append the option to the select element
+    });
+    hrly_chart_config.data.labels = time_array
+
+    function sample_update_chart(selectionValueId=0){
+      if (!selectionValueId|selectionValueId<0){
+        for (i=0;i<dataset_11.length; i++){
+          hrly_chart_config.data.datasets[i] = {
+            data: dataset_11[i],
+            label: area_array[i],
+          }
+        }
+      }
+      else{
+        hrly_chart_config.data.datasets = []
+        hrly_chart_config.data.datasets[0]= {
+          data: dataset_11[selectionValueId],
+          label: area_array[selectionValueId],
+        }
+        console.log(hrly_chart_config.data.datasets)
+      }
+      hrly_chart.update()  
+    }
+    sample_update_chart()
+
+    function toggleDashboardFullscreen(element) {
+      if (!card.classList.contains("fullscreen")) {
+        card.classList.add("fullscreen");   
+        card.requestFullscreen();       
+        element.innerHTML=`<i class="feather icon-minimize-2"></i> Minimize `
+      } 
+      else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+          card.classList.remove("fullscreen");
+          element.innerHTML=`<i class="feather icon-maximize-2"></i> Maximize`
+        }
+      }
+    }
+
+  </script>
+ 
+
+{% endblock content %}

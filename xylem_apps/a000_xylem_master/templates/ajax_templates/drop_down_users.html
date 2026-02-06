@@ -1,0 +1,10 @@
+{% load a000_custom_tags %}
+
+{% if user_options %}
+	<option value="">---------</option>
+	{% for user_option in user_options %}
+		<option value="{{ user_option.id }}">{{ user_option | get_user_display_format }}</option>
+	{% endfor %}
+{% else %}
+	<option value="">-- No data --</option>
+{% endif %}

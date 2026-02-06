@@ -1,0 +1,356 @@
+{% load static %}
+{% load a000_custom_tags %}
+
+<script src="{% static 'assets/plugins/jspdf/jspdf.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jspdf/jspdf.plugin.autotable.min.js' %}"></script>
+<script src="{% static 'assets/plugins/jsxlsx/xlsx.full.min.js' %}"></script>
+
+<style>
+  td{
+    white-space: normal !important;
+    word-wrap: break-word;
+  }
+</style>
+
+<!--[ Rejection and Rework Report Table - Filtered Data ] start-->	
+<div class="table-responsive">
+  <table class="table table-striped border" id="table1">
+    <tr><th> Production Line{% if production_lines|length %}s{% endif %}: {{ production_lines | icode_queryset_to_string }} </th></tr>
+    <tr><th> Period : {{ period }} </th></tr>
+    <tr><th> Shift{% if shifts|length %}s{% endif %}: {{ shifts | icode_queryset_to_string }} </th></tr>
+    <tr><th> Part Status{% if part_statuses|length %}es{% endif %}: {{ part_statuses | icode_queryset_to_string }} </th></tr>
+  </table>
+</div>
+<div class="row justify-content-end">
+  <div class="col-sm-5 mt-2 mb-2">
+    <div class="input-group">
+      <div class="input-group-prepend">
+        <span class="input-group-text"><i class="feather icon-search"></i></span>
+      </div>
+      <input type="text" id="searchInput" class="form-control" placeholder="Search data inside table...">				
+    </div>
+  </div>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped border" id="table2">
+    <thead>
+      <tr>		
+        <th>Production Line</th>
+        <th>Production Station</th>
+        <th>Barcode Data</th>
+        <th>Part Number</th>
+        <th>Rejection Reason</th>
+        <th>Part Status</th>
+        <th>Booking Time</th>
+        <th>Description</th>
+        <th>Booked User</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for data in filtered_data %}
+      <tr> 				
+        <td>{{ data.production_line_i.name }}</td>
+        <td>{{ data.production_station_i.name }}</td>
+        <td>{{ data.barcode_data }}</td> 
+        <td>{{ data.part_number_i.name }}</td>
+        <td>{{ data.rejection_reason_i.name }} </td>
+        <td>{{ data.part_status_i.name }}</td>
+        <td>{{ data.booked_datetime }}</td> 
+        {% if  data.description_i %}
+          <td>{{ data.description_i.name }}</td> 
+        {% else %}
+          <td>-</td> 
+        {% endif %}
+        <td>{{ data.booked_user | get_user_display_format }}</td>                                                                          
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<button class="btn btn-primary" onclick="exportPdf('table1', 'table2')">
+  <i class="fa fa-download"></i> Download as Pdf
+</button>
+<button class="btn btn-primary" onclick="exportExcel('table1', 'table2')">
+  <i class="fa fa-download"></i> Download as Excel
+</button>
+<!--[ Rejection and Rework Report Table - Filtered Data ] end-->
+
+<!-- [ Script / Print table as Pdf, Excel, Search the Filtered data ] start-->
+<script>
+
+  var filteredRows = document.querySelectorAll("#table2.table-striped tbody tr");						
+  document.getElementById("searchInput").addEventListener("input", function () {
+    var searchTerm = this.value.toLowerCase().trim();
+    filteredRows.forEach(function (row) {
+      var rowData = row.textContent.toLowerCase();
+      if (rowData.includes(searchTerm)) {
+        row.style.display = "table-row";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  });
+
+  function getImageWidthHeightOfPanel(imgNaturalWidth, imgNaturalHeight, panelWidth, panelHeight){
+    var mf = panelWidth/imgNaturalWidth
+    if (imgNaturalHeight*mf > panelHeight){
+      mf = panelHeight/imgNaturalHeight
+    }
+    var width = imgNaturalWidth*mf;
+    var height = imgNaturalHeight*mf;
+
+    var img_space_hori =  panelWidth - width
+    var img_space_vert =  panelHeight - height
+
+    return [width, height, img_space_hori, img_space_vert]
+  }
+
+
+  function exportPdf(table1Id, table2Id) {
+    var pdf = new jsPDF('l', 'mm', 'a4');
+
+    var table1 = document.getElementById(table1Id);
+    var table2 = document.getElementById(table2Id);
+
+    var xylem_logo = new Image();
+    xylem_logo.src = "{% static 'assets/images/xylem-logo.png' %}";
+
+    var company_logo = new Image();
+    company_logo.src = "{% static 'assets/images/ZF_Rane.png' %}";
+
+    marginTop = 5
+    marginBottom = 5
+    marginLeft = 5
+    marginRight = 5
+    additionalSpace = 5
+    headerHeight = 10
+    footerHeight = 5
+    headerFontSize = 20
+    headerFontColor = 20
+    footerFontSize = 10
+    footerpageNumFontSize = 5
+    headerFooterColor = [52, 58, 64] // '#343A40'
+    headerFooterLineLogoGap = 2
+    headerFooterLineThickness = 0.4
+    dividingLineColor = [136, 136, 136] // '#888888'
+    dividingLineThickness = 0.3
+
+    pdfWidth = pdf.internal.pageSize.width
+    pdfHeight = pdf.internal.pageSize.height
+
+    pdfHeaderText = "Rejections and Rework Report" //Should be less length
+    pdfFooterText = "Xylem - An Inhouse Development" //Should be less length
+
+    full_size_table = {
+      html: null,
+      startY: 0,
+      theme: null,
+      styles: {minCellHeight: 10},
+      tableWidth: pdfWidth - marginLeft - marginRight,
+      columnStyles: {},
+      margin: {
+        top: marginTop + headerHeight + additionalSpace,
+        bottom: marginBottom + footerHeight + additionalSpace,
+        left: marginLeft,
+        right: marginRight
+      },
+      headStyles : null,
+      didParseCell: null,
+      rowPageBreak: "avoid",
+    }
+    half_size_table = structuredClone(full_size_table)
+    half_size_table.tableWidth = (pdfWidth - marginLeft - marginLeft - additionalSpace)/ 2
+
+
+    function CustomHeadStyleBlue(data) {
+      if (data.cell.raw.tagName === 'TH') {              
+        data.cell.styles.fillColor = [45, 131, 188]; // blue background
+        data.cell.styles.textColor = [255, 255, 255]; // White text
+        data.cell.styles.fontStyle = 'bold';                              
+        data.cell.styles.lineWidth = 0.3;                              
+        data.cell.styles.lineColor = [221, 221, 221];          
+        
+        // add extra custom styles below
+      }
+    }
+
+
+    function CustomHeadStyleGreen(data) {
+      if (data.cell.raw.tagName === 'TH') {              
+        data.cell.styles.fillColor = [44, 184, 149]; // blue background
+        data.cell.styles.textColor = [255, 255, 255]; // White text
+        data.cell.styles.fontStyle = 'bold';                              
+        data.cell.styles.lineWidth = 0.3;                              
+        data.cell.styles.lineColor = [221, 221, 221];      
+        
+        // add extra custom styles below
+      }
+    }
+
+
+    function generate_pdf(){
+      X = marginLeft
+      Y = marginTop + headerHeight + additionalSpace
+
+      // table 1
+      tempTableParam = structuredClone(full_size_table)
+      tempTableParam.html = table1
+      tempTableParam.startY = Y
+      tempTableParam.theme = "striped"
+      pdf.autoTable(tempTableParam)
+      
+      // line below table 1
+      Y = pdf.autoTable.previous.finalY + additionalSpace
+      pdf.setDrawColor(dividingLineColor[0], dividingLineColor[1], dividingLineColor[2])
+      pdf.setLineWidth(dividingLineThickness)
+      pdf.line(X, Y, pdfWidth - X, Y)
+
+      // table 2
+      Y = Y + dividingLineThickness + additionalSpace
+      tempTableParam = structuredClone(full_size_table)
+      tempTableParam.html = table2
+      tempTableParam.startY = Y
+      tempTableParam.theme = "striped"
+      tempTableParam.columnStyles = {2: {cellWidth: 40}}
+      pdf.autoTable(tempTableParam)
+
+      const totalPages = pdf.internal.getNumberOfPages()
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i)
+        X = marginLeft
+        Y = marginTop
+        headerPanelHeight = headerHeight - headerFooterLineLogoGap - headerFooterLineThickness
+        footerPanelHeight = footerHeight - headerFooterLineLogoGap - headerFooterLineThickness
+
+        // xylem logo
+        var [img_w, img_h, hori_space, verti_space] = getImageWidthHeightOfPanel(xylem_logo.naturalWidth, xylem_logo.naturalHeight, pdfWidth, headerPanelHeight)
+        pdf.addImage(xylem_logo, 'PNG', X, Y, img_w, img_h)
+        
+        // company logo
+        var [img_w, img_h, hori_space, verti_space] = getImageWidthHeightOfPanel(company_logo.naturalWidth, company_logo.naturalHeight, pdfWidth, headerPanelHeight)
+        pdf.addImage(company_logo, 'PNG', pdfWidth - img_w - marginRight, Y, img_w, img_h)
+
+        // header text
+        Y = Y + headerPanelHeight
+        pdf.setTextColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+        pdf.setFontSize(headerFontSize)
+        pdf.setFontStyle('bold')
+        pdf.text(pdfHeaderText, pdfWidth/2, Y, {align: 'center'})
+
+        // line below header
+        Y = Y + headerFooterLineLogoGap
+        pdf.setDrawColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+        pdf.setLineWidth(headerFooterLineThickness)
+        pdf.line(X, Y, pdfWidth - X, Y)
+
+        // adding rectangle to hide if any overflow occured inside footer
+        space_height = footerHeight + headerFooterLineLogoGap + marginBottom
+        Y = pdfHeight - space_height
+        pdf.setFillColor(255, 255, 255)
+        pdf.rect(0, Y, pdfWidth, space_height, "F")
+
+        // line above footer
+        Y = Y + headerFooterLineLogoGap
+        pdf.setDrawColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+        pdf.setLineWidth(headerFooterLineThickness)
+        pdf.line(X, Y, pdfWidth - X, Y)
+
+        // footer text
+        Y = Y + footerHeight
+        pdf.setTextColor(headerFooterColor[0], headerFooterColor[1], headerFooterColor[2])
+        pdf.setFontSize(footerFontSize)
+        pdf.setFontStyle('bold')
+        pdf.text(pdfFooterText, pdfWidth / 2, Y, {align: 'center'})
+
+        // page number
+        pdf.setFontSize(footerpageNumFontSize)
+        pdf.text(`Page ${i} of ${totalPages}`, pdfWidth - marginRight, Y, {align: 'right'})
+      }
+
+      var today = new Date();
+      const offset = today.getTimezoneOffset()
+      today = new Date(today.getTime() - (offset * 60 * 1000))
+
+      // Save the PDF with a specified filename
+      pdf.save(`xylem_a002_rejection_and_rework_report${today.toISOString().split('.')[0]}.pdf`)
+    }
+
+    
+    let loadedImages = 0
+    images = [xylem_logo, company_logo]
+    images.forEach(function(image) {
+      if (image.complete) {
+        loadedImages++;
+        if (loadedImages === images.length){
+          generate_pdf()
+        }
+      } else {
+        image.onload = function(){
+          loadedImages++;
+          if (loadedImages === images.length){
+            generate_pdf()
+          }
+        }
+      }
+    })
+  }
+
+  function exportExcel(table1Id, table2Id) {
+    var wb = XLSX.utils.book_new();
+    var sheetData = [];
+    // Capture the first table (table1)
+    var table1 = document.getElementById(table1Id);
+    for (var i = 0; i < table1.rows.length; i++) {
+      var rowData = [];
+      var cells = table1.rows[i].cells;
+      for (var j = 0; j < cells.length; j++) {
+        rowData.push(cells[j].textContent);
+      }
+      sheetData.push(rowData);
+    }
+
+    // Add a blank row between the two tables for better readability
+    sheetData.push([]);
+
+    // Capture the second table (table2)
+    var table2 = document.getElementById(table2Id);
+
+    // Capture header row for table2
+    var headerRow2 = [];
+    var headerCells2 = table2.querySelectorAll("thead th");
+    for (var j = 0; j < headerCells2.length; j++) {
+      headerRow2.push(headerCells2[j].textContent);
+    }
+    sheetData.push(headerRow2); // Add header row for table2
+
+    // Iterate over all rows in table2
+    for (var i = 1; i < table2.rows.length; i++) {
+      var rowData = [];
+      var cells = table2.rows[i].cells;
+      for (var j = 0; j < cells.length; j++) {
+        rowData.push(cells[j].textContent);
+      }
+      sheetData.push(rowData);
+    }
+
+    // Create a single sheet from all the data
+    var sheet = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Apply sheet protection
+    sheet["!protect"] = {
+      selectLockedCells: false,
+      selectUnlockedCells: false,
+      sheet: true,
+      password: "Admin@123", // Replace with your actual password
+    };
+    // Append the sheet to the workbook
+    XLSX.utils.book_append_sheet(wb, sheet, "Combined Data");
+
+    // Save the workbook
+    var today = new Date();
+    const offset = today.getTimezoneOffset();
+    today = new Date(today.getTime() - (offset * 60 * 1000));
+    XLSX.writeFile(wb, `xylem_a002_${today.toISOString().split('.')[0]}.xlsx`);
+  }
+</script>	
+<!-- [ Script / Print table as Pdf, Excel, Search the Filtered data ] end-->
